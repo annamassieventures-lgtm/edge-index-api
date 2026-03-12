@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
+    "dev": "node --watch src/index.js",
+    "bot": "node src/telegram-bot.js",
+    "bot:dev": "node --watch src/telegram-bot.js"
   },
   "keywords": [],
   "author": "",
@@ -15,9 +17,12 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
     "astronomy-engine": "^2.1.19",
     "cors": "^2.8.6",
     "express": "^5.2.1",
-    "natalengine": "^1.0.8"
+    "natalengine": "^1.0.8",
+    "node-cron": "^3.0.3",
+    "node-telegram-bot-api": "^0.66.0"
   }
 }
