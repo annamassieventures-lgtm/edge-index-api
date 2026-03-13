@@ -375,7 +375,7 @@ bot.onText(/\/start/, async (msg) => {
   saveUser(chatId, { chatId, firstName, telegramUsername: msg.from?.username });
   state[chatId] = 'awaiting_date';
 
-  await bot.sendMessage(chatId, `Welcome to The Edge Index ⚡
+  await bot.sendMessage(chatId, `⚠️ Error: ${err.message}`);⚡
 
 I'm your personalised trading timing intelligence system.
 
