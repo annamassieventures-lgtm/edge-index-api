@@ -4,6 +4,7 @@ import cors from 'cors';
 import chartRouter from './routes/chart.js';
 import moonRouter  from './routes/moon.js';
 import hoursRouter from './routes/hours.js';
+import './telegram-bot.js';
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
