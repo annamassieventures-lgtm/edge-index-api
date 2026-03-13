@@ -34,7 +34,7 @@ app.use('/webhook', webhookRouter);
 // Temporary debug endpoint — remove after testing
 app.get('/debug', (req, res) => {
   const token = req.query.token;
-  if (token !== process.env.ANNA_CHAT_ID) {
+  if (token !== 'edgeindex2025debug') {
     return res.status(403).json({ error: 'Forbidden' });
   }
   const paidEmails = (process.env.PAID_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
