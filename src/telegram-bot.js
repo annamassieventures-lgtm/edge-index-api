@@ -337,14 +337,7 @@ async function sendReportToUser(chatId, userData) {
   try {
     await bot.sendMessage(chatId, '⚡ Generating your 12-month Edge Index Brief... this takes about 60 seconds.');
 
-    const [chartData, moonData, hoursData] = await Promise.all([
-      getHumanDesignChart(userData),
-      getMoonData(),
-      getPlanetaryHours(),
-    ]);
-
-    const report = await generateReport(userData, chartData, moonData, hoursData);
-
+    const report = await generateReport(userData, null, null, null);
     // Telegram has a 4096 char limit per message — split if needed
     if (report.length <= 4000) {
       await bot.sendMessage(chatId, report, { parse_mode: 'Markdown' });
