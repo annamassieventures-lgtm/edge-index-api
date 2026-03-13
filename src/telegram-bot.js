@@ -285,37 +285,15 @@ FORMATTING:
 - Total target: 4,500-5,500 words`;
 
 
-async function generateReport(userData, chartData, moonData, hoursData) {
+async function generateReport(userData) {
   const clientData = {
-    client: {
-      name:          userData.firstName || 'Trader',
-      birthDate:     userData.dob,
-      birthTime:     userData.time,
-      birthLocation: userData.location,
-    },
-    humanDesign: {
-      type:           chartData.human_design.type,
-      profile:        chartData.human_design.profile?.join('/') || chartData.human_design.profile,
-      authority:      chartData.human_design.authority,
-      strategy:       chartData.human_design.strategy,
-      definedCenters: chartData.human_design.defined_centers,
-      undefinedCenters: chartData.human_design.undefined_centers,
-      incarnationCross: chartData.human_design.incarnation_cross,
-      channels:       chartData.human_design.channels,
-    },
-    currentAstrology: {
-      reportDate:    new Date().toISOString().split('T')[0],
-      moonPhase:     moonData.phase ?? moonData.moonPhase ?? 'Unknown',
-      lunarDay:      moonData.lunarDay ?? moonData.lunar_day ?? null,
-      sunSign:       moonData.sunSign ?? moonData.sun_sign ?? null,
-      retrogrades:   moonData.retrogrades ?? [],
-      planetaryHourGovernor: hoursData.currentHour?.planet ?? hoursData.current_hour?.planet ?? 'Unknown',
-    },
-    moneyBlueprint: {
-      context: '12-month Edge Index Brief — annual decision-timing intelligence report.',
-      knownPatterns: [],
-      reactivePatterns: 'Unknown — first report',
-    },
+    name:          userData.firstName || 'Trader',
+    birthDate:     userData.dob,
+    birthTime:     userData.time,
+    birthLocation: userData.location,
+    lat:           userData.lat,
+    lon:           userData.lon,
+    reportDate:    new Date().toISOString().split('T')[0],
   };
 
   const message = await anthropic.messages.create({
@@ -337,7 +315,7 @@ async function sendReportToUser(chatId, userData) {
   try {
     await bot.sendMessage(chatId, '⚡ Generating your 12-month Edge Index Brief... this takes about 60 seconds.');
 
-    const report = await generateReport(userData, null, null, null);
+    const report = await generateReport(userData);
     // Telegram has a 4096 char limit per message — split if needed
     if (report.length <= 4000) {
       await bot.sendMessage(chatId, report, { parse_mode: 'Markdown' });
