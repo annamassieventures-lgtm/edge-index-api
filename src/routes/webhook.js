@@ -40,11 +40,14 @@ router.post('/whop', async (req, res) => {
     const action = event?.action || 'unknown';
     console.log(`Whop webhook: ${action}`);
 
-    // Whop fires membership.went_valid when payment succeeds
+    // Handle both dot and underscore event name formats from Whop
     if (
       action === 'membership.went_valid'  ||
+      action === 'membership_activated'   ||
       action === 'payment.succeeded'      ||
-      action === 'membership.created'
+      action === 'payment_succeeded'      ||
+      action === 'membership.created'     ||
+      action === 'entry_approved'
     ) {
       // Email can be nested in different places depending on product type
       const email =
