@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Automation Blueprint — How This Business Runs Without You</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:  #0D1B3E;
+    --navy2: #1a2d5a;
+    --blue:  #2B4BAA;
+    --blue2: #4A72C4;
+    --sky:   #D0DCF5;
+    --coral: #D94040;
+    --mint:  #2A7A5C;
+    --mint2: #3DAA7C;
+    --gold:  #C9A84C;
+    --gold2: #F0D07A;
+    --cream: #FAF8F4;
+    --warm:  #F5F0E8;
+    --border: rgba(0,0,0,0.08);
+    --shadow: 0 4px 24px rgba(0,0,0,0.10);
+  }
+
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', sans-serif; background: var(--cream); color: #1a1a1a; line-height: 1.6; font-size: 14px; }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #0D1B3E 0%, #1a2d5a 40%, #2B4BAA 100%);
+    padding: 72px 48px 56px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .hero-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--gold2); margin-bottom: 16px; }
+  .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 5vw, 60px); font-weight: 300; color: #fff; line-height: 1.15; margin-bottom: 14px; }
+  .hero h1 em { font-style: italic; color: var(--gold2); }
+  .hero-sub { font-size: 15px; color: rgba(255,255,255,0.65); max-width: 580px; margin: 0 auto 32px; font-weight: 300; }
+  .hero-stats { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; }
+  .hero-stat { text-align: center; }
+  .hero-stat .val { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 400; color: var(--gold2); line-height: 1; }
+  .hero-stat .lbl { font-size: 10px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+  /* NAV */
+  .nav { background: var(--navy); display: flex; justify-content: center; gap: 0; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap; }
+  .nav a { color: rgba(255,255,255,0.6); text-decoration: none; padding: 12px 18px; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; transition: color 0.2s; }
+  .nav a:hover { color: #fff; }
+
+  .wrapper { max-width: 1060px; margin: 0 auto; padding: 0 28px; }
+
+  /* SECTION HEADERS */
+  .sec-header { text-align: center; padding: 64px 0 40px; }
+  .sec-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
+  .sec-header h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(26px, 3.5vw, 44px); font-weight: 400; color: var(--navy); line-height: 1.2; }
+  .sec-header p { margin-top: 12px; color: #555; max-width: 600px; margin-left: auto; margin-right: auto; }
+
+  /* ANNA TIME BOX */
+  .anna-time {
+    background: linear-gradient(135deg, var(--mint) 0%, var(--mint2) 100%);
+    border-radius: 20px;
+    padding: 40px 48px;
+    margin: 0 0 64px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 32px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .anna-time::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E"); pointer-events: none; }
+  .anna-time h3 { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: #fff; font-weight: 400; margin-bottom: 8px; }
+  .anna-time p { color: rgba(255,255,255,0.8); font-size: 14px; }
+  .anna-time-number { text-align: center; }
+  .anna-time-number .big { font-family: 'Cormorant Garamond', serif; font-size: 80px; color: #fff; line-height: 1; font-weight: 300; }
+  .anna-time-number .unit { font-size: 12px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 2px; }
+
+  /* FLOW DIAGRAM */
+  .flow-section { background: var(--navy); padding: 72px 0; }
+  .flow-section .sec-eyebrow { color: var(--gold2); }
+  .flow-section h2 { color: #fff; }
+  .flow-section p { color: rgba(255,255,255,0.6); }
+  .flow-steps { display: flex; flex-direction: column; gap: 0; max-width: 800px; margin: 48px auto 0; }
+  .flow-step {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 0;
+    position: relative;
+  }
+  .flow-step:not(:last-child) .flow-line { border-left: 2px dashed rgba(255,255,255,0.15); margin-left: 27px; height: 40px; }
+  .flow-left { display: flex; flex-direction: column; align-items: center; }
+  .flow-circle {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .flow-circle.auto { background: rgba(45,180,120,0.20); border: 2px solid var(--mint2); }
+  .flow-circle.semi { background: rgba(240,208,122,0.15); border: 2px solid var(--gold2); }
+  .flow-circle.anna { background: rgba(217,64,64,0.20); border: 2px solid #E8705A; }
+  .flow-content { padding: 0 0 0 20px; padding-bottom: 8px; }
+  .flow-tag {
+    display: inline-block;
+    font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 10px; margin-bottom: 6px;
+  }
+  .tag-auto { background: rgba(45,180,120,0.2); color: #6EE7B7; }
+  .tag-semi { background: rgba(240,208,122,0.15); color: var(--gold2); }
+  .tag-anna { background: rgba(217,64,64,0.15); color: #FCA5A5; }
+  .flow-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: #fff; font-weight: 500; margin-bottom: 4px; }
+  .flow-desc { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.6; }
+  .flow-tools { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .tool-chip { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 3px 10px; font-size: 10px; color: rgba(255,255,255,0.6); }
+  .flow-line { width: 2px; }
+
+  /* PIPELINE DETAIL */
+  .pipeline-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding-bottom: 72px; }
+  .p-card { background: #fff; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
+  .p-card-top { padding: 20px 22px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .p-card-icon { font-size: 24px; }
+  .p-card-title { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 500; color: var(--navy); }
+  .p-card-sub { font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+  .p-card-body { padding: 16px 22px; }
+  .p-card-body p { font-size: 12.5px; color: #444; line-height: 1.7; margin-bottom: 10px; }
+  .p-card-body p:last-child { margin: 0; }
+  .step-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .step-list li { font-size: 12px; color: #444; padding-left: 16px; position: relative; line-height: 1.5; }
+  .step-list li::before { content: '→'; position: absolute; left: 0; color: var(--blue); font-size: 10px; top: 2px; }
+  .status-chip { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; margin-top: 10px; }
+  .chip-live { background: #ECFDF5; color: #065F46; }
+  .chip-build { background: #FFF7ED; color: #92400E; }
+
+  /* CREATOR ENGINE */
+  .creator-section { background: var(--warm); padding: 72px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .creator-flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 48px; padding-bottom: 8px; }
+  .c-step { background: #fff; border-radius: 14px; border: 1px solid var(--border); padding: 20px 20px; position: relative; }
+  .c-step-num { font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 300; color: var(--sky); line-height: 1; margin-bottom: 8px; }
+  .c-step-title { font-weight: 600; font-size: 13px; color: var(--navy); margin-bottom: 6px; }
+  .c-step-desc { font-size: 12px; color: #555; line-height: 1.6; }
+  .c-step-tool { margin-top: 10px; font-size: 10px; color: var(--blue); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  .c-auto-badge { position: absolute; top: 12px; right: 12px; background: #ECFDF5; color: #065F46; font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 7px; border-radius: 8px; }
+
+  /* REVENUE MODEL */
+  .revenue-section { padding: 72px 0; }
+  .rev-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); margin-top: 48px; }
+  .rev-table th { background: var(--navy); color: rgba(255,255,255,0.8); padding: 14px 18px; font-size: 11px; font-weight: 600; text-align: left; letter-spacing: 0.5px; }
+  .rev-table td { padding: 14px 18px; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #333; }
+  .rev-table tr:last-child td { border: none; }
+  .rev-table tr:hover td { background: #FAFAFA; }
+  .rev-highlight { font-weight: 700; color: var(--mint); }
+  .rev-table .scenario { font-weight: 600; color: var(--navy); }
+
+  /* TOOLS COST */
+  .tools-section { background: var(--navy); padding: 72px 0; }
+  .tools-section .sec-eyebrow { color: var(--gold2); }
+  .tools-section h2 { color: #fff; }
+  .tools-section p { color: rgba(255,255,255,0.6); }
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 40px; padding-bottom: 8px; }
+  .tool-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; padding: 16px 18px; }
+  .tool-name { font-weight: 600; font-size: 13px; color: #fff; margin-bottom: 3px; }
+  .tool-purpose { font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 8px; }
+  .tool-cost { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--gold2); font-weight: 400; }
+  .tool-cost span { font-size: 11px; font-family: 'Inter', sans-serif; color: rgba(255,255,255,0.4); }
+  .tools-total { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 14px; padding: 24px 28px; margin-top: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+  .tools-total-label { color: rgba(255,255,255,0.7); font-size: 13px; }
+  .tools-total-val { font-family: 'Cormorant Garamond', serif; font-size: 32px; color: var(--gold2); }
+  .tools-total-sub { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+  /* OUTREACH */
+  .outreach-section { padding: 72px 0; }
+  .outreach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; padding-bottom: 8px; }
+  .o-card { background: #fff; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 24px 26px; }
+  .o-card h4 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500; color: var(--navy); margin-bottom: 6px; }
+  .o-card .o-sub { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--blue); margin-bottom: 14px; }
+  .o-card p { font-size: 12.5px; color: #444; line-height: 1.7; margin-bottom: 10px; }
+  .o-card p:last-child { margin: 0; }
+
+  /* INTAKE PREVIEW */
+  .intake-section { background: var(--warm); padding: 72px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .intake-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; }
+  .q-block { background: #fff; border-radius: 14px; border: 1px solid var(--border); padding: 22px 24px; }
+  .q-section-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--blue); margin-bottom: 12px; }
+  .q-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .q-list li { font-size: 12.5px; color: #333; padding: 8px 12px; background: var(--warm); border-radius: 8px; border-left: 3px solid var(--blue2); line-height: 1.4; }
+
+  /* ANNA WEEKLY */
+  .anna-weekly { padding: 72px 0; }
+  .weekly-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 40px; }
+  .w-card { border-radius: 14px; padding: 22px 22px; }
+  .w-card.does { background: #ECFDF5; border: 1px solid #A7F3D0; }
+  .w-card.doesnt { background: #FFF1F2; border: 1px solid #FECDD3; }
+  .w-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+  .w-card.does .w-label { color: #065F46; }
+  .w-card.doesnt .w-label { color: #9F1239; }
+  .w-items { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .w-items li { font-size: 12.5px; line-height: 1.5; }
+  .w-card.does .w-items li { color: #064E3B; }
+  .w-card.doesnt .w-items li::before { content: '✕ '; font-size: 10px; }
+  .w-card.doesnt .w-items li { color: #881337; }
+  .w-card.does .w-items li::before { content: '✓ '; font-size: 10px; }
+
+  /* BUILD ORDER */
+  .build-section { background: var(--navy); padding: 72px 0; }
+  .build-section .sec-eyebrow { color: var(--gold2); }
+  .build-section h2 { color: #fff; }
+  .build-section p { color: rgba(255,255,255,0.6); }
+  .build-weeks { display: flex; flex-direction: column; gap: 16px; max-width: 860px; margin: 48px auto 0; }
+  .week-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); border-radius: 14px; padding: 22px 26px; display: grid; grid-template-columns: 100px 1fr; gap: 20px; align-items: start; }
+  .week-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold2); margin-bottom: 4px; }
+  .week-num { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: #fff; font-weight: 300; }
+  .week-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: #fff; font-weight: 500; margin-bottom: 8px; }
+  .week-items { display: flex; flex-direction: column; gap: 5px; }
+  .week-items li { font-size: 12px; color: rgba(255,255,255,0.6); list-style: none; padding-left: 14px; position: relative; }
+  .week-items li::before { content: '—'; position: absolute; left: 0; color: rgba(255,255,255,0.25); }
+  .week-milestone { display: inline-block; margin-top: 10px; background: rgba(240,208,122,0.15); border: 1px solid rgba(240,208,122,0.3); border-radius: 8px; padding: 4px 12px; font-size: 11px; color: var(--gold2); }
+
+  /* FOOTER */
+  footer { background: var(--navy); padding: 36px 32px; text-align: center; border-top: 1px solid rgba(255,255,255,0.08); }
+  footer p { color: rgba(255,255,255,0.35); font-size: 12px; }
+  footer strong { color: rgba(255,255,255,0.6); }
+
+  .divider { height: 1px; background: linear-gradient(to right, transparent, var(--border), transparent); }
+
+  @media (max-width: 700px) {
+    .hero { padding: 48px 20px 40px; }
+    .wrapper { padding: 0 16px; }
+    .outreach-grid, .intake-grid { grid-template-columns: 1fr; }
+    .anna-time { grid-template-columns: 1fr; text-align: center; }
+    .week-card { grid-template-columns: 1fr; }
+    .hero-stats { gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <p class="hero-eyebrow">Anna Massie Ventures · Automation Blueprint</p>
+  <h1>How This Business Runs<br/><em>Without You.</em></h1>
+  <p class="hero-sub">Every step from a parent discovering the report to cash arriving in your account — fully automated. No Anna required.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="val">~3h</div><div class="lbl">Anna's weekly time</div></div>
+    <div class="hero-stat"><div class="val">0</div><div class="lbl">Reports Anna writes</div></div>
+    <div class="hero-stat"><div class="val">24/7</div><div class="lbl">Pipeline runs</div></div>
+    <div class="hero-stat"><div class="val">∞</div><div class="lbl">Scale ceiling</div></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#flow">The Flow</a>
+  <a href="#pipeline">Pipeline Detail</a>
+  <a href="#creators">Creator Engine</a>
+  <a href="#outreach">Outreach</a>
+  <a href="#revenue">Revenue Math</a>
+  <a href="#tools">Tools & Cost</a>
+  <a href="#intake">Intake Form</a>
+  <a href="#anna">Anna's Role</a>
+  <a href="#build">Build Order</a>
+</nav>
+
+<!-- ANNA TIME -->
+<section id="anna-intro">
+  <div class="wrapper">
+    <div style="padding-top:56px;">
+      <div class="anna-time">
+        <div>
+          <h3>Your weekly time commitment once this is running</h3>
+          <p>Review a monthly financial summary (30 mins). Approve a batch of scheduled social content (30 mins). Handle any escalated edge cases a VA can't resolve (rare). Everything else — discovery, purchase, generation, delivery, creator management, outreach, tracking — happens without you.</p>
+        </div>
+        <div class="anna-time-number">
+          <div class="big">3</div>
+          <div class="unit">hours / week</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FULL FLOW -->
+<section id="flow" class="flow-section">
+  <div class="wrapper">
+    <div class="sec-header">
+      <p class="sec-eyebrow">End-to-End Journey</p>
+      <h2>From Stranger to Report in Inbox</h2>
+      <p>Every node in this chain is automated. The green circles run themselves. The gold circle is a one-time setup. The one red circle is where Anna exists in the business.</p>
+    </div>
+
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-circle auto">🌐</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <span class="flow-tag tag-auto">Fully Automated</span>
+          <div class="flow-title">Discovery</div>
+          <div class="flow-desc">A parent finds the report through a creator's unique referral link, a Facebook group post, a scheduled Instagram reel, or a Google search. No Anna involved. The creator network and scheduled content do the work.</div>
+          <div class="flow-tools"><span class="tool-chip">Creator Links</span><span class="tool-chip">Buffer / Later</span><span class="tool-chip">Facebook Groups</span><span class="tool-chip">SEO</span></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-circle auto">📋</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <span class="flow-tag tag-auto">Fully Automated</span>
+          <div class="flow-title">Intake Form</div>
+          <div class="flow-desc">Parent lands on the Typeform. They enter their child's birth details and answer 12 questions about their child's behaviour, learning style, emotional patterns, and what the parent most needs to understand. Typeform collects everything and fires a webhook on completion.</div>
+          <div class="flow-tools"><span class="tool-chip">Typeform</span><span class="tool-chip">Webhook → N8N</span></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-circle auto">💳</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <span class="flow-tag tag-auto">Fully Automated</span>
+          <div class="flow-title">Payment</div>
+          <div class="flow-desc">Stripe handles payment. On success, Stripe fires a webhook to N8N with the payment confirmation, creator referral code (if applicable), and customer email. Creator commission is logged automatically. No manual reconciliation.</div>
+          <div class="flow-tools"><span class="tool-chip">Stripe</span><span class="tool-chip">Webhook → N8N</span><span class="tool-chip">Supabase log</span></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-circle auto">🔮</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <span class="flow-tag tag-auto">Fully Automated · Already Live</span>
+          <div class="flow-title">Human Design Calculation</div>
+          <div class="flow-desc">N8N sends the child's birth date, time, and location to the existing Railway API (POST /chart). Returns full HD profile: type, authority, profile, definition, all gates, channels, defined/undefined centres. This is the DNA of the report.</div>
+          <div class="flow-tools"><span class="tool-chip">N8N</span><span class="tool-chip">Railway API ✅ Live</span><span class="tool-chip">natalengine</span></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-circle auto">🤖</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <span class="flow-tag tag-auto">Fully Automated</span>
+          <div class="flow-title">Report Generation — Section by Section</div>
+          <div class="flow-desc">N8N calls Claude API with the HD chart data + the parent's intake answers. The report is generated section by section — 15 Claude API calls, one per report section. This preserves the depth of the original manual process. Each section receives both the chart data AND the parent's specific answers about that child. This is what creates the "someone finally understands my child" response.</div>
+          <div class="flow-tools"><span class="tool-chip">N8N orchestration</span><span class="tool-chip">Claude API (15 calls)</span><span class="tool-chip">HD data + intake answers</span></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-circle auto">📄</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <span class="flow-tag tag-auto">Fully Automated</span>
+          <div class="flow-title">PDF Generation</div>
+          <div class="flow-desc">N8N assembles all 15 sections into the HTML report template (already built). A PDF conversion service renders it with full design, gradients, and formatting. Output is a 25–30 page luxury PDF indistinguishable from the originals.</div>
+          <div class="flow-tools"><span class="tool-chip">N8N</span><span class="tool-chip">WeasyPrint or Puppeteer</span><span class="tool-chip">HTML template ✅ Done</span></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-circle auto">📧</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <span class="flow-tag tag-auto">Fully Automated</span>
+          <div class="flow-title">Delivery + Follow-Up Sequence</div>
+          <div class="flow-desc">PDF is emailed to the parent within minutes of payment. A 5-email follow-up sequence triggers automatically: Day 1 delivery confirmation, Day 2 Mira chat upsell, Day 3 "how to use your report" guide, Day 7 The Vibe or Edge upsell (based on parent gender), Day 14 referral invitation to become a creator.</div>
+          <div class="flow-tools"><span class="tool-chip">Gmail SMTP</span><span class="tool-chip">N8N sequences</span><span class="tool-chip">Supabase customer record</span></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-circle semi">💬</div><div class="flow-line"></div></div>
+        <div class="flow-content">
+          <span class="flow-tag tag-semi">Semi-Automated</span>
+          <div class="flow-title">Customer Support</div>
+          <div class="flow-desc">A Tidio FAQ chatbot handles 95% of support queries automatically (delivery questions, report explanations, refund policy). Edge cases are caught by a part-time VA ($500–800/month) who uses templated responses. Anna is not in this loop at all.</div>
+          <div class="flow-tools"><span class="tool-chip">Tidio chatbot</span><span class="tool-chip">VA (templated)</span><span class="tool-chip">Supabase lookup</span></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-left"><div class="flow-circle anna">📊</div></div>
+        <div class="flow-content">
+          <span class="flow-tag tag-anna">Anna Only</span>
+          <div class="flow-title">Monthly Review</div>
+          <div class="flow-desc">Once a month, an automated report is emailed to Anna: total revenue, creator performance, top-converting channels, Mira chat conversions, report breakdown by type. She reads it, makes any strategic decisions (pricing, new creator push, new market), and that's it. 30 minutes.</div>
+          <div class="flow-tools"><span class="tool-chip">Supabase analytics</span><span class="tool-chip">Stripe dashboard</span><span class="tool-chip">Auto-email to Anna</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE DETAIL -->
+<section id="pipeline">
+  <div class="wrapper">
+    <div class="sec-header">
+      <p class="sec-eyebrow">Under the Hood</p>
+      <h2>Pipeline — Every Component</h2>
+      <p>What each piece does, what it connects to, and whether it's already built.</p>
+    </div>
+    <div class="pipeline-cards">
+      <div class="p-card">
+        <div class="p-card-top"><span class="p-card-icon">📋</span><div><div class="p-card-title">Typeform Intake</div><div class="p-card-sub">Children's + Teen</div></div></div>
+        <div class="p-card-body">
+          <p>One form per report type. Parent enters child's birth data plus 12 context questions. On submission, Typeform sends a webhook payload to N8N containing all answers in structured JSON.</p>
+          <ul class="step-list">
+            <li>Child birth data (date, time, city/country)</li>
+            <li>12 parent context questions</li>
+            <li>Report type selection (children's / teen)</li>
+            <li>Creator referral code captured in URL param</li>
+          </ul>
+          <span class="status-chip chip-build">To Build</span>
+        </div>
+      </div>
+      <div class="p-card">
+        <div class="p-card-top"><span class="p-card-icon">💳</span><div><div class="p-card-title">Stripe Checkout</div><div class="p-card-sub">Payment + Referral Tracking</div></div></div>
+        <div class="p-card-body">
+          <p>Stripe Payment Link or embedded checkout on the landing page. Referral codes passed as metadata. On payment success, webhook fires to N8N with customer email + payment confirmation + creator ID.</p>
+          <ul class="step-list">
+            <li>$97 single report product</li>
+            <li>Bundle products (2, 3, 4 kids)</li>
+            <li>Creator referral metadata logged</li>
+            <li>Mira chat subscription product (separate)</li>
+          </ul>
+          <span class="status-chip chip-build">To Build</span>
+        </div>
+      </div>
+      <div class="p-card">
+        <div class="p-card-top"><span class="p-card-icon">🔧</span><div><div class="p-card-title">N8N Orchestration</div><div class="p-card-sub">The Brain</div></div></div>
+        <div class="p-card-body">
+          <p>N8N is the central nervous system. It receives webhooks from Typeform and Stripe, sequences all downstream calls, handles errors, and manages the follow-up email sequences. One workflow per report type.</p>
+          <ul class="step-list">
+            <li>Receives Typeform + Stripe webhooks</li>
+            <li>Calls Railway /chart API</li>
+            <li>Calls Claude API (15 sequential calls)</li>
+            <li>Assembles HTML, triggers PDF</li>
+            <li>Sends emails, logs to Supabase</li>
+            <li>Triggers follow-up sequences</li>
+          </ul>
+          <span class="status-chip chip-build">To Build</span>
+        </div>
+      </div>
+      <div class="p-card">
+        <div class="p-card-top"><span class="p-card-icon">🔮</span><div><div class="p-card-title">Railway HD API</div><div class="p-card-sub">Already Live ✅</div></div></div>
+        <div class="p-card-body">
+          <p>POST /chart endpoint already deployed on Railway. Returns complete Human Design profile from birth data. This is the calculation engine the entire report system is built on.</p>
+          <ul class="step-list">
+            <li>Type, strategy, authority, profile</li>
+            <li>All 64 gates (personality + design)</li>
+            <li>36 channels, defined/undefined centres</li>
+            <li>Incarnation cross, definition type</li>
+          </ul>
+          <span class="status-chip chip-live">Live on Railway</span>
+        </div>
+      </div>
+      <div class="p-card">
+        <div class="p-card-top"><span class="p-card-icon">🤖</span><div><div class="p-card-title">Claude API — Report Engine</div><div class="p-card-sub">Section-by-Section</div></div></div>
+        <div class="p-card-body">
+          <p>Each of the 15 report sections gets its own Claude API call. Prompt = HD chart data + section-specific instructions + relevant parent intake answers. This structure replicates the original manual depth — Claude focuses on one thing at a time and goes deep.</p>
+          <ul class="step-list">
+            <li>15 API calls per report (~$0.80–1.20 total cost)</li>
+            <li>Each call: chart data + intake context + section prompt</li>
+            <li>N8N assembles all 15 outputs into HTML</li>
+            <li>Depth preserved = "someone finally understands my child"</li>
+          </ul>
+          <span class="status-chip chip-build">Prompts to build</span>
+        </div>
+      </div>
+      <div class="p-card">
+        <div class="p-card-top"><span class="p-card-icon">🗄️</span><div><div class="p-card-title">Supabase Database</div><div class="p-card-sub">Records + Analytics</div></div></div>
+        <div class="p-card-body">
+          <p>Every purchase, every report generated, every creator commission logged to Supabase in real time. Powers the monthly auto-report to Anna and the creator payout summaries.</p>
+          <ul class="step-list">
+            <li>Customer records (email, report type, date)</li>
+            <li>Creator records (ID, link, total sales, commission owed)</li>
+            <li>Revenue by channel + report type</li>
+            <li>Mira chat conversion tracking</li>
+          </ul>
+          <span class="status-chip chip-build">Schema to build</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CREATOR ENGINE -->
+<section id="creators" class="creator-section">
+  <div class="wrapper">
+    <div class="sec-header" style="padding-top:0;">
+      <p class="sec-eyebrow">Creator Referral Engine</p>
+      <h2>Scale Without a Marketing Budget</h2>
+      <p>Creators are your distribution network. Every one is fully automated from application to commission payout tracking — no Anna in any step.</p>
+    </div>
+    <div class="creator-flow">
+      <div class="c-step">
+        <span class="c-auto-badge">Auto</span>
+        <div class="c-step-num">01</div>
+        <div class="c-step-title">Creator Finds the Programme</div>
+        <div class="c-step-desc">Via outreach email sequence, Facebook group post, or existing customer Day 14 email invitation. Lands on the creator application page.</div>
+        <div class="c-step-tool">Apollo.io · Instantly.ai · N8N</div>
+      </div>
+      <div class="c-step">
+        <span class="c-auto-badge">Auto</span>
+        <div class="c-step-num">02</div>
+        <div class="c-step-title">Application & Approval</div>
+        <div class="c-step-desc">Simple Typeform application. Auto-approved for anyone with 500+ relevant followers. N8N triggers onboarding sequence immediately on submission.</div>
+        <div class="c-step-tool">Typeform · N8N</div>
+      </div>
+      <div class="c-step">
+        <span class="c-auto-badge">Auto</span>
+        <div class="c-step-num">03</div>
+        <div class="c-step-title">Unique Link Generated</div>
+        <div class="c-step-desc">Stripe referral link automatically generated with creator's unique ID embedded. Logged to Supabase. Creator receives their link, promo kit, and caption templates via automated email.</div>
+        <div class="c-step-tool">Stripe · Supabase · N8N</div>
+      </div>
+      <div class="c-step">
+        <span class="c-auto-badge">Auto</span>
+        <div class="c-step-num">04</div>
+        <div class="c-step-title">Creator Promotes</div>
+        <div class="c-step-desc">Creator shares their link in parenting Facebook groups, Instagram stories, TikTok, or WhatsApp communities. Every click is tracked. Every sale is attributed instantly.</div>
+        <div class="c-step-tool">Stripe tracking · Supabase</div>
+      </div>
+      <div class="c-step">
+        <span class="c-auto-badge">Auto</span>
+        <div class="c-step-num">05</div>
+        <div class="c-step-title">Sale + Commission Logged</div>
+        <div class="c-step-desc">On each sale via creator link: Stripe logs the referral, N8N writes to Supabase (creator ID, sale amount, $35–40 commission). Creator receives automated confirmation email with running total.</div>
+        <div class="c-step-tool">Stripe · N8N · Supabase</div>
+      </div>
+      <div class="c-step">
+        <span class="c-auto-badge">Auto</span>
+        <div class="c-step-num">06</div>
+        <div class="c-step-title">Monthly Payout Report</div>
+        <div class="c-step-desc">N8N auto-generates monthly creator payout summary from Supabase. Emailed to Anna on the 1st of each month. Anna approves and processes payouts in one batch. 20 minutes total.</div>
+        <div class="c-step-tool">Supabase · N8N · Anna (1x/month)</div>
+      </div>
+    </div>
+
+    <div style="background:#fff; border-radius:16px; border:1px solid var(--border); padding:28px 32px; margin-top:24px; display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:20px; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+      <div>
+        <div style="font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#999; margin-bottom:6px;">Commission Per Sale</div>
+        <div style="font-family:'Cormorant Garamond',serif; font-size:32px; color:var(--navy);">$35–40</div>
+      </div>
+      <div>
+        <div style="font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#999; margin-bottom:6px;">Creator Rate</div>
+        <div style="font-family:'Cormorant Garamond',serif; font-size:32px; color:var(--navy);">~40%</div>
+      </div>
+      <div>
+        <div style="font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#999; margin-bottom:6px;">Anna's Touch Points</div>
+        <div style="font-family:'Cormorant Garamond',serif; font-size:32px; color:var(--mint);">1×/month</div>
+      </div>
+      <div>
+        <div style="font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#999; margin-bottom:6px;">Target Creator Network</div>
+        <div style="font-family:'Cormorant Garamond',serif; font-size:32px; color:var(--navy);">500+</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OUTREACH AUTOMATION -->
+<section id="outreach" class="outreach-section">
+  <div class="wrapper">
+    <div class="sec-header">
+      <p class="sec-eyebrow">Automated Outreach</p>
+      <h2>Finding Creators & Communities at Scale</h2>
+      <p>Perplexity researches. Apollo sends. N8N tracks. Anna reads the results once a month.</p>
+    </div>
+    <div class="outreach-grid">
+      <div class="o-card">
+        <h4>Creator Outreach</h4>
+        <div class="o-sub">Automated Email Sequences</div>
+        <p>Perplexity (or AI web research) builds targeted lists of parenting influencers, child psychology accounts, homeschooling communities, neurodivergent parent advocates, and family wellness creators. Filtered by audience size, engagement, and relevance.</p>
+        <p>Apollo.io or Instantly.ai sends personalised cold email sequences automatically. Email 1: introduce the report + the "someone finally understands my child" outcome. Email 2: share the creator commission model. Email 3: send a sample report. All tracked, all automated.</p>
+        <p><strong>Target lists:</strong> Parenting bloggers, Instagram mums, child therapists, homeschool educators, NDIS support workers, family coaches, paediatric OTs.</p>
+      </div>
+      <div class="o-card">
+        <h4>Facebook Group Strategy</h4>
+        <div class="o-sub">Community-Led Distribution</div>
+        <p>Facebook parenting groups are the highest-converting channel for this product globally. Mums Help Mums, Working Mums, Gentle Parenting, Neurodivergent Parents, Homeschooling — these groups have millions of members and a buying culture around child development tools.</p>
+        <p>N8N + a social posting tool (Publer or ManyChat) schedules authentic-feeling posts into relevant groups at optimal times. Posts share relatable parenting content that naturally leads to the report. Compliant with group rules — value-first, not sales-first.</p>
+        <p><strong>Target groups:</strong> 50+ parenting Facebook groups globally. Rotated on a schedule. New groups added monthly via Perplexity research.</p>
+      </div>
+      <div class="o-card">
+        <h4>School & Educator Outreach</h4>
+        <div class="o-sub">B2B Licensing Pipeline</div>
+        <p>Apollo.io sends automated sequences to primary school principals, learning support coordinators, homeschool co-ops, Montessori schools, and child development centres. The pitch: license the report to offer parents as part of your enrolment or support package.</p>
+        <p>License model: school pays a monthly fee to offer the report under their brand (white-label). Powered by the same pipeline. This is the highest-value B2B revenue stream — one school = recurring monthly income vs one-off $97 sales.</p>
+      </div>
+      <div class="o-card">
+        <h4>Instagram & Content Automation</h4>
+        <div class="o-sub">Scheduled Content · No Anna Required</div>
+        <p>Buffer or Later schedules Instagram content in advance. Content batches are prepared monthly (Anna reviews, approves, done). Reels, carousels, and stories on parenting themes that resonate: "why your child has meltdowns," "how your child really learns," "what your child's behaviour is actually telling you."</p>
+        <p>Each post ends with a soft CTA to the report. Creators reshare content with their affiliate link. Content compounds over time — every post is an evergreen asset driving ongoing traffic to the checkout.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REVENUE MATH -->
+<section id="revenue" class="revenue-section">
+  <div class="wrapper">
+    <div class="sec-header">
+      <p class="sec-eyebrow">Revenue Model</p>
+      <h2>What This Generates at Scale</h2>
+      <p>Pricing TBD — this section will be updated once pricing strategy is confirmed. The structure below shows volume scenarios; slot in the final price points when ready.</p>
+    </div>
+    <table class="rev-table">
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>Reports/Month</th>
+          <th>Report Revenue</th>
+          <th>Upsell Revenue</th>
+          <th>Monthly Total</th>
+          <th>Annual</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="scenario">🌱 Month 1–2 (Launch)</td>
+          <td>50</td>
+          <td>TBD × 50</td>
+          <td>TBD</td>
+          <td>—</td>
+          <td class="rev-highlight">—</td>
+        </tr>
+        <tr>
+          <td class="scenario">📈 Month 3–4 (Growing)</td>
+          <td>200</td>
+          <td>TBD × 200</td>
+          <td>TBD</td>
+          <td>—</td>
+          <td class="rev-highlight">—</td>
+        </tr>
+        <tr>
+          <td class="scenario">🚀 Month 5–6 (Momentum)</td>
+          <td>500</td>
+          <td>TBD × 500</td>
+          <td>TBD</td>
+          <td>—</td>
+          <td class="rev-highlight">—</td>
+        </tr>
+        <tr>
+          <td class="scenario">⚡ Scale (Creator Network Live)</td>
+          <td>1,000</td>
+          <td>TBD × 1,000</td>
+          <td>TBD</td>
+          <td>—</td>
+          <td class="rev-highlight">—</td>
+        </tr>
+        <tr>
+          <td class="scenario">🏆 + School Licensing</td>
+          <td>1,000+</td>
+          <td>TBD</td>
+          <td>TBD + licensing</td>
+          <td>—</td>
+          <td class="rev-highlight">—</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:16px; font-size:11px; color:#888; text-align:center;">Creator commissions reduce net on referred sales. Direct sales keep full margin. Update this table once pricing is locked.</p>
+  </div>
+</section>
+
+<!-- TOOLS & COST -->
+<section id="tools" class="tools-section">
+  <div class="wrapper">
+    <div class="sec-header">
+      <p class="sec-eyebrow">The Stack</p>
+      <h2>Tools & Monthly Cost</h2>
+      <p>Every tool chosen for lowest possible overhead. Total operating cost is a tiny fraction of revenue at any scale.</p>
+    </div>
+    <div class="tools-grid">
+      <div class="tool-card"><div class="tool-name">Railway</div><div class="tool-purpose">HD API hosting</div><div class="tool-cost">$20 <span>/mo · already paying</span></div></div>
+      <div class="tool-card"><div class="tool-name">N8N (cloud)</div><div class="tool-purpose">Workflow automation</div><div class="tool-cost">$24 <span>/mo</span></div></div>
+      <div class="tool-card"><div class="tool-name">Typeform</div><div class="tool-purpose">Intake forms</div><div class="tool-cost">$29 <span>/mo</span></div></div>
+      <div class="tool-card"><div class="tool-name">Stripe</div><div class="tool-purpose">Payments + referrals</div><div class="tool-cost">2.9% <span>+ 30¢ per sale</span></div></div>
+      <div class="tool-card"><div class="tool-name">Supabase</div><div class="tool-purpose">Database</div><div class="tool-cost">$25 <span>/mo</span></div></div>
+      <div class="tool-card"><div class="tool-name">Claude API</div><div class="tool-purpose">Report generation</div><div class="tool-cost">~$1 <span>/report (15 calls)</span></div></div>
+      <div class="tool-card"><div class="tool-name">Netlify</div><div class="tool-purpose">Landing page hosting</div><div class="tool-cost">Free <span>→ $19/mo at scale</span></div></div>
+      <div class="tool-card"><div class="tool-name">SendGrid / Gmail</div><div class="tool-purpose">Email delivery</div><div class="tool-cost">Free <span>→ $15/mo</span></div></div>
+      <div class="tool-card"><div class="tool-name">Tidio</div><div class="tool-purpose">Support chatbot</div><div class="tool-cost">$29 <span>/mo</span></div></div>
+      <div class="tool-card"><div class="tool-name">Buffer / Later</div><div class="tool-purpose">Social scheduling</div><div class="tool-cost">$18 <span>/mo</span></div></div>
+      <div class="tool-card"><div class="tool-name">Apollo.io</div><div class="tool-purpose">Creator outreach</div><div class="tool-cost">$49 <span>/mo</span></div></div>
+      <div class="tool-card"><div class="tool-name">WeasyPrint / Puppeteer</div><div class="tool-purpose">PDF generation</div><div class="tool-cost">$0–20 <span>/mo</span></div></div>
+    </div>
+    <div class="tools-total">
+      <div>
+        <div class="tools-total-label">Total fixed monthly stack cost</div>
+        <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-top:2px;">Excluding Stripe fees and Claude API (per-use)</div>
+      </div>
+      <div>
+        <div class="tools-total-val">~$230</div>
+        <div class="tools-total-sub">per month · &lt;0.5% of revenue at 50 reports/month</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTAKE FORM QUESTIONS -->
+<section id="intake" class="intake-section">
+  <div class="wrapper">
+    <div class="sec-header" style="padding-top:0;">
+      <p class="sec-eyebrow">Children's Intake Form</p>
+      <h2>The Questions That Create the Depth</h2>
+      <p>Adapted from the proven adult intake form. Every question maps directly to a report section — this is what makes the report feel personal rather than generic.</p>
+    </div>
+    <div class="intake-grid">
+      <div class="q-block">
+        <div class="q-section-label">Section 1 · Child's Birth Details</div>
+        <ul class="q-list">
+          <li>Child's first name (for personalisation)</li>
+          <li>Date of birth (day / month / year)</li>
+          <li>Birth time — as accurate as possible (AM/PM)</li>
+          <li>City and country of birth</li>
+        </ul>
+      </div>
+      <div class="q-block">
+        <div class="q-section-label">Section 2 · What You Want to Understand</div>
+        <ul class="q-list">
+          <li>What do you most want this report to help you understand about your child? <em>(select up to 2)</em> — Their learning style / Their emotional patterns / Their strengths & gifts / Their career direction / Why they behave the way they do / Their social energy & friendships</li>
+        </ul>
+      </div>
+      <div class="q-block">
+        <div class="q-section-label">Section 3 · Biggest Parenting Challenges</div>
+        <ul class="q-list">
+          <li>What concerns you most about your child right now? <em>(multi-select)</em> — Emotional meltdowns / School & learning difficulties / Social anxiety / Low confidence / Sensory overwhelm / Focus & attention / Strong will / Anxiety or worry / Feeling misunderstood</li>
+          <li>What's your biggest challenge in parenting this child? <em>(open text)</em></li>
+        </ul>
+      </div>
+      <div class="q-block">
+        <div class="q-section-label">Section 4 · How They Learn Best</div>
+        <ul class="q-list">
+          <li>How does your child learn best? — Needs to move while learning / Needs quiet focus / Visual & creative / Needs to understand "why" first / Needs lots of encouragement / Learns by doing / Learns by watching others first</li>
+          <li>Does your child struggle at school? (Yes / No / Sometimes)</li>
+          <li>Do they have a diagnosis or suspected neurodivergence? <em>(optional)</em></li>
+        </ul>
+      </div>
+      <div class="q-block">
+        <div class="q-section-label">Section 5 · Energy & Overwhelm</div>
+        <ul class="q-list">
+          <li>When your child is overwhelmed, they typically: — Have a meltdown / Shutdown & go quiet / Get explosive or angry / Become anxious & clingy / Avoid & escape / Other</li>
+          <li>How quickly do they recover after overwhelm? — Minutes / Hours / A full day / Multiple days</li>
+          <li>What are their main sensory triggers? — Loud noise / Crowds / Unexpected change / Bright lights / Clothing textures / Food textures / Not sure</li>
+        </ul>
+      </div>
+      <div class="q-block">
+        <div class="q-section-label">Section 6 · Social Energy</div>
+        <ul class="q-list">
+          <li>Is your child energised by people or alone time? — Social time / Alone time / Both / Depends on the day</li>
+          <li>How do they handle group settings? — Thrives / Struggles / Depends on who's there</li>
+          <li>Do they struggle with friendships? (Yes / No / Sometimes)</li>
+        </ul>
+      </div>
+      <div class="q-block">
+        <div class="q-section-label">Section 7 · Confidence & Self-Worth</div>
+        <ul class="q-list">
+          <li>Does your child struggle with confidence? (Yes / No / Sometimes)</li>
+          <li>Do they compare themselves to siblings or peers? (Yes / No / Sometimes)</li>
+          <li>Do they know and express their own strengths? (Yes / No / Not yet)</li>
+          <li>How do they typically respond to criticism or failure? — Shutdown / Gets angry / Bounces back quickly / Seeks reassurance / Gives up easily</li>
+        </ul>
+      </div>
+      <div class="q-block">
+        <div class="q-section-label">Section 8 · Daily Support & Rituals</div>
+        <ul class="q-list">
+          <li>How does your child recharge? — Alone time / Creative play / Physical activity / Screen time / Social play / Outdoor/nature time / Sleep / Not sure</li>
+          <li>What time of day is your child most focused and calm? — Morning / Midday / Afternoon / Evening / Varies</li>
+          <li>Is there anything specific you'd love this report to help you with? <em>(free text)</em></li>
+        </ul>
+      </div>
+    </div>
+    <div style="background:#fff; border:1px solid var(--border); border-radius:14px; padding:22px 26px; margin-top:20px; box-shadow:0 2px 12px rgba(0,0,0,0.05);">
+      <p style="font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--blue); margin-bottom:10px;">Teen Report — Intake Adjustments</p>
+      <p style="font-size:13px; color:#444; line-height:1.7;">The teen intake uses the same structure but language shifts: <em>"your teen"</em> instead of <em>"your child."</em> Section 2 adds career options: future direction & career, identity & self-worth, peer pressure & social confidence, relationship with parents. Section 4 shifts to: academic performance, exam stress, subject strengths. Section 7 adds: body image, social media impact, comparing to peers. Optional: invite the teen to add their own note at the end — what they'd like understood about themselves.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ANNA'S ROLE -->
+<section id="anna" class="anna-weekly">
+  <div class="wrapper">
+    <div class="sec-header">
+      <p class="sec-eyebrow">Anna's Role</p>
+      <h2>What You Do vs What the System Does</h2>
+    </div>
+    <div class="weekly-grid">
+      <div class="w-card doesnt">
+        <div class="w-label">Anna Does NOT Do</div>
+        <ul class="w-items">
+          <li>Write any reports</li>
+          <li>Answer customer emails</li>
+          <li>Process payments manually</li>
+          <li>Send PDFs to buyers</li>
+          <li>Generate creator links</li>
+          <li>Track commissions</li>
+          <li>Post to Facebook groups daily</li>
+          <li>Follow up with prospects</li>
+          <li>Log sales to a spreadsheet</li>
+          <li>Handle refund requests</li>
+          <li>Send payout emails to creators</li>
+          <li>Chase late payments</li>
+        </ul>
+      </div>
+      <div class="w-card does">
+        <div class="w-label">Anna Does (Monthly · ~3 hours)</div>
+        <ul class="w-items">
+          <li>Reviews automated revenue report</li>
+          <li>Approves creator payout batch</li>
+          <li>Reviews next month's content batch</li>
+          <li>Makes strategic decisions (pricing, new verticals)</li>
+          <li>Handles any VA escalations (rare)</li>
+          <li>Directs The Edge / Vibe build when ready</li>
+          <li>High-value licensing conversations (schools, corporates)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BUILD ORDER -->
+<section id="build" class="build-section">
+  <div class="wrapper">
+    <div class="sec-header">
+      <p class="sec-eyebrow">Sprint Plan</p>
+      <h2>Build Order — Week by Week</h2>
+      <p>Everything needed before Euro Summer. The goal: pipeline live and generating before May.</p>
+    </div>
+    <div class="build-weeks">
+      <div class="week-card">
+        <div>
+          <div class="week-label">Week</div>
+          <div class="week-num">1</div>
+        </div>
+        <div>
+          <div class="week-title">Children's Report Pipeline Foundation</div>
+          <ul class="week-items">
+            <li>Typeform intake form built (children's — 8 sections, 12 questions)</li>
+            <li>Stripe product created ($97 children's report)</li>
+            <li>N8N workflow: Typeform webhook → Stripe payment check → Railway /chart API</li>
+            <li>Claude API connection tested with sample chart data</li>
+            <li>Supabase schema created (customers, creators, commissions)</li>
+          </ul>
+          <span class="week-milestone">✓ Milestone: Full data flow working end-to-end</span>
+        </div>
+      </div>
+      <div class="week-card">
+        <div>
+          <div class="week-label">Week</div>
+          <div class="week-num">2</div>
+        </div>
+        <div>
+          <div class="week-title">Claude Prompts + PDF Generation</div>
+          <ul class="week-items">
+            <li>15 section-by-section Claude prompts written and tested</li>
+            <li>N8N assembles 15 outputs into children's HTML template</li>
+            <li>PDF generation tested (WeasyPrint or Puppeteer)</li>
+            <li>Gmail SMTP delivery tested with real PDF attachment</li>
+            <li>Full end-to-end test: submit form → pay → receive PDF in inbox</li>
+          </ul>
+          <span class="week-milestone">✓ Milestone: First automated report delivered to test inbox</span>
+        </div>
+      </div>
+      <div class="week-card">
+        <div>
+          <div class="week-label">Week</div>
+          <div class="week-num">3</div>
+        </div>
+        <div>
+          <div class="week-title">Landing Page + Creator System + Teen Pipeline</div>
+          <ul class="week-items">
+            <li>Landing page live on Netlify (children's + teen report offering)</li>
+            <li>Creator application form + auto-onboarding sequence</li>
+            <li>Stripe referral link generation automated</li>
+            <li>Teen Typeform intake built (adapted from children's)</li>
+            <li>Teen report routed through same N8N workflow</li>
+            <li>Follow-up email sequence (5 emails including Mira upsell)</li>
+          </ul>
+          <span class="week-milestone">✓ Milestone: Both reports live. First creators onboarded.</span>
+        </div>
+      </div>
+      <div class="week-card">
+        <div>
+          <div class="week-label">Week</div>
+          <div class="week-num">4</div>
+        </div>
+        <div>
+          <div class="week-title">Outreach + Social + First Sales</div>
+          <ul class="week-items">
+            <li>Apollo.io creator outreach list built (500 targets via Perplexity)</li>
+            <li>First email sequence launched to creators</li>
+            <li>Facebook group posting schedule set up</li>
+            <li>Buffer content calendar loaded (first month of Instagram posts)</li>
+            <li>Tidio chatbot configured with FAQ responses</li>
+            <li>First real sales tested and monitored</li>
+          </ul>
+          <span class="week-milestone">✓ Milestone: First real paying customers. Pipeline proven.</span>
+        </div>
+      </div>
+      <div class="week-card">
+        <div>
+          <div class="week-label">Weeks 5–8</div>
+          <div class="week-num">→</div>
+        </div>
+        <div>
+          <div class="week-title">Scale + The Edge Build</div>
+          <ul class="week-items">
+            <li>Creator network growing (target: 50+ active creators by week 8)</li>
+            <li>The Edge report pipeline built in parallel (same N8N infrastructure)</li>
+            <li>The Edge landing page + intake + Optimise-style prompt</li>
+            <li>Chat subscription product page + flow (pricing TBD)</li>
+            <li>Upsell sequences live (mothers → The Vibe, fathers → The Edge)</li>
+          </ul>
+          <span class="week-milestone">✓ Milestone: Three revenue streams live before Euro Summer</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>Anna Massie Ventures</strong> · Internal Automation Blueprint · March 2026</p>
+  <p style="margin-top:6px;">This document is the operational architecture of the business. Everything in green runs without Anna.</p>
+</footer>
+
+</body>
+</html>

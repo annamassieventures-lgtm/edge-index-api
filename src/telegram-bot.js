@@ -1,43 +1,63 @@
 /**
- * Edge Index — Telegram Bot
+ * Edge Index — Telegram Bot v2
  *
- * Handles:
- *  - New user onboarding (collects birth data)
- *  - On-demand report generation (/report)
- *  - Weekly automated delivery (every Monday 8am UTC)
+ * Flow:
+ *  1. /start → ask for email
+ *  2. Email → verify payment (isPaidEmail) → if not paid, send Whop link
+ *  3. If paid → collect date of birth → time → location
+ *  4. Generate 17-section annual brief via Claude
+ *  5. Email report via Resend (HTML, styled)
+ *  6. Confirm in Telegram: "Sent to your email"
  *
- * Required environment variables (set in Railway or .env):
+ * Cron jobs:
+ *  - Monday 8am UTC: weekly report re-delivery to all paid users
+ *  - Daily 22:00 UTC (8am AEST): outreach briefing to Anna's Telegram
+ *
+ * Admin commands (Anna only, via ANNA_CHAT_ID):
+ *  /admin             — show admin menu
+ *  /admin paid <email> — manually mark email as paid
+ *  /admin users       — list registered users
+ *  /admin emails      — list all paid emails
+ *  /admin outreach    — show today's outreach briefing now
+ *
+ * Required env vars (Railway):
  *  TELEGRAM_BOT_TOKEN   — from @BotFather
- *  const RAILWAY_URL = `http://localhost:${process.env.PORT || 8080}`;
  *  ANTHROPIC_API_KEY    — from console.anthropic.com
- *
- * Install dependencies before running:
- *  npm install node-telegram-bot-api node-cron @anthropic-ai/sdk
+ *  RESEND_API_KEY       — from resend.com
+ *  ANNA_CHAT_ID         — Anna's Telegram chat ID (send /myid to the bot to get it)
+ *  WHOP_URL             — link to Whop checkout page (e.g. https://whop.com/edge-index)
+ *  PAID_EMAILS          — comma-separated manual override list (optional)
+ *  WHOP_WEBHOOK_SECRET  — from Whop dashboard (optional, for signature verification)
  */
 
 import TelegramBot from 'node-telegram-bot-api';
-import cron from 'node-cron';
-import Anthropic from '@anthropic-ai/sdk';
-import fs from 'fs';
-import path from 'path';
+import cron        from 'node-cron';
+import Anthropic   from '@anthropic-ai/sdk';
+import fs          from 'fs';
+import path        from 'path';
 import { fileURLToPath } from 'url';
+import { isPaidEmail, addPaidEmail, getAllPaidEmails } from './shared/paidUsers.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// ─── Configuration ────────────────────────────────────────────────────────────
+// ─── Configuration ─────────────────────────────────────────────────────────────
 
 const BOT_TOKEN     = process.env.TELEGRAM_BOT_TOKEN;
-const RAILWAY_URL = `http://localhost:${process.env.PORT || 8080}`;
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
+const RESEND_KEY    = process.env.RESEND_API_KEY;
+const ANNA_CHAT_ID  = process.env.ANNA_CHAT_ID ? String(process.env.ANNA_CHAT_ID) : null;
+const WHOP_URL      = process.env.WHOP_URL || 'https://whop.com/edge-index';
+const FROM_EMAIL    = 'The Edge Index <reports@edgeindex.io>';
+const RAILWAY_URL   = `http://localhost:${process.env.PORT || 8080}`;
 
 if (!BOT_TOKEN)     throw new Error('TELEGRAM_BOT_TOKEN is required');
 if (!ANTHROPIC_KEY) throw new Error('ANTHROPIC_API_KEY is required');
+if (!RESEND_KEY)    console.warn('⚠️  RESEND_API_KEY not set — email delivery disabled');
 
 const bot       = new TelegramBot(BOT_TOKEN, { polling: true });
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_KEY });
 
 // ─── User data persistence ─────────────────────────────────────────────────────
-// Stored as a JSON file. Replace with a database for production scale.
 
 const DATA_FILE = path.join(__dirname, '..', 'data', 'users.json');
 
@@ -48,9 +68,7 @@ function loadUsers() {
       fs.writeFileSync(DATA_FILE, '{}');
     }
     return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-  } catch {
-    return {};
-  }
+  } catch { return {}; }
 }
 
 function saveUsers(users) {
@@ -58,92 +76,77 @@ function saveUsers(users) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(users, null, 2));
 }
 
-function getUser(chatId) {
-  return loadUsers()[String(chatId)] || null;
-}
-
-function saveUser(chatId, data) {
+function getUser(chatId)         { return loadUsers()[String(chatId)] || null; }
+function getAllUsers()            { return loadUsers(); }
+function saveUser(chatId, data)  {
   const users = loadUsers();
   users[String(chatId)] = { ...users[String(chatId)], ...data };
   saveUsers(users);
 }
 
-function getAllUsers() {
-  return loadUsers();
+// ─── Outreach state persistence ────────────────────────────────────────────────
+
+const OUTREACH_FILE = path.join(__dirname, '..', 'data', 'outreach-state.json');
+
+const INITIAL_TARGETS = [
+  { id: 'wolf-of-trading',   handle: '@WolfofTradingAdmin', name: 'Wolf of Trading',    platform: 'Telegram', size: '90k',   tier: 'Scale',      stage: 0, lastMessageDate: null, replied: false, notes: 'Also @wolfoftradingteam' },
+  { id: 'bitcoin-bullets',   handle: '@joe1322',            name: 'Bitcoin Bullets',     platform: 'Telegram', size: '106k',  tier: 'Scale',      stage: 0, lastMessageDate: null, replied: false, notes: 'Also @BitcoinBullets' },
+  { id: 'fat-pig-signals',   handle: '@dad10',              name: 'Fat Pig Signals',     platform: 'Telegram', size: '46k',   tier: 'Growth',     stage: 0, lastMessageDate: null, replied: false, notes: 'Also @gangplank123 @Ibrahim_Harb1' },
+  { id: 'sureshotfx',        handle: '@sureshot_fx',        name: 'SureShotFX',          platform: 'Telegram', size: '48k',   tier: 'Growth',     stage: 0, lastMessageDate: null, replied: false, notes: 'Also @SSF_AdminBot' },
+  { id: 'binance-killers',   handle: '@BKCEO',              name: 'Binance Killers',     platform: 'Telegram', size: '250k+', tier: 'Enterprise', stage: 0, lastMessageDate: null, replied: false, notes: 'Large — enterprise pitch' },
+  { id: 'cryptoninjas',      handle: 'Reply to X/Telegram', name: 'CryptoNinjas Trading',platform: 'Telegram', size: '46k',   tier: 'Growth',     stage: 0, lastMessageDate: null, replied: false, notes: 'Public P&L posts' },
+  { id: 'learn2trade',       handle: 'Via website',         name: 'Learn2Trade (L2T)',   platform: 'Discord',  size: '25k',   tier: 'Growth',     stage: 0, lastMessageDate: null, replied: false, notes: 'UK-based' },
+  { id: 'jacobs-crypto-clan',handle: 'YouTube DM or Discord',name: "Jacob's Crypto Clan",platform: 'Discord',  size: '44.5k', tier: 'Growth',     stage: 0, lastMessageDate: null, replied: false, notes: 'Jacob Crypto Bury' },
+  { id: 'rand-trading',      handle: 'YouTube DM or Discord',name: 'Rand Trading Group', platform: 'Discord',  size: '38.8k', tier: 'Growth',     stage: 0, lastMessageDate: null, replied: false, notes: '300K+ YouTube' },
+  { id: 'eagle-investors',   handle: 'Discord DM',          name: 'Eagle Investors',     platform: 'Discord',  size: '160k+', tier: 'Enterprise', stage: 0, lastMessageDate: null, replied: false, notes: 'SEC-registered' },
+  { id: 'cryptohub',         handle: 'Discord DM',          name: 'Cryptohub',           platform: 'Discord',  size: '54k',   tier: 'Scale',      stage: 0, lastMessageDate: null, replied: false, notes: '15+ analysts on staff' },
+  { id: 'trader-capital',    handle: 'Discord DM',          name: 'Trader Capital LLC',  platform: 'Discord',  size: '19.8k', tier: 'Growth',     stage: 0, lastMessageDate: null, replied: false, notes: '' },
+  { id: 'potion-alpha',      handle: '@Orangie on X',       name: 'Potion Alpha',        platform: 'Discord',  size: '12k+',  tier: 'Starter',    stage: 0, lastMessageDate: null, replied: false, notes: 'Crypto trader' },
+  { id: 'the-trade-hub',     handle: 'Discord DM',          name: 'The Trade Hub',       platform: 'Discord',  size: '11.3k', tier: 'Starter',    stage: 0, lastMessageDate: null, replied: false, notes: '' },
+  { id: 'fxgears',           handle: 'FXGears.com contact', name: 'FXGears',             platform: 'Discord',  size: '~20k',  tier: 'Growth',     stage: 0, lastMessageDate: null, replied: false, notes: 'Contact Jack' },
+  { id: 'liquidity-hunter',  handle: 'Discord DM',          name: 'Liquidity Hunter Academy', platform: 'Discord', size: 'N/A', tier: 'Starter', stage: 0, lastMessageDate: null, replied: false, notes: '' },
+  { id: 'elite-crypto',      handle: 'Discord DM',          name: 'Elite Crypto Signals',platform: 'Discord',  size: '23.5k', tier: 'Growth',     stage: 0, lastMessageDate: null, replied: false, notes: 'VIP model already in place' },
+  { id: 'axion',             handle: 'Discord DM',          name: 'Axion',               platform: 'Discord',  size: '88k',   tier: 'Scale',      stage: 0, lastMessageDate: null, replied: false, notes: '' },
+  { id: 'wallstreetbets',    handle: 'Discord DM',          name: 'WallStreetBets Crypto',platform: 'Discord', size: '600k+', tier: 'Enterprise', stage: 0, lastMessageDate: null, replied: false, notes: 'Enterprise approach only' },
+  { id: 'easytradingbots',   handle: 'easytradingbots.ca',  name: 'EasyTradingBots',     platform: 'Discord',  size: 'Growing', tier: 'Starter', stage: 0, lastMessageDate: null, replied: false, notes: 'Contact James' },
+];
+
+function loadOutreach() {
+  try {
+    if (!fs.existsSync(OUTREACH_FILE)) {
+      fs.mkdirSync(path.dirname(OUTREACH_FILE), { recursive: true });
+      fs.writeFileSync(OUTREACH_FILE, JSON.stringify({ targets: INITIAL_TARGETS }, null, 2));
+    }
+    return JSON.parse(fs.readFileSync(OUTREACH_FILE, 'utf8'));
+  } catch { return { targets: INITIAL_TARGETS }; }
+}
+
+function saveOutreach(data) {
+  fs.mkdirSync(path.dirname(OUTREACH_FILE), { recursive: true });
+  fs.writeFileSync(OUTREACH_FILE, JSON.stringify(data, null, 2));
 }
 
 // ─── Conversation state ────────────────────────────────────────────────────────
-// Tracks what stage of onboarding each user is at
+// awaiting_email → awaiting_date → awaiting_time → awaiting_location → complete
 
-const state = {}; // { chatId: 'awaiting_date' | 'awaiting_time' | 'awaiting_location' | 'complete' }
+const state = {};
 
 // ─── Geocoding ─────────────────────────────────────────────────────────────────
 
 async function geocode(locationString) {
   try {
     const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationString)}&format=json&limit=1`;
-    const res = await fetch(url, {
-      headers: { 'User-Agent': 'EdgeIndex/1.0 (contact@edgeindex.io)' }
+    const res  = await fetch(url, {
+      headers: { 'User-Agent': 'EdgeIndex/2.0 (contact@edgeindex.io)' }
     });
     const data = await res.json();
     if (!data || !data.length) return null;
     return {
-      lat: parseFloat(data[0].lat),
-      lon: parseFloat(data[0].lon),
+      lat:     parseFloat(data[0].lat),
+      lon:     parseFloat(data[0].lon),
       display: data[0].display_name,
     };
-  } catch {
-    return null;
-  }
-}
-
-// ─── API calls to Railway ──────────────────────────────────────────────────────
-
-async function getHumanDesignChart(userData) {
-  const res = await fetch(`${RAILWAY_URL}/chart`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      date_of_birth: userData.dob,           // "YYYY-MM-DD"
-      birth_time:    userData.time,           // "HH:MM"
-      birth_location: userData.location,
-      lat:           userData.lat,
-      lon:           userData.lon,
-      timezone:      userData.timezone ?? 0, // default UTC if unknown
-    }),
-  });
-  if (!res.ok) throw new Error(`Chart API error: ${res.status}`);
-  return res.json();
-}
-
-async function getMoonData() {
-  const now = new Date();
-  const res = await fetch(`${RAILWAY_URL}/moon`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      date: now.toISOString().split('T')[0],
-      lat: 0,
-      lon: 0,
-    }),
-  });
-  if (!res.ok) throw new Error(`Moon API error: ${res.status}`);
-  return res.json();
-}
-
-async function getPlanetaryHours() {
-  const now = new Date();
-  const res = await fetch(`${RAILWAY_URL}/hours`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      date: now.toISOString().split('T')[0],
-      lat:  0,
-      lon:  0,
-    }),
-  });
-  if (!res.ok) throw new Error(`Hours API error: ${res.status}`);
-  return res.json();
+  } catch { return null; }
 }
 
 // ─── Claude report generation ──────────────────────────────────────────────────
@@ -309,108 +312,488 @@ async function generateReport(userData) {
   return message.content[0].text;
 }
 
-// ─── Send report to a single user ─────────────────────────────────────────────
+// ─── Markdown → HTML for email ─────────────────────────────────────────────────
+
+function mdToHtml(md, clientName) {
+  let body = md
+    // Escape HTML entities first
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    // Headers
+    .replace(/^# (.+)$/gm, '<h1 style="font-size:26px;font-family:Georgia,serif;color:#0a0a0a;margin:32px 0 12px">$1</h1>')
+    .replace(/^## (.+)$/gm, '<h2 style="font-size:20px;font-family:Georgia,serif;color:#1a1a1a;border-bottom:2px solid #C9A84C;padding-bottom:6px;margin:28px 0 10px">$1</h2>')
+    .replace(/^### (.+)$/gm, '<h3 style="font-size:17px;font-family:Arial,sans-serif;color:#333;margin:20px 0 8px">$1</h3>')
+    // Bold & italic
+    .replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+?)\*/g, '<em>$1</em>')
+    // Table rows (simple — strip separator rows)
+    .replace(/^\|[-: |]+\|$/gm, '')
+    .replace(/^\|(.+)\|$/gm, (_, row) => {
+      const cells = row.split('|').map(c => c.trim());
+      return '<tr>' + cells.map(c => `<td style="padding:8px 14px;border:1px solid #e0e0e0;font-family:Arial,sans-serif;font-size:14px">${c}</td>`).join('') + '</tr>';
+    })
+    // Wrap consecutive <tr> blocks in a table
+    .replace(/(<tr>.*?<\/tr>(\s*<tr>.*?<\/tr>)*)/gs, '<table style="width:100%;border-collapse:collapse;margin:16px 0">$1</table>')
+    // Numbered and bullet lists
+    .replace(/^\d+\. (.+)$/gm, '<li style="margin:6px 0;line-height:1.7;font-family:Georgia,serif">$1</li>')
+    .replace(/^[-•] (.+)$/gm, '<li style="margin:6px 0;line-height:1.7;font-family:Georgia,serif">$1</li>')
+    // Wrap consecutive <li> in <ul>
+    .replace(/(<li[^>]*>.*?<\/li>(\s*<li[^>]*>.*?<\/li>)*)/gs, '<ul style="padding-left:24px;margin:12px 0">$1</ul>')
+    // Horizontal rule
+    .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid #C9A84C;margin:32px 0">')
+    // Paragraphs
+    .replace(/\n\n+/g, '\n\n')
+    .split('\n\n')
+    .map(block => {
+      const trimmed = block.trim();
+      if (!trimmed) return '';
+      if (trimmed.startsWith('<')) return trimmed;
+      return `<p style="margin:14px 0;line-height:1.75;font-family:Georgia,serif;font-size:16px;color:#1a1a1a">${trimmed.replace(/\n/g, '<br>')}</p>`;
+    })
+    .join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Edge Index Brief — ${clientName}</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f0;font-family:Georgia,serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f0">
+    <tr><td align="center" style="padding:40px 20px">
+      <table width="700" cellpadding="0" cellspacing="0" style="background:#ffffff;max-width:700px;width:100%">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:#0a0a0a;padding:40px 48px 32px">
+            <div style="border-top:3px solid #C9A84C;padding-top:20px">
+              <p style="margin:0 0 4px;font-family:'Arial Black',Arial,sans-serif;font-size:11px;letter-spacing:4px;color:#C9A84C;text-transform:uppercase">Personalised Decision-Timing Intelligence</p>
+              <h1 style="margin:0;font-family:'Arial Black',Arial,sans-serif;font-size:32px;letter-spacing:3px;color:#ffffff;text-transform:uppercase;font-weight:900">THE EDGE INDEX</h1>
+              <h2 style="margin:8px 0 0;font-family:Georgia,serif;font-size:16px;color:#888;font-weight:400;font-style:italic">Annual Brief — ${clientName}</h2>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:40px 48px 48px">
+            ${body}
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#0a0a0a;padding:24px 48px">
+            <p style="margin:0;font-family:Arial,sans-serif;font-size:11px;color:#555;letter-spacing:1px">
+              THE EDGE INDEX &nbsp;|&nbsp; edgeindex.io &nbsp;|&nbsp; This report is confidential and prepared exclusively for ${clientName}. Not for redistribution.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+// ─── Email delivery via Resend ─────────────────────────────────────────────────
+
+async function sendReportEmail(toEmail, toName, reportMarkdown) {
+  if (!RESEND_KEY) {
+    console.warn('RESEND_API_KEY not set — skipping email delivery');
+    return { skipped: true };
+  }
+
+  const htmlBody = mdToHtml(reportMarkdown, toName);
+  const subject  = `Your Edge Index Brief — ${toName}`;
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method:  'POST',
+    headers: {
+      'Authorization': `Bearer ${RESEND_KEY}`,
+      'Content-Type':  'application/json',
+    },
+    body: JSON.stringify({
+      from:    FROM_EMAIL,
+      to:      toEmail,
+      subject,
+      html:    htmlBody,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Resend API error (${res.status}): ${err}`);
+  }
+
+  return res.json();
+}
+
+// ─── Full report flow ──────────────────────────────────────────────────────────
 
 async function sendReportToUser(chatId, userData) {
+  const email     = userData.email;
+  const firstName = userData.firstName || 'Trader';
+
   try {
-    await bot.sendMessage(chatId, '⚡ Generating your 12-month Edge Index Brief... this takes about 60 seconds.');
+    await bot.sendMessage(chatId,
+      `⚡ Generating your 12-month Edge Index Brief...\n\nThis takes about 60 seconds. We'll send it directly to *${email}* when it's ready.`,
+      { parse_mode: 'Markdown' }
+    );
 
     const report = await generateReport(userData);
-    // Telegram has a 4096 char limit per message — split if needed
-    if (report.length <= 4000) {
-      await bot.sendMessage(chatId, report, { parse_mode: 'Markdown' });
+
+    if (email) {
+      await sendReportEmail(email, firstName, report);
+      await bot.sendMessage(chatId,
+        `✅ Your Edge Index Brief has been sent to *${email}*\n\nCheck your inbox — and your spam folder just in case. The report is 17 sections of personalised decision-timing intelligence for the next 12 months.\n\nIf you have questions, reply here.`,
+        { parse_mode: 'Markdown' }
+      );
     } else {
-      const chunks = report.match(/[\s\S]{1,4000}/g) || [report];
-      for (const chunk of chunks) {
-        await bot.sendMessage(chatId, chunk, { parse_mode: 'Markdown' });
-        await new Promise(r => setTimeout(r, 500)); // small delay between chunks
-      }
+      // Fallback: send in Telegram if no email (shouldn't happen in normal flow)
+      await bot.sendMessage(chatId, report.substring(0, 4000), { parse_mode: 'Markdown' });
     }
 
-    // Update last report timestamp
     saveUser(chatId, { lastReportAt: new Date().toISOString() });
 
   } catch (err) {
     console.error(`Error sending report to ${chatId}:`, err.message);
-    await bot.sendMessage(chatId, '⚠️ There was an error generating your report. Please try again in a few minutes, or reply /report to retry.');
+    await bot.sendMessage(chatId,
+      '⚠️ There was an error generating your report. Please try again in a few minutes, or send /report to retry.'
+    );
   }
 }
 
-// ─── Bot message handlers ──────────────────────────────────────────────────────
+// ─── Admin check ───────────────────────────────────────────────────────────────
 
-// /start — welcome message
+function isAnna(chatId) {
+  return ANNA_CHAT_ID && String(chatId) === ANNA_CHAT_ID;
+}
+
+// ─── Outreach briefing builder ─────────────────────────────────────────────────
+
+const OUTREACH_MSG_1 = (name) =>
+  `Hey ${name},\n\nNoticed your trading community is solid. Quick question — what's your biggest pain point with retention right now?\n\nI built something that's basically a retention hack disguised as a performance tool. Members get personalized timing windows for their trades (based on their chart + planetary transits). When they use it, outcomes improve noticeably.\n\nWorth a 5-min chat to see if it fits? No pressure either way.`;
+
+const OUTREACH_MSG_2 = (name) =>
+  `Hey ${name},\n\nFollowing up — know you're busy.\n\nJust launched this with a few other communities (similar size to yours). Members are actually *using* it consistently, which is rare. The retention lift has been solid.\n\nIt's 100% hands-off on your end — Telegram bot, fully automated.\n\nIf timing tools + retention interest you, lmk. Otherwise no worries — I'll stop pinging.`;
+
+const OUTREACH_MSG_3 = (name) =>
+  `Hey ${name},\n\nLast one, I promise.\n\nHere's the real value prop: most communities leak members because they don't get consistent wins. This tool gives members *personalized decision timing* — when their Human Design chart aligns with planetary transits, their trading outcomes 10X. It's psychology + timing, not magic.\n\nMembers who see results don't leave. That's the retention play.\n\nHow it works:\n- I handle everything. Telegram bot, fully automated.\n- Members enter their birth data once. They get weekly timing windows.\n- You do nothing after a 5-min setup.\n\nThe founding beta offer:\n$500/month for 3 months (normally $800–$6,000/month depending on community size). If it doesn't move the needle in 90 days, we part ways.\n\nWant to talk about your community's retention goals?`;
+
+function buildOutreachBriefing() {
+  const outreach  = loadOutreach();
+  const today     = new Date();
+  const todayStr  = today.toISOString().split('T')[0];
+  const lines     = [`📋 *Edge Index Outreach Briefing — ${todayStr}*\n`];
+
+  let actionCount = 0;
+
+  for (const target of outreach.targets) {
+    if (target.replied || target.stage >= 3) continue;
+
+    const lastDate  = target.lastMessageDate ? new Date(target.lastMessageDate) : null;
+    const daysSince = lastDate
+      ? Math.floor((today - lastDate) / (1000 * 60 * 60 * 24))
+      : null;
+
+    let shouldSend = false;
+    let msgNum     = null;
+
+    if (target.stage === 0 && !lastDate) {
+      // Never contacted — send Message 1
+      shouldSend = true;
+      msgNum     = 1;
+    } else if (target.stage === 1 && daysSince !== null && daysSince >= 3) {
+      // Message 1 sent, 3+ days ago, no reply — send Message 2
+      shouldSend = true;
+      msgNum     = 2;
+    } else if (target.stage === 2 && daysSince !== null && daysSince >= 5) {
+      // Message 2 sent, 5+ days ago, no reply — send Message 3
+      shouldSend = true;
+      msgNum     = 3;
+    }
+
+    if (shouldSend) {
+      actionCount++;
+      const platformEmoji = target.platform === 'Telegram' ? '✈️' : '💬';
+      const msgFn = msgNum === 1 ? OUTREACH_MSG_1 : msgNum === 2 ? OUTREACH_MSG_2 : OUTREACH_MSG_3;
+      const msg   = msgFn(target.name);
+
+      lines.push(
+        `${platformEmoji} *${target.name}* (${target.size} · ${target.tier})`,
+        `Contact: ${target.handle}`,
+        `Message ${msgNum}:`,
+        `\`\`\``,
+        msg,
+        `\`\`\``,
+        `After sending, reply to me: /admin sent ${target.id}`,
+        ``,
+      );
+    }
+  }
+
+  if (actionCount === 0) {
+    lines.push('✅ No outreach actions due today. Check back tomorrow.');
+  } else {
+    lines.push(`\n📊 ${actionCount} message(s) to send today.`);
+    lines.push(`\nFor each one you've sent, reply: /admin sent <id>`);
+    lines.push(`For replies/interest, reply: /admin replied <id>`);
+  }
+
+  return lines.join('\n');
+}
+
+// ─── Bot commands ──────────────────────────────────────────────────────────────
+
+// /myid — anyone can use, helps Anna find her chat ID
+bot.onText(/\/myid/, async (msg) => {
+  await bot.sendMessage(msg.chat.id, `Your Telegram chat ID is: \`${msg.chat.id}\``, { parse_mode: 'Markdown' });
+});
+
+// /start — begin onboarding
 bot.onText(/\/start/, async (msg) => {
   const chatId    = msg.chat.id;
   const firstName = msg.from?.first_name || 'there';
 
   saveUser(chatId, { chatId, firstName, telegramUsername: msg.from?.username });
-  state[chatId] = 'awaiting_date';
+  state[chatId] = 'awaiting_email';
 
-  await bot.sendMessage(chatId, `⚡ Welcome to The Edge Index, ${firstName}!\n\nI'm your personalised trading timing intelligence system.\n\nTo generate your Edge Index report, I need three things:\n\n1. Your **date of birth** (DD/MM/YYYY)\n2. Your **time of birth** (HH:MM — approximate is fine)\n3. Your **city and country of birth**\n\nReply with your **date of birth** to begin.`, { parse_mode: 'Markdown' });
+  await bot.sendMessage(chatId,
+    `⚡ Welcome to The Edge Index, ${firstName}!\n\nI'm your personalised trading timing intelligence system.\n\nTo get started, I need to verify your purchase. Please reply with the *email address you used to purchase your Edge Index report*.`,
+    { parse_mode: 'Markdown' }
+  );
 });
 
-// /report — generate report on demand
+// /report — regenerate report
 bot.onText(/\/report/, async (msg) => {
   const chatId = msg.chat.id;
   const user   = getUser(chatId);
 
-  if (!user || !user.dob || !user.time || !user.location) {
+  if (!user || !user.email) {
+    state[chatId] = 'awaiting_email';
+    await bot.sendMessage(chatId,
+      'Please send me the email address you used to purchase your Edge Index report, and I\'ll verify your access.',
+    );
+    return;
+  }
+
+  if (!isPaidEmail(user.email)) {
+    await bot.sendMessage(chatId,
+      `⚠️ I can't find a purchase for *${user.email}*.\n\nTo get your Edge Index report, complete your purchase here:\n${WHOP_URL}\n\nOnce payment is confirmed, send /start to proceed.`,
+      { parse_mode: 'Markdown' }
+    );
+    return;
+  }
+
+  if (!user.dob || !user.time || !user.location) {
     state[chatId] = 'awaiting_date';
-    await bot.sendMessage(chatId, "I don't have your birth data yet. Let's set that up first.\n\nReply with your **date of birth** (DD/MM/YYYY):", { parse_mode: 'Markdown' });
+    await bot.sendMessage(chatId,
+      'Your purchase is confirmed ✓\n\nI still need your birth data. Reply with your **date of birth** (DD/MM/YYYY):',
+      { parse_mode: 'Markdown' }
+    );
     return;
   }
 
   await sendReportToUser(chatId, user);
 });
 
-// /mystats — show stored birth data
+// /mystats — show stored data
 bot.onText(/\/mystats/, async (msg) => {
   const chatId = msg.chat.id;
   const user   = getUser(chatId);
 
   if (!user || !user.dob) {
-    await bot.sendMessage(chatId, "I don't have your data yet. Send /start to begin.");
+    await bot.sendMessage(chatId, "I don't have your profile yet. Send /start to begin.");
     return;
   }
 
-  await bot.sendMessage(chatId, `Your Edge Index profile:\n\n📅 Date of birth: ${user.dob}\n🕐 Time of birth: ${user.time}\n📍 Birth location: ${user.location}\n\nSend /report to generate your current week's report.`);
+  await bot.sendMessage(chatId,
+    `Your Edge Index profile:\n\n📧 Email: ${user.email || 'not set'}\n📅 Date of birth: ${user.dob}\n🕐 Time of birth: ${user.time}\n📍 Birth location: ${user.location}\n\nSend /report to generate your report.`
+  );
 });
 
 // /help
 bot.onText(/\/help/, async (msg) => {
-  await bot.sendMessage(msg.chat.id, `Edge Index commands:
-
-/start — set up your profile
-/report — generate your weekly report now
-/mystats — view your stored birth data
-/help — show this message
-
-Your weekly report is automatically sent every Monday morning.`);
+  await bot.sendMessage(msg.chat.id,
+    `Edge Index commands:\n\n/start — set up your profile\n/report — generate your report\n/mystats — view your profile\n/myid — show your Telegram ID\n/help — this message`
+  );
 });
 
-// Handle free-text messages (onboarding flow)
+// /admin — Anna-only admin commands
+bot.onText(/\/admin(.*)/, async (msg, match) => {
+  const chatId = msg.chat.id;
+
+  if (!isAnna(chatId)) {
+    await bot.sendMessage(chatId, 'Unknown command. Send /help for available commands.');
+    return;
+  }
+
+  const args = (match[1] || '').trim().split(/\s+/);
+  const cmd  = args[0]?.toLowerCase();
+
+  // /admin — show menu
+  if (!cmd) {
+    await bot.sendMessage(chatId,
+      `🔧 *Edge Index Admin*\n\n` +
+      `/admin users — list registered users\n` +
+      `/admin emails — list paid emails\n` +
+      `/admin paid <email> — manually mark email as paid\n` +
+      `/admin outreach — show today's outreach briefing\n` +
+      `/admin sent <target-id> — mark message as sent to target\n` +
+      `/admin replied <target-id> — mark target as replied`,
+      { parse_mode: 'Markdown' }
+    );
+    return;
+  }
+
+  // /admin users
+  if (cmd === 'users') {
+    const users = getAllUsers();
+    const list  = Object.values(users);
+    if (!list.length) {
+      await bot.sendMessage(chatId, 'No users registered yet.');
+      return;
+    }
+    const lines = list.map(u =>
+      `• ${u.firstName || 'Unknown'} (@${u.telegramUsername || '?'}) — ${u.email || 'no email'} — ${u.dob ? '✅ full profile' : '⏳ incomplete'}`
+    );
+    await bot.sendMessage(chatId, `*Registered users (${list.length}):*\n\n${lines.join('\n')}`, { parse_mode: 'Markdown' });
+    return;
+  }
+
+  // /admin emails
+  if (cmd === 'emails') {
+    const emails = getAllPaidEmails();
+    if (!emails.length) {
+      await bot.sendMessage(chatId, 'No paid emails on file yet.\n\nAdd manually: /admin paid email@example.com\nOr set PAID_EMAILS env var in Railway.');
+      return;
+    }
+    await bot.sendMessage(chatId, `*Paid emails (${emails.length}):*\n\n${emails.map(e => `• ${e}`).join('\n')}`, { parse_mode: 'Markdown' });
+    return;
+  }
+
+  // /admin paid <email>
+  if (cmd === 'paid') {
+    const email = args[1]?.toLowerCase();
+    if (!email || !email.includes('@')) {
+      await bot.sendMessage(chatId, 'Usage: /admin paid email@example.com');
+      return;
+    }
+    addPaidEmail(email);
+    await bot.sendMessage(chatId, `✅ ${email} marked as paid. They can now use /start to access their report.`);
+    return;
+  }
+
+  // /admin outreach
+  if (cmd === 'outreach') {
+    const briefing = buildOutreachBriefing();
+    // Split if over Telegram limit
+    const chunks = briefing.match(/[\s\S]{1,4000}/g) || [briefing];
+    for (const chunk of chunks) {
+      await bot.sendMessage(chatId, chunk, { parse_mode: 'Markdown' });
+      await new Promise(r => setTimeout(r, 300));
+    }
+    return;
+  }
+
+  // /admin sent <target-id>
+  if (cmd === 'sent') {
+    const targetId = args[1];
+    if (!targetId) {
+      await bot.sendMessage(chatId, 'Usage: /admin sent <target-id>\n\nTarget IDs are shown in the outreach briefing.');
+      return;
+    }
+    const outreach = loadOutreach();
+    const target   = outreach.targets.find(t => t.id === targetId);
+    if (!target) {
+      await bot.sendMessage(chatId, `Target "${targetId}" not found. Check the ID in the briefing.`);
+      return;
+    }
+    target.stage           = (target.stage || 0) + 1;
+    target.lastMessageDate = new Date().toISOString().split('T')[0];
+    saveOutreach(outreach);
+    await bot.sendMessage(chatId, `✅ ${target.name} — Message ${target.stage} recorded as sent (${target.lastMessageDate}).`);
+    return;
+  }
+
+  // /admin replied <target-id>
+  if (cmd === 'replied') {
+    const targetId = args[1];
+    if (!targetId) {
+      await bot.sendMessage(chatId, 'Usage: /admin replied <target-id>');
+      return;
+    }
+    const outreach = loadOutreach();
+    const target   = outreach.targets.find(t => t.id === targetId);
+    if (!target) {
+      await bot.sendMessage(chatId, `Target "${targetId}" not found.`);
+      return;
+    }
+    target.replied = true;
+    saveOutreach(outreach);
+    await bot.sendMessage(chatId, `🎉 ${target.name} marked as replied! Move this one to a call.`);
+    return;
+  }
+
+  await bot.sendMessage(chatId, `Unknown admin command: ${cmd}. Send /admin to see options.`);
+});
+
+// ─── Free-text message handler (onboarding flow) ───────────────────────────────
+
 bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
   const text   = msg.text?.trim();
 
-  // Ignore commands (already handled above)
   if (!text || text.startsWith('/')) return;
 
   const currentState = state[chatId] || 'unknown';
 
+  // ── Step 0: Email verification ──
+  if (currentState === 'awaiting_email') {
+    const emailMatch = text.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    if (!emailMatch) {
+      await bot.sendMessage(chatId, 'Please enter a valid email address — the one you used when purchasing your Edge Index report.');
+      return;
+    }
+
+    const email = text.toLowerCase();
+    saveUser(chatId, { email });
+
+    if (!isPaidEmail(email)) {
+      await bot.sendMessage(chatId,
+        `⚠️ I can't find a purchase linked to *${email}*.\n\nTo access your Edge Index report, complete your purchase here:\n${WHOP_URL}\n\nOnce payment is confirmed, send /start again and enter this email address.`,
+        { parse_mode: 'Markdown' }
+      );
+      return;
+    }
+
+    state[chatId] = 'awaiting_date';
+    await bot.sendMessage(chatId,
+      `✅ Purchase confirmed — welcome!\n\nTo generate your personalised 12-month Edge Index Brief, I need three things:\n\n1. Your **date of birth**\n2. Your **time of birth**\n3. Your **city and country of birth**\n\nLet's start. Reply with your **date of birth** (DD/MM/YYYY):`,
+      { parse_mode: 'Markdown' }
+    );
+    return;
+  }
+
   // ── Step 1: Date of birth ──
   if (currentState === 'awaiting_date') {
-    // Accepts DD/MM/YYYY
     const dateMatch = text.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/);
     if (!dateMatch) {
-      await bot.sendMessage(chatId, "Please enter your date of birth in DD/MM/YYYY format. Example: 15/03/1988");
+      await bot.sendMessage(chatId, 'Please enter your date of birth in DD/MM/YYYY format. Example: 15/03/1988');
       return;
     }
     const [, day, month, year] = dateMatch;
     const iso = `${year}-${month.padStart(2,'0')}-${day.padStart(2,'0')}`;
     saveUser(chatId, { dob: iso });
     state[chatId] = 'awaiting_time';
-    await bot.sendMessage(chatId, `Got it — ${day}/${month}/${year} ✓\n\nNow your **time of birth** (HH:MM, 24-hour format). If you're not sure, give your best estimate — even within an hour is useful.`, { parse_mode: 'Markdown' });
+    await bot.sendMessage(chatId,
+      `Got it — ${day}/${month}/${year} ✓\n\nNow your **time of birth** (HH:MM, 24-hour format). If you're unsure, give your best estimate — within an hour is useful.`,
+      { parse_mode: 'Markdown' }
+    );
     return;
   }
 
@@ -418,14 +801,17 @@ bot.on('message', async (msg) => {
   if (currentState === 'awaiting_time') {
     const timeMatch = text.match(/^(\d{1,2})[:\.](\d{2})$/);
     if (!timeMatch) {
-      await bot.sendMessage(chatId, "Please enter your birth time as HH:MM (24-hour format). Example: 14:30 or 09:15");
+      await bot.sendMessage(chatId, 'Please enter your birth time as HH:MM (24-hour). Example: 14:30 or 09:15');
       return;
     }
     const [, h, m] = timeMatch;
     const time = `${h.padStart(2,'0')}:${m}`;
     saveUser(chatId, { time });
     state[chatId] = 'awaiting_location';
-    await bot.sendMessage(chatId, `Birth time ${time} ✓\n\nFinally, your **city and country of birth**. Example: Sydney, Australia`, { parse_mode: 'Markdown' });
+    await bot.sendMessage(chatId,
+      `Birth time ${time} ✓\n\nFinally, your **city and country of birth**. Example: Sydney, Australia`,
+      { parse_mode: 'Markdown' }
+    );
     return;
   }
 
@@ -434,50 +820,68 @@ bot.on('message', async (msg) => {
     await bot.sendMessage(chatId, `Looking up ${text}...`);
 
     const geo = await geocode(text);
-
     if (!geo) {
       await bot.sendMessage(chatId, `I couldn't find that location. Try being more specific — for example: "Sydney, Australia" or "London, UK"`);
       return;
     }
 
-    saveUser(chatId, {
-      location: text,
-      lat:      geo.lat,
-      lon:      geo.lon,
-    });
-
+    saveUser(chatId, { location: text, lat: geo.lat, lon: geo.lon });
     state[chatId] = 'complete';
 
-    await bot.sendMessage(chatId, `${text} ✓ (${geo.lat.toFixed(2)}°, ${geo.lon.toFixed(2)}°)\n\n✅ Profile complete. Generating your first Edge Index report now...`, { parse_mode: 'Markdown' });
+    await bot.sendMessage(chatId,
+      `${text} ✓ (${geo.lat.toFixed(2)}°, ${geo.lon.toFixed(2)}°)\n\n✅ Profile complete. Generating your Edge Index Brief now...`,
+      { parse_mode: 'Markdown' }
+    );
 
     const user = getUser(chatId);
     await sendReportToUser(chatId, user);
     return;
   }
 
-  // ── Unknown state — prompt restart ──
+  // ── Catch-all ──
   await bot.sendMessage(chatId, "Send /start to set up your Edge Index profile, or /report if you're already set up.");
 });
 
-// ─── Weekly automated delivery ─────────────────────────────────────────────────
+// ─── Cron: Weekly report delivery ─────────────────────────────────────────────
 // Every Monday at 8:00 AM UTC
 
 cron.schedule('0 8 * * 1', async () => {
-  console.log('Running weekly Edge Index report delivery...');
+  console.log('[CRON] Weekly report delivery starting...');
   const users = getAllUsers();
 
   for (const [chatId, userData] of Object.entries(users)) {
-    if (!userData.dob || !userData.time || !userData.location) continue;
-    console.log(`Sending weekly report to ${chatId} (${userData.firstName || 'unknown'})`);
+    if (!userData.dob || !userData.time || !userData.location || !userData.email) continue;
+    if (!isPaidEmail(userData.email)) continue;
+
+    console.log(`[CRON] Sending weekly report to ${chatId} (${userData.firstName || 'unknown'})`);
     await sendReportToUser(chatId, userData);
-    // Stagger sends — 3 seconds between each user to avoid rate limits
-    await new Promise(r => setTimeout(r, 3000));
+    await new Promise(r => setTimeout(r, 3000)); // stagger sends
   }
 
-  console.log('Weekly delivery complete.');
-}, {
-  timezone: 'UTC',
-});
+  console.log('[CRON] Weekly delivery complete.');
+}, { timezone: 'UTC' });
+
+// ─── Cron: Daily outreach briefing to Anna ────────────────────────────────────
+// Every day at 22:00 UTC = 8:00 AM AEST
+
+cron.schedule('0 22 * * *', async () => {
+  if (!ANNA_CHAT_ID) {
+    console.log('[CRON] Outreach briefing skipped — ANNA_CHAT_ID not set');
+    return;
+  }
+
+  console.log('[CRON] Sending daily outreach briefing to Anna...');
+  try {
+    const briefing = buildOutreachBriefing();
+    const chunks   = briefing.match(/[\s\S]{1,4000}/g) || [briefing];
+    for (const chunk of chunks) {
+      await bot.sendMessage(ANNA_CHAT_ID, chunk, { parse_mode: 'Markdown' });
+      await new Promise(r => setTimeout(r, 300));
+    }
+  } catch (err) {
+    console.error('[CRON] Outreach briefing error:', err.message);
+  }
+}, { timezone: 'UTC' });
 
 // ─── Polling error handler ─────────────────────────────────────────────────────
 
@@ -485,5 +889,7 @@ bot.on('polling_error', (err) => {
   console.error('Telegram polling error:', err.message);
 });
 
-console.log('Edge Index Telegram bot started.');
-console.log('Railway API:', RAILWAY_URL);
+console.log('✅ Edge Index Telegram bot started (v2)');
+console.log(`   Railway API: ${RAILWAY_URL}`);
+console.log(`   Anna chat ID: ${ANNA_CHAT_ID || 'NOT SET — set ANNA_CHAT_ID in Railway'}`);
+console.log(`   Resend: ${RESEND_KEY ? 'configured' : 'NOT CONFIGURED — set RESEND_API_KEY'}`);

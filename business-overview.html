@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Business Overview — Anna Massie Ventures</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:    #0D1B3E;
+    --navy2:   #1a2d5a;
+    --blue:    #2B4BAA;
+    --blue2:   #4A72C4;
+    --sky:     #D0DCF5;
+    --coral:   #D94040;
+    --coral2:  #E8705A;
+    --peach:   #F2B8A8;
+    --mint:    #2A7A5C;
+    --mint2:   #3DAA7C;
+    --gold:    #C9A84C;
+    --gold2:   #F0D07A;
+    --sage:    #5C7A5A;
+    --cream:   #FAF8F4;
+    --warm:    #F5F0E8;
+    --border:  rgba(0,0,0,0.08);
+    --shadow:  0 4px 24px rgba(0,0,0,0.10);
+    --shadow2: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--cream);
+    color: #1a1a1a;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 40%, var(--blue) 100%);
+    padding: 80px 48px 64px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+    opacity: 0.3;
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--gold2); margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 300; color: #fff; line-height: 1.15; margin-bottom: 16px;
+  }
+  .hero h1 em { font-style: italic; color: var(--gold2); }
+  .hero-sub {
+    font-size: 16px; color: rgba(255,255,255,0.72);
+    max-width: 640px; margin: 0 auto 40px; font-weight: 300;
+  }
+  .hero-badges { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.20);
+    color: rgba(255,255,255,0.88); padding: 8px 18px; border-radius: 40px;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.5px;
+  }
+
+  /* ── NAV ── */
+  .nav-strip {
+    background: var(--navy); display: flex; justify-content: center;
+    position: sticky; top: 0; z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap;
+  }
+  .nav-strip a {
+    color: rgba(255,255,255,0.65); text-decoration: none;
+    padding: 14px 20px; font-size: 11px; font-weight: 500;
+    letter-spacing: 0.5px; transition: color 0.2s, background 0.2s;
+  }
+  .nav-strip a:hover { color: #fff; background: rgba(255,255,255,0.06); }
+
+  .wrapper { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+
+  /* ── SECTION HEADERS ── */
+  .section-header { text-align: center; padding: 72px 0 48px; }
+  .section-eyebrow {
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--blue); margin-bottom: 12px;
+  }
+  .section-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 4vw, 46px); font-weight: 400;
+    color: var(--navy); line-height: 1.2;
+  }
+  .section-header p {
+    margin-top: 14px; color: #555; max-width: 640px;
+    margin-left: auto; margin-right: auto; font-size: 15px;
+  }
+
+  /* ── MISSION STRIP ── */
+  .mission-strip {
+    background: var(--warm); border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border); padding: 48px 32px; text-align: center;
+  }
+  .mission-strip blockquote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(20px, 2.5vw, 28px); font-weight: 300; font-style: italic;
+    color: var(--navy); max-width: 860px; margin: 0 auto; line-height: 1.5;
+  }
+  .mission-strip blockquote strong { font-style: normal; font-weight: 600; }
+
+  /* ── PRODUCT CARDS ── */
+  .products-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 28px; padding-bottom: 72px;
+  }
+  .product-card {
+    border-radius: 20px; overflow: hidden; box-shadow: var(--shadow);
+    display: flex; flex-direction: column;
+  }
+  .product-card-header {
+    padding: 36px 32px 28px; position: relative; overflow: hidden;
+  }
+  .product-card-header::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .card-children .product-card-header { background: linear-gradient(140deg, #4A72C4 0%, #7A9AD4 100%); }
+  .card-female .product-card-header  { background: linear-gradient(140deg, var(--mint) 0%, var(--mint2) 100%); }
+  .card-edge .product-card-header    { background: linear-gradient(140deg, var(--coral) 0%, var(--coral2) 100%); }
+  .card-subs .product-card-header    { background: linear-gradient(140deg, var(--navy) 0%, #3a4a8a 100%); }
+
+  .product-icon { font-size: 32px; margin-bottom: 14px; display: block; }
+  .product-card-header h3 {
+    font-family: 'Cormorant Garamond', serif; font-size: 26px;
+    font-weight: 500; color: #fff; margin-bottom: 6px;
+  }
+  .product-card-header .tagline { font-size: 12px; color: rgba(255,255,255,0.72); font-style: italic; }
+  .product-card-body {
+    background: #fff; padding: 28px 32px 32px; flex: 1;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .product-audience {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    padding: 5px 14px; border-radius: 20px;
+  }
+  .card-children .product-audience { background: #EEF2FF; color: var(--blue); }
+  .card-female .product-audience  { background: #EEFAF4; color: var(--mint); }
+  .card-edge .product-audience    { background: #FFF0F0; color: var(--coral); }
+  .card-subs .product-audience    { background: #EEF2FF; color: var(--navy); }
+
+  .product-desc { font-size: 14px; color: #444; line-height: 1.65; }
+  .product-price-box {
+    background: var(--warm); border-radius: 10px; padding: 16px 20px;
+    border: 1px solid var(--border);
+  }
+  .price-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #999; margin-bottom: 5px; }
+  .price { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 400; color: var(--navy); }
+  .price span { font-size: 13px; font-weight: 400; color: #888; }
+  .report-pill {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: #444; padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .report-pill:last-child { border-bottom: none; }
+  .dot { width: 7px; height: 7px; background: var(--blue); border-radius: 50%; flex-shrink: 0; }
+  .card-female .dot  { background: var(--mint); }
+  .card-edge .dot    { background: var(--coral); }
+  .card-subs .dot    { background: var(--navy2); }
+
+  /* ── FUNNEL SECTION ── */
+  .funnel-section {
+    background: var(--navy); padding: 80px 0;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .funnel-section .section-eyebrow { color: var(--gold2); }
+  .funnel-section h2, .funnel-section p { color: rgba(255,255,255,0.85); }
+  .funnel-section .section-header p { color: rgba(255,255,255,0.55); }
+  .funnel-wrap { max-width: 860px; margin: 0 auto; padding-bottom: 72px; }
+  .funnel-top {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px; padding: 32px 40px; text-align: center;
+    margin-bottom: 0;
+  }
+  .funnel-top .f-eyebrow {
+    font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--gold2); margin-bottom: 10px;
+  }
+  .funnel-top h3 {
+    font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 400;
+    color: #fff; margin-bottom: 8px;
+  }
+  .funnel-top p { font-size: 13px; color: rgba(255,255,255,0.55); }
+  .funnel-arrow {
+    text-align: center; font-size: 22px; color: rgba(255,255,255,0.3);
+    padding: 12px 0;
+  }
+  .funnel-split {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 0;
+    align-items: center; margin-bottom: 0;
+  }
+  .funnel-branch {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px; padding: 24px 28px; text-align: center;
+  }
+  .funnel-branch .fb-eye {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .funnel-branch.left .fb-eye  { color: var(--mint2); }
+  .funnel-branch.right .fb-eye { color: var(--coral2); }
+  .funnel-branch h4 {
+    font-family: 'Cormorant Garamond', serif; font-size: 22px;
+    font-weight: 500; color: #fff; margin-bottom: 5px;
+  }
+  .funnel-branch p { font-size: 12px; color: rgba(255,255,255,0.5); }
+  .funnel-or {
+    width: 40px; text-align: center; font-size: 11px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.25);
+  }
+  .funnel-arrow2 {
+    text-align: center; font-size: 18px; color: rgba(255,255,255,0.2); padding: 10px 0;
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 0;
+  }
+  .funnel-arrow2 span { text-align: center; }
+  .funnel-bottom-row {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: center;
+  }
+  .funnel-sub {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 18px 22px; text-align: center;
+  }
+  .funnel-sub .fs-eye {
+    font-size: 9px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 5px;
+  }
+  .funnel-sub p { font-size: 12px; color: rgba(255,255,255,0.5); }
+  .funnel-note {
+    margin-top: 32px; text-align: center;
+    font-size: 13px; color: rgba(255,255,255,0.4); font-style: italic;
+  }
+
+  /* ── PIPELINE SECTION ── */
+  .pipeline-section {
+    background: var(--navy2); padding: 80px 0;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .pipeline-section .section-eyebrow { color: var(--gold2); }
+  .pipeline-section h2 { color: #fff; }
+  .pipeline-section .section-header p { color: rgba(255,255,255,0.55); }
+  .pipeline-steps {
+    display: flex; gap: 0; align-items: flex-start;
+    max-width: 960px; margin: 0 auto; flex-wrap: wrap; justify-content: center;
+    padding-bottom: 72px;
+  }
+  .step {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 8px; flex: 1; min-width: 110px;
+    position: relative; padding: 0 10px;
+  }
+  .step:not(:last-child)::after {
+    content: '→'; position: absolute; right: -8px; top: 16px;
+    font-size: 18px; color: rgba(255,255,255,0.25);
+  }
+  .step-bubble {
+    width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.20); display: flex; align-items: center;
+    justify-content: center; font-size: 22px; position: relative;
+  }
+  .step.built .step-bubble { border-color: var(--mint2); background: rgba(61,170,124,0.15); }
+  .built-badge {
+    position: absolute; top: -8px; right: -8px; background: var(--mint2);
+    color: #fff; font-size: 9px; font-weight: 700; padding: 2px 7px;
+    border-radius: 10px; letter-spacing: 0.5px;
+  }
+  .step-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.35); }
+  .step-name { font-weight: 600; font-size: 12px; color: #fff; text-align: center; }
+  .step-tool { font-size: 11px; color: rgba(255,255,255,0.45); text-align: center; }
+  .callout-strip {
+    display: flex; gap: 16px; align-items: flex-start;
+    border: 1px solid; border-radius: 14px; padding: 20px 24px;
+    font-size: 13px; line-height: 1.65;
+  }
+  .callout-strip .icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+
+  /* ── TECH STACK ── */
+  .tech-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px; padding-bottom: 72px;
+  }
+  .tech-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px 18px; display: flex; gap: 14px; align-items: center;
+    box-shadow: var(--shadow2);
+  }
+  .tech-icon { font-size: 28px; flex-shrink: 0; }
+  .tech-name { font-weight: 700; font-size: 14px; color: var(--navy); }
+  .tech-role { font-size: 11px; color: #888; margin-top: 2px; }
+  .tech-status {
+    display: inline-block; font-size: 9px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase; padding: 3px 9px;
+    border-radius: 10px; margin-top: 6px;
+  }
+  .status-live  { background: #E6F7F0; color: var(--mint); }
+  .status-build { background: #FFF8E6; color: #B07D1A; }
+  .status-ready { background: #EEF2FF; color: var(--blue); }
+
+  /* ── FEASIBILITY ── */
+  .feasibility-section { background: var(--warm); padding: 80px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .feas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; padding-bottom: 56px; }
+  .feas-card {
+    background: #fff; border-radius: 18px; overflow: hidden; box-shadow: var(--shadow2);
+  }
+  .feas-card-top {
+    padding: 22px 26px 18px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .feas-icon { font-size: 26px; }
+  .feas-title { font-weight: 700; font-size: 15px; color: var(--navy); }
+  .feas-sub { font-size: 11px; color: #888; }
+  .feas-body { padding: 22px 26px; }
+  .feas-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 9px 0; border-bottom: 1px solid #f5f5f5; font-size: 13.5px;
+  }
+  .feas-row:last-child { border-bottom: none; }
+  .feas-lbl { color: #555; }
+  .feas-val { font-weight: 600; color: var(--navy); }
+  .green { color: var(--mint); }
+  .amber { color: #B07D1A; }
+  .red   { color: var(--coral); }
+
+  .verdict-box {
+    border-radius: 18px; padding: 36px 40px; margin-bottom: 56px;
+    display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: start;
+    border: 2px solid;
+  }
+  .verdict-box.positive { border-color: var(--mint2); background: #F0FAF5; }
+  .verdict-box.caution  { border-color: #E8C84A; background: #FFFBE6; }
+  .verdict-number {
+    font-family: 'Cormorant Garamond', serif; font-size: 72px; font-weight: 300;
+    line-height: 1; color: var(--mint); text-align: center; padding-top: 4px;
+  }
+  .verdict-content h3 {
+    font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 500;
+    color: var(--navy); margin-bottom: 10px;
+  }
+  .verdict-content p { font-size: 14px; color: #444; line-height: 1.7; }
+  .risk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; padding-bottom: 0; }
+  .risk-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px 22px; box-shadow: var(--shadow2);
+  }
+  .risk-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .risk-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .risk-dot.green { background: var(--mint2); }
+  .risk-dot.amber { background: #E8C84A; }
+  .risk-dot.red   { background: var(--coral); }
+  .risk-label { font-weight: 700; font-size: 13px; color: var(--navy); }
+  .risk-card p { font-size: 13px; color: #555; line-height: 1.6; }
+
+  /* ── ROADMAP ── */
+  .roadmap-timeline { display: flex; flex-direction: column; gap: 0; padding-bottom: 72px; }
+  .phase { display: grid; grid-template-columns: 100px 1fr; gap: 24px; position: relative; }
+  .phase:not(:last-child)::before {
+    content: ''; position: absolute; left: 49px; top: 56px;
+    width: 2px; bottom: 0; background: var(--border);
+  }
+  .phase-marker { display: flex; flex-direction: column; align-items: center; padding-top: 4px; }
+  .phase-circle {
+    width: 40px; height: 40px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-weight: 700;
+    font-size: 16px; color: #fff; margin-bottom: 8px; z-index: 1;
+  }
+  .p1 .phase-circle { background: var(--coral); }
+  .p2 .phase-circle { background: var(--blue); }
+  .p3 .phase-circle { background: var(--mint); }
+  .p4 .phase-circle { background: var(--gold); }
+  .phase-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: #aaa;
+  }
+  .phase-content {
+    background: #fff; border: 1px solid var(--border); border-radius: 18px;
+    margin-bottom: 24px; overflow: hidden; box-shadow: var(--shadow2);
+  }
+  .phase-content-header { padding: 22px 28px 18px; border-bottom: 1px solid var(--border); }
+  .phase-period { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #aaa; margin-bottom: 4px; }
+  .phase-content-header h4 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; color: var(--navy); }
+  .phase-body { padding: 20px 28px 24px; display: flex; flex-direction: column; gap: 10px; }
+  .phase-item {
+    font-size: 13.5px; color: #444; padding: 8px 12px;
+    background: var(--warm); border-radius: 8px; line-height: 1.5;
+  }
+
+  /* ── ECOSYSTEM ── */
+  .ecosystem { background: var(--navy); padding: 80px 0; }
+  .ecosystem .section-eyebrow { color: var(--gold2); }
+  .ecosystem h2, .ecosystem p { color: rgba(255,255,255,0.85); }
+  .ecosystem .section-header p { color: rgba(255,255,255,0.5); }
+  .eco-center { display: flex; justify-content: center; margin-top: 48px; }
+  .eco-hub {
+    background: rgba(255,255,255,0.10); border: 2px solid rgba(255,255,255,0.25);
+    border-radius: 20px; padding: 28px 44px; text-align: center;
+  }
+  .eco-hub-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold2); margin-bottom: 8px; }
+  .eco-hub-name { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 400; color: #fff; margin-bottom: 4px; }
+  .eco-hub-sub { font-size: 12px; color: rgba(255,255,255,0.5); }
+  .eco-arrow-row { text-align: center; font-size: 28px; color: rgba(255,255,255,0.25); padding: 16px 0 8px; }
+  .eco-flows { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; padding-bottom: 72px; }
+  .eco-node {
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px; padding: 28px; text-align: center;
+  }
+  .eco-node-icon { font-size: 32px; margin-bottom: 12px; }
+  .eco-node-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; color: #fff; margin-bottom: 8px; }
+  .eco-node-desc { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.7; }
+
+  /* ── CREATOR ── */
+  .creator-section { background: var(--warm); padding: 80px 0; border-top: 1px solid var(--border); }
+  .creator-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; padding-bottom: 0; }
+  .creator-left .section-eyebrow { color: var(--blue); text-align: left; padding-top: 0; margin-bottom: 12px; display: block; }
+  .creator-left h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(26px, 3vw, 38px); font-weight: 400; color: var(--navy); line-height: 1.25; margin-bottom: 16px; }
+  .creator-left p { font-size: 14px; color: #555; line-height: 1.75; }
+  .creator-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .creator-stat {
+    background: #fff; border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px; text-align: center; box-shadow: var(--shadow2);
+  }
+  .creator-stat .val { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 400; color: var(--navy); line-height: 1; }
+  .creator-stat .lbl { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
+
+  /* ── LICENSING ── */
+  .licensing-section { padding: 80px 0; border-top: 1px solid var(--border); }
+  .lic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; padding-bottom: 72px; }
+  .lic-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 18px;
+    overflow: hidden; box-shadow: var(--shadow2);
+  }
+  .lic-card-top { padding: 24px 26px 18px; border-bottom: 1px solid var(--border); }
+  .lic-icon { font-size: 28px; margin-bottom: 10px; }
+  .lic-card-top h4 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; color: var(--navy); margin-bottom: 4px; }
+  .lic-sub { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+  .lic-body { padding: 18px 26px 22px; font-size: 13.5px; color: #555; line-height: 1.7; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy); color: rgba(255,255,255,0.45);
+    text-align: center; padding: 36px 24px; font-size: 13px;
+  }
+  footer strong { color: rgba(255,255,255,0.75); }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: var(--border); }
+
+  @media (max-width: 720px) {
+    .hero { padding: 56px 24px 48px; }
+    .wrapper { padding: 0 18px; }
+    .products-grid, .feas-grid, .eco-flows, .creator-inner, .funnel-split, .funnel-arrow2, .funnel-bottom-row { grid-template-columns: 1fr; }
+    .funnel-or { display: none; }
+    .phase { grid-template-columns: 1fr; }
+    .phase:not(:last-child)::before { display: none; }
+    .phase-marker { flex-direction: row; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <p class="hero-eyebrow">Anna Massie Ventures · Business Overview</p>
+  <h1>The Edge Index.<br/><em>Decision Intelligence at Scale.</em></h1>
+  <p class="hero-sub">Personal timing intelligence — Human Design + planetary cycles — packaged as a licensed tool for trading, crypto, and AI communities. Built to run without you. Phase 1 focus: The Edge Index.</p>
+  <div class="hero-badges">
+    <span class="badge">⚡ The Edge Index — Phase 1</span>
+    <span class="badge">🏦 Trading &amp; Crypto Communities</span>
+    <span class="badge">🤖 AI Schools</span>
+    <span class="badge">📘 Children's Suite — Phase 2</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav-strip">
+  <a href="#thesis">Core Thesis</a>
+  <a href="#products">Products</a>
+  <a href="#funnel">Architecture</a>
+  <a href="#pipeline">Pipeline</a>
+  <a href="#tech">Tech</a>
+  <a href="#feasibility">Feasibility</a>
+  <a href="#roadmap">Roadmap</a>
+  <a href="#licensing">Licensing</a>
+  <a href="#revenue">Revenue Model</a>
+</nav>
+
+<!-- MISSION -->
+<div class="mission-strip">
+  <blockquote>
+    "Just like a war has a cycle on property prices and oil — <strong>humans run a cycle on when to go hard and when to stand still.</strong>
+    The Edge Index tells you where you are in that cycle. <strong>Personalised. Precise. At scale.</strong>"
+  </blockquote>
+</div>
+
+<!-- CORE THESIS -->
+<section id="thesis" style="padding: 80px 0; background: var(--warm); border-bottom: 1px solid var(--border);">
+  <div class="wrapper" style="max-width: 900px; margin: 0 auto;">
+    <div class="section-header">
+      <p class="section-eyebrow">The Origin Insight</p>
+      <h2>Macro Cycles + Personal Cycles<br/><em>= Decision Intelligence</em></h2>
+      <p>The concept that everything is built on — and why it's genuinely original.</p>
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px;">
+      <div style="background:#fff; border-radius:18px; padding:32px; border: 1px solid var(--border); box-shadow: var(--shadow2);">
+        <div style="font-size:32px; margin-bottom:12px;">🌍</div>
+        <h3 style="font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:400; color:var(--navy); margin-bottom:10px;">Macro Cycles</h3>
+        <p style="font-size:14px; color:#555; line-height:1.7;">Geopolitical events, planetary movements, and market cycles are well understood by traders. War in Iran → oil rises → interest rates follow → property markets respond. These cycles are real, predictable in retrospect, and already tracked by professional analysts.</p>
+      </div>
+      <div style="background:#fff; border-radius:18px; padding:32px; border: 1px solid var(--border); box-shadow: var(--shadow2);">
+        <div style="font-size:32px; margin-bottom:12px;">👤</div>
+        <h3 style="font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:400; color:var(--navy); margin-bottom:10px;">Personal Cycles</h3>
+        <p style="font-size:14px; color:#555; line-height:1.7;">Every individual also runs a cycle — when to go hard, when to stand still, when their decision-making is sharp, and when they're in a high-risk window for expensive mistakes. This is derived from their Human Design chart intersecting with current planetary transits. Nobody accounts for this layer.</p>
+      </div>
+    </div>
+    <div style="background: linear-gradient(135deg, var(--navy), var(--blue)); border-radius:18px; padding:36px 40px; margin-top:24px; text-align:center;">
+      <p style="color:rgba(255,255,255,0.6); font-size:13px; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:12px;">The White Space</p>
+      <p style="color:#fff; font-size:20px; font-family:'Cormorant Garamond',serif; font-style:italic; line-height:1.6; max-width:640px; margin:0 auto;">"Financial astrology tracks when the market is optimal. Human Design tracks who you are. Nobody is asking when <em>you specifically</em> are optimal — given the macro environment and your personal chart. That is The Edge Index."</p>
+    </div>
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-top:24px;">
+      <div style="background:#fff; border-radius:14px; padding:24px; border:1px solid var(--border); text-align:center;">
+        <div style="font-size:13px; font-weight:600; color:var(--blue); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">Financial Astrology</div>
+        <p style="font-size:13px; color:#777;">Tracks planetary cycles affecting markets broadly. Impersonal. Exists. Paying customers.</p>
+      </div>
+      <div style="background:#fff; border-radius:14px; padding:24px; border:1px solid var(--border); text-align:center;">
+        <div style="font-size:13px; font-weight:600; color:var(--mint); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">Human Design Tools</div>
+        <p style="font-size:13px; color:#777;">Personal chart analysis. Wellness-framed. No performance or financial angle. No trading integration.</p>
+      </div>
+      <div style="background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.2)); border-radius:14px; padding:24px; border:2px solid var(--gold); text-align:center;">
+        <div style="font-size:13px; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">The Edge Index ✦</div>
+        <p style="font-size:13px; color:#555;">Personal chart × current planetary environment = your specific decision timing window. Nobody has built this.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PRODUCT -->
+<section id="products">
+  <div class="wrapper">
+    <div class="section-header">
+      <p class="section-eyebrow">The Product</p>
+      <h2>The Edge Index.</h2>
+      <p>One product. One audience. Build this first. Everything else waits.</p>
+    </div>
+
+    <div style="max-width: 720px; margin: 0 auto 72px;">
+      <div class="product-card card-edge" style="border: 2px solid var(--gold);">
+        <div class="product-card-header">
+          <span class="product-icon">⚡</span>
+          <h3>The Edge Index</h3>
+          <p class="tagline">Personal timing intelligence for high-stakes decision makers</p>
+        </div>
+        <div class="product-card-body">
+          <span class="product-audience">Traders · Crypto · AI/Tech · High-Achievers</span>
+          <p class="product-desc">
+            HD chart + planetary hours + moon cycle scoring = a personalised timing intelligence layer for anyone making high-stakes financial, business, or strategic decisions. Gender-neutral. Performance-framed. Not wellness — decision intelligence. Licensed to trading groups, crypto communities, and AI schools who offer it as an exclusive member tool. Anna is not the face. The tool is the product.
+          </p>
+          <div class="product-price-box">
+            <div class="price-label">Revenue Model</div>
+            <div class="price">B2B Licensing <span>tiered by community size</span></div>
+          </div>
+          <div class="product-reports">
+            <div class="report-pill"><span class="dot"></span>Planetary Hours API — live on Railway ✅</div>
+            <div class="report-pill"><span class="dot"></span>Moon Phase API — live on Railway ✅</div>
+            <div class="report-pill"><span class="dot"></span>HD Chart API — live on Railway ✅</div>
+            <div class="report-pill"><span class="dot"></span>Delivery: Telegram bot per licensed community</div>
+            <div class="report-pill"><span class="dot"></span>Target: YouTube trading groups, crypto Discords, AI cohort programs</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px; background: var(--warm); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; font-size: 13.5px; color: #666; line-height: 1.7; text-align: center;">
+        Other products (children's suite, adult female report, Mira) exist in the broader vision and will be built in Phase 2–4. They are not the focus right now. This document is about The Edge Index.
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- THE FUNNEL -->
+<section id="funnel" class="funnel-section">
+  <div class="wrapper">
+    <div class="section-header">
+      <p class="section-eyebrow">The Architecture</p>
+      <h2 style="color:#fff;">The Tool Finds the People.<br/>The People Find Anna.</h2>
+      <p style="color:rgba(255,255,255,0.65);">The Edge Index operates at two levels simultaneously — B2B licensing to communities, and B2C direct subscriptions for individual traders. Both channels are fully automated. Anna is invisible behind the brand. The tool scales without limit.</p>
+    </div>
+
+    <div class="funnel-wrap">
+      <!-- TOP -->
+      <div class="funnel-top">
+        <div class="f-eyebrow">Scale Layer · B2B Licensing</div>
+        <h3>⚡ The Edge Index — Licensed to Communities</h3>
+        <p>Trading groups, crypto Discords, AI cohort programs. Community admins license the tool and offer it as an exclusive member benefit. Members receive personalised timing intelligence via Telegram. Anna is not visible — the tool is the product.</p>
+      </div>
+
+      <div class="funnel-arrow">↓ members use the tool, results build trust ↓</div>
+
+      <!-- SPLIT -->
+      <div class="funnel-split">
+        <div class="funnel-branch left">
+          <div class="fb-eye">Community Members · Trading / Crypto / AI</div>
+          <h4>📊 Thousands of users</h4>
+          <p>Each member receives personalised timing windows based on their HD chart + planetary transits. Delivered via Telegram. No direct relationship with Anna. The tool does the work at this layer.</p>
+        </div>
+        <div class="funnel-or">→</div>
+        <div class="funnel-branch right">
+          <div class="fb-eye">Individual Traders — Direct B2C</div>
+          <h4>📊 Personal Subscriptions</h4>
+          <p>Individual traders subscribe directly — Weekly, Daily, or Live Edge tiers. No community required. They find the tool via Whop, organic search, or community word of mouth. Fully automated delivery via Telegram bot.</p>
+        </div>
+      </div>
+
+      <div class="funnel-arrow2">
+        <span style="color:transparent;">·</span>
+        <span>↓</span>
+        <span style="color:transparent;">·</span>
+      </div>
+
+      <!-- BOTTOM -->
+      <div class="funnel-bottom-row">
+        <div class="funnel-sub" style="grid-column: 1 / -1; text-align:center;">
+          <div class="fs-eye">Scale Layer · Global</div>
+          <p>⚡ <strong style="color:rgba(255,255,255,0.75);">Both channels compound.</strong> Community licenses drive member adoption. Members who leave communities take their B2C subscription with them. Word of mouth within trading communities drives organic B2C growth. One tool. Two revenue streams. Fully automated. No ceiling.</p>
+        </div>
+      </div>
+
+      <p class="funnel-note">Phase 2: Children's suite + Adult Female product run as a parallel consumer funnel feeding the same ecosystem — separate audience, same engine</p>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE -->
+<section id="pipeline" class="pipeline-section">
+  <div class="wrapper">
+    <div class="section-header">
+      <p class="section-eyebrow">Automation Pipeline</p>
+      <h2 style="color:#fff;">From Intake to Inbox.<br/>Fully Automated.</h2>
+      <p>The pipeline replicates the original manual process — intake depth + section-by-section Claude prompting — at any volume. Steps 2–3 are already live.</p>
+    </div>
+
+    <div style="max-width:860px; margin: 0 auto 48px;">
+      <div class="callout-strip" style="background:rgba(255,255,255,0.06); border-color:rgba(61,170,124,0.4); color:rgba(255,255,255,0.7);">
+        <span class="icon">🟢</span>
+        <p style="color:rgba(255,255,255,0.65);"><strong style="color:var(--mint2);">Already built (Railway):</strong> POST /chart returns full Human Design data. POST /moon and POST /hours power the Edge Index real-time features. The calculation engine — the hardest part — is complete. The pipeline is approximately 40% done.</p>
+      </div>
+    </div>
+
+    <div class="pipeline-steps">
+      <div class="step">
+        <div class="step-bubble">📋</div>
+        <div class="step-label">Step 1</div>
+        <div class="step-name">Q&amp;A Intake</div>
+        <div class="step-tool">Typeform</div>
+      </div>
+      <div class="step">
+        <div class="step-bubble">💳</div>
+        <div class="step-label">Step 2</div>
+        <div class="step-name">Payment</div>
+        <div class="step-tool">Stripe</div>
+      </div>
+      <div class="step built">
+        <div class="step-bubble">🔮<span class="built-badge">Live</span></div>
+        <div class="step-label">Step 3</div>
+        <div class="step-name">HD Calculation</div>
+        <div class="step-tool">Railway · natalengine</div>
+      </div>
+      <div class="step">
+        <div class="step-bubble">🤖</div>
+        <div class="step-label">Step 4</div>
+        <div class="step-name">Report Generation</div>
+        <div class="step-tool">Claude API · N8N</div>
+      </div>
+      <div class="step">
+        <div class="step-bubble">📄</div>
+        <div class="step-label">Step 5</div>
+        <div class="step-name">PDF Render</div>
+        <div class="step-tool">Puppeteer / WeasyPrint</div>
+      </div>
+      <div class="step">
+        <div class="step-bubble">📧</div>
+        <div class="step-label">Step 6</div>
+        <div class="step-name">Delivery</div>
+        <div class="step-tool">Gmail SMTP</div>
+      </div>
+    </div>
+
+    <div style="max-width:860px; margin: 0 auto 72px;">
+      <div class="callout-strip" style="background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.15); color:rgba(255,255,255,0.65);">
+        <span class="icon">💡</span>
+        <p style="color:rgba(255,255,255,0.65);">The quality that makes buyers say "someone finally understands me" comes from going <em>one section at a time</em> through Claude — combining chart data with the parent's specific intake answers for each section. The automation must preserve this: Claude API called per-section to maintain 30-page luxury quality, not a single bulk prompt.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section id="tech">
+  <div class="wrapper">
+    <div class="section-header">
+      <p class="section-eyebrow">Technology</p>
+      <h2>The Stack</h2>
+      <p>Every tool chosen for speed, cost-efficiency, and no-code operability. The full stack can be run without an in-house engineering team.</p>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <span class="tech-icon">🛤️</span>
+        <div>
+          <div class="tech-name">Railway</div>
+          <div class="tech-role">Node.js API hosting</div>
+          <span class="tech-status status-live">Live</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">🔧</span>
+        <div>
+          <div class="tech-name">N8N</div>
+          <div class="tech-role">Workflow automation</div>
+          <span class="tech-status status-build">Build</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">🗄️</span>
+        <div>
+          <div class="tech-name">Supabase</div>
+          <div class="tech-role">Database + user records</div>
+          <span class="tech-status status-ready">Ready</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">📝</span>
+        <div>
+          <div class="tech-name">Typeform</div>
+          <div class="tech-role">Q&amp;A intake + birth data</div>
+          <span class="tech-status status-build">Build</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">💳</span>
+        <div>
+          <div class="tech-name">Stripe</div>
+          <div class="tech-role">Payments + referrals</div>
+          <span class="tech-status status-ready">Ready</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">🤖</span>
+        <div>
+          <div class="tech-name">Claude API</div>
+          <div class="tech-role">Report generation engine</div>
+          <span class="tech-status status-build">Build</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">📄</span>
+        <div>
+          <div class="tech-name">Puppeteer</div>
+          <div class="tech-role">HTML → PDF rendering</div>
+          <span class="tech-status status-build">Build</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">📧</span>
+        <div>
+          <div class="tech-name">Gmail SMTP</div>
+          <div class="tech-role">Report delivery email</div>
+          <span class="tech-status status-ready">Ready</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">🌐</span>
+        <div>
+          <div class="tech-name">Netlify / Stan</div>
+          <div class="tech-role">Landing pages</div>
+          <span class="tech-status status-build">Build</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">🔮</span>
+        <div>
+          <div class="tech-name">natalengine</div>
+          <div class="tech-role">Human Design calculations</div>
+          <span class="tech-status status-live">Live</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">⭐</span>
+        <div>
+          <div class="tech-name">astronomy-engine</div>
+          <div class="tech-role">Moon + planetary hours</div>
+          <span class="tech-status status-live">Live</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">🐙</span>
+        <div>
+          <div class="tech-name">GitHub</div>
+          <div class="tech-role">Version control + CI/CD</div>
+          <span class="tech-status status-live">Live</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">🛒</span>
+        <div>
+          <div class="tech-name">Whop</div>
+          <div class="tech-role">Marketplace + payments</div>
+          <span class="tech-status status-live">Live</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">✈️</span>
+        <div>
+          <div class="tech-name">Telegram Bot</div>
+          <div class="tech-role">Report delivery + onboarding</div>
+          <span class="tech-status status-build">Deploy ready</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">⚡</span>
+        <div>
+          <div class="tech-name">Zapier</div>
+          <div class="tech-role">Whop → MailerLite bridge</div>
+          <span class="tech-status status-build">Setup pending</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">📨</span>
+        <div>
+          <div class="tech-name">MailerLite</div>
+          <div class="tech-role">Email CRM + sequences</div>
+          <span class="tech-status status-build">Setup pending</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEASIBILITY -->
+<section id="feasibility" class="feasibility-section">
+  <div class="wrapper">
+    <div class="section-header">
+      <p class="section-eyebrow">Honest Assessment</p>
+      <h2>Is This Achievable?</h2>
+      <p>The vision is big. The question is whether the foundations support it. Here's a clear-eyed read — what's genuinely strong, what's genuinely hard, and a realistic timeline.</p>
+    </div>
+
+    <!-- VERDICT -->
+    <div class="verdict-box positive">
+      <div class="verdict-number">✓</div>
+      <div class="verdict-content">
+        <h3>Yes — and the hardest part is already done.</h3>
+        <p>The calculation API — the piece that makes this entire product suite unique and defensible — is live, tested, and running on Railway. Most startups in this space are still trying to figure out how to generate accurate Human Design data. That problem is solved. What remains is execution: connecting the pipeline, building intake forms, and getting the first automated report out the door. That is a focused build problem, not a technical invention problem.</p>
+      </div>
+    </div>
+
+    <!-- FEASIBILITY CARDS -->
+    <div class="feas-grid">
+      <div class="feas-card">
+        <div class="feas-card-top">
+          <span class="feas-icon">💪</span>
+          <div>
+            <div class="feas-title">What's genuinely strong</div>
+            <div class="feas-sub">Competitive advantages already in place</div>
+          </div>
+        </div>
+        <div class="feas-body">
+          <div class="feas-row"><span class="feas-lbl">HD calculation engine</span><span class="feas-val green">Live ✓</span></div>
+          <div class="feas-row"><span class="feas-lbl">HD chart + moon + planetary hours APIs</span><span class="feas-val green">Live on Railway ✓</span></div>
+          <div class="feas-row"><span class="feas-lbl">Origin concept — genuinely original IP</span><span class="feas-val green">Validated ✓</span></div>
+          <div class="feas-row"><span class="feas-lbl">White space confirmed — nobody doing this</span><span class="feas-val green">Verified ✓</span></div>
+          <div class="feas-row"><span class="feas-lbl">Trading psychology market validated</span><span class="feas-val green">70%+ emotional loss ✓</span></div>
+          <div class="feas-row"><span class="feas-lbl">B2B licensing model — no per-seat complexity</span><span class="feas-val green">Clean ✓</span></div>
+          <div class="feas-row"><span class="feas-lbl">Automation stack (N8N, Stripe, Supabase)</span><span class="feas-val green">Understood ✓</span></div>
+          <div class="feas-row"><span class="feas-lbl">Community admin pitch — written</span><span class="feas-val green">Ready ✓</span></div>
+        </div>
+      </div>
+
+      <div class="feas-card">
+        <div class="feas-card-top">
+          <span class="feas-icon">⚠️</span>
+          <div>
+            <div class="feas-title">What needs focus</div>
+            <div class="feas-sub">Honest gaps to close before launch</div>
+          </div>
+        </div>
+        <div class="feas-body">
+          <div class="feas-row"><span class="feas-lbl">Telegram bot</span><span class="feas-val green">Built — deploy ready ✓</span></div>
+          <div class="feas-row"><span class="feas-lbl">Edge Index report prompt</span><span class="feas-val green">Built — production ready ✓</span></div>
+          <div class="feas-row"><span class="feas-lbl">Whop seller account</span><span class="feas-val green">Live ✓</span></div>
+          <div class="feas-row"><span class="feas-lbl">Whop listing copy (B2B + B2C)</span><span class="feas-val green">Written — paste ready ✓</span></div>
+          <div class="feas-row"><span class="feas-lbl">Zapier + MailerLite automation</span><span class="feas-val amber">45 min setup remaining</span></div>
+          <div class="feas-row"><span class="feas-lbl">Telegram bot deployed to Railway</span><span class="feas-val amber">npm install + env vars needed</span></div>
+          <div class="feas-row"><span class="feas-lbl">First community admin relationship</span><span class="feas-val amber">Outreach begins now</span></div>
+          <div class="feas-row"><span class="feas-lbl">Edge Index landing page — not live</span><span class="feas-val amber">Next priority after Whop</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RISK BREAKDOWN -->
+    <div class="risk-grid">
+      <div class="risk-card">
+        <div class="risk-top">
+          <div class="risk-dot green"></div>
+          <div class="risk-label">LOW RISK — Technical Core</div>
+        </div>
+        <p>The HD API works. The report prompts produce the quality that drives "someone finally understands me" responses. The automation tools (N8N, Stripe, Supabase) are mature and well-documented. No technical uncertainty here — just build time.</p>
+      </div>
+      <div class="risk-card">
+        <div class="risk-top">
+          <div class="risk-dot amber"></div>
+          <div class="risk-label">MEDIUM RISK — PDF Quality</div>
+        </div>
+        <p>Rendering a luxury 30-page PDF programmatically that matches the quality of a manually produced report is the hardest remaining technical challenge. Puppeteer can do it, but it requires careful HTML template design. Allow extra time here — it determines the product's first impression.</p>
+      </div>
+      <div class="risk-card">
+        <div class="risk-top">
+          <div class="risk-dot amber"></div>
+          <div class="risk-label">MEDIUM RISK — First License Cold Start</div>
+        </div>
+        <p>The first community admin relationship has to be earned manually — a conversation, not a vendor pitch. The pitch is strong ("a retention tool disguised as a performance tool") but it requires finding the right admin at the right moment. AI agents can automate the research and initial outreach at scale, but the first 1–2 relationships need genuine relationship energy.</p>
+      </div>
+      <div class="risk-card">
+        <div class="risk-top">
+          <div class="risk-dot green"></div>
+          <div class="risk-label">LOW RISK — Market Demand</div>
+        </div>
+        <p>Trading communities actively spend on tools that give members an edge. 70%+ of traders cite emotional decision-making as their primary loss driver. The trading psychology market is proven, paying, and hungry for anything that gives them an advantage. The Edge Index reframes personal timing as performance intelligence — a language trading communities already speak.</p>
+      </div>
+      <div class="risk-card">
+        <div class="risk-top">
+          <div class="risk-dot green"></div>
+          <div class="risk-label">LOW RISK — The Concept Sells Itself</div>
+        </div>
+        <p>The pitch doesn't require educating a sceptical audience on astrology or Human Design. It simply asks: "what if you knew when your personal decision window was optimal?" Every trader already understands the cost of bad timing. The tool makes that measurable and personal. The conversation is easy — the proof is in the results.</p>
+      </div>
+      <div class="risk-card">
+        <div class="risk-top">
+          <div class="risk-dot green"></div>
+          <div class="risk-label">LOW RISK — Competitive Moat</div>
+        </div>
+        <p>The combination of HD calculation accuracy + quality report prompts + automated delivery pipeline is genuinely hard to replicate quickly. The manual process required deep domain knowledge to build — that same knowledge now powers the automation. Generic AI report competitors can't match the specificity.</p>
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div style="margin-top: 48px; background: #fff; border: 1px solid var(--border); border-radius: 18px; padding: 36px 40px; box-shadow: var(--shadow2);">
+      <p class="section-eyebrow" style="text-align:left; padding:0; margin-bottom:4px;">The Jupiter Window — March to June 2026</p>
+      <p style="font-size:13px; color:#888; margin-bottom:20px; font-style:italic;">Jupiter direct in Cancer (exaltation) · Capricorn rising · 7th house partnerships activated · Compound from here.</p>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px;">
+        <div style="text-align:center; padding:20px; background:var(--warm); border-radius:12px; border-top: 3px solid var(--coral);">
+          <div style="font-family:'Cormorant Garamond',serif; font-size:28px; color:var(--coral); font-weight:400;">Mar 12–26</div>
+          <div style="font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--coral); margin:6px 0;">Week 1–2</div>
+          <div style="font-size:13px; color:#555; margin-top:4px; line-height:1.6;">Whop listing live. Bot deployed. BotFather + Railway env vars. Zapier + MailerLite active. First outreach to 5 community admins.</div>
+          <div style="margin-top:10px; font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--coral);">Target: First $500</div>
+        </div>
+        <div style="text-align:center; padding:20px; background:var(--warm); border-radius:12px; border-top: 3px solid var(--blue);">
+          <div style="font-family:'Cormorant Garamond',serif; font-size:28px; color:var(--blue); font-weight:400;">Mar 27–Apr 13</div>
+          <div style="font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--blue); margin:6px 0;">Weeks 3–4</div>
+          <div style="font-size:13px; color:#555; margin-top:4px; line-height:1.6;">Beta testimonials in. First community license closed (Starter or founding beta). First 10–20 B2C individual subscribers on Whop.</div>
+          <div style="margin-top:10px; font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--blue);">Target: $2–5k/month</div>
+        </div>
+        <div style="text-align:center; padding:20px; background:var(--warm); border-radius:12px; border-top: 3px solid var(--mint);">
+          <div style="font-family:'Cormorant Garamond',serif; font-size:28px; color:var(--mint); font-weight:400;">April</div>
+          <div style="font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--mint); margin:6px 0;">Month 2</div>
+          <div style="font-size:13px; color:#555; margin-top:4px; line-height:1.6;">3–5 community licenses active. Case studies replace the cold pitch. B2C word-of-mouth starts. Live Edge tier gains energy traders.</div>
+          <div style="margin-top:10px; font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--mint);">Target: $15–30k/month</div>
+        </div>
+        <div style="text-align:center; padding:20px; background: linear-gradient(135deg, rgba(201,168,76,0.08), rgba(201,168,76,0.15)); border-radius:12px; border-top: 3px solid var(--gold);">
+          <div style="font-family:'Cormorant Garamond',serif; font-size:28px; color:var(--gold); font-weight:400;">May–June</div>
+          <div style="font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold); margin:6px 0;">Month 3</div>
+          <div style="font-size:13px; color:#555; margin-top:4px; line-height:1.6;">10+ active licenses. 200+ B2C subscribers. Recurring base established before Jupiter moves. Compound cycle locked in.</div>
+          <div style="margin-top:10px; font-family:'Cormorant Garamond',serif; font-size:20px; color:var(--gold); font-weight:600;">Target: $100k+/month</div>
+        </div>
+      </div>
+      <div style="margin-top:20px; background: linear-gradient(135deg, var(--navy), var(--blue)); border-radius:12px; padding:20px 28px; text-align:center;">
+        <p style="color:rgba(255,255,255,0.55); font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px;">The Astro Context</p>
+        <p style="color:rgba(255,255,255,0.85); font-size:14px; line-height:1.7;">Jupiter direct in Cancer is its sign of exaltation — the strongest Jupiter possible. For Capricorn rising, this activates the 7th house: partnerships, business deals, public visibility. Every licensing conversation started in this window has the full force of Jupiter's expansion behind it. The base built here compounds exponentially. This is the window.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <div class="wrapper">
+    <div class="section-header">
+      <p class="section-eyebrow">Build Roadmap</p>
+      <h2>Phased Execution</h2>
+      <p>Starting with The Edge Index — tool live, Whop listing active, first community licenses closed, B2C subscriptions growing. Children's suite, adult female report, and Mira follow in later phases.</p>
+    </div>
+
+    <div class="roadmap-timeline">
+
+      <div class="phase p1">
+        <div class="phase-marker">
+          <div class="phase-circle">1</div>
+          <div class="phase-tag">Now</div>
+        </div>
+        <div class="phase-content">
+          <div class="phase-content-header">
+            <div class="phase-period">Phase 1 · The Edge Index — Build &amp; First License</div>
+            <h4>⚡ Tool Live. First Community Partner. First Revenue.</h4>
+          </div>
+          <div class="phase-body">
+            <div class="phase-item">The Edge Index report pipeline: Typeform → Stripe → N8N → POST /chart + /moon + /hours → Claude API → PDF → email</div>
+            <div class="phase-item">Edge Index report prompt build (personalised timing intelligence: HD + planetary windows)</div>
+            <div class="phase-item">Telegram bot build — personalised daily timing delivery per community member</div>
+            <div class="phase-item">The Edge Index landing page (performance-framed, data-forward, gender-neutral)</div>
+            <div class="phase-item">Identify 3–5 YouTube trading group admins + crypto/AI communities as targets</div>
+            <div class="phase-item">Outreach and close first 1–2 licensing relationships (Starter or Growth tier)</div>
+            <div class="phase-item">Prove the product. Gather results and member feedback as case study material.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase p2">
+        <div class="phase-marker">
+          <div class="phase-circle">2</div>
+          <div class="phase-tag">Next</div>
+        </div>
+        <div class="phase-content">
+          <div class="phase-content-header">
+            <div class="phase-period">Phase 2 · Scale Licensing + B2C Growth · April–June 2026</div>
+            <h4>10+ Communities. 500+ Individual Subscribers. $100k/Month.</h4>
+          </div>
+          <div class="phase-body">
+            <div class="phase-item">Scale to 10+ licensing relationships across Starter, Growth, Scale tiers</div>
+            <div class="phase-item">Case studies from Phase 1 results become the primary sales asset for admin outreach</div>
+            <div class="phase-item">B2C subscriber base grows organically through community word-of-mouth</div>
+            <div class="phase-item">Live Edge tier becomes flagship product for energy traders and intraday operators</div>
+            <div class="phase-item">White-label licensing conversations begin with larger platforms (Finelo, prop firms)</div>
+            <div class="phase-item">Establish base recurring revenue before Jupiter moves from Cancer (~July 2026)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase p3">
+        <div class="phase-marker">
+          <div class="phase-circle">3</div>
+          <div class="phase-tag">Soon</div>
+        </div>
+        <div class="phase-content">
+          <div class="phase-content-header">
+            <div class="phase-period">Phase 3 · Children's Suite + Adult Female Product</div>
+            <h4>Parallel Consumer Funnel Goes Live</h4>
+          </div>
+          <div class="phase-body">
+            <div class="phase-item">Children's brand name confirmed + landing page built</div>
+            <div class="phase-item">Children's report pipeline live (8-section intake, age-adaptive)</div>
+            <div class="phase-item">Adult female report pipeline live (17-question intake)</div>
+            <div class="phase-item">Post-purchase upsell sequences: mother → female report, father → Edge Index</div>
+            <div class="phase-item">Community referral / affiliate program for parenting audience</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase p4">
+        <div class="phase-marker">
+          <div class="phase-circle">4</div>
+          <div class="phase-tag">Future</div>
+        </div>
+        <div class="phase-content">
+          <div class="phase-content-header">
+            <div class="phase-period">Phase 4 · Mira + Enterprise + NDIS (Long-term)</div>
+            <h4>Full Ecosystem. Maximum Scale.</h4>
+          </div>
+          <div class="phase-body">
+            <div class="phase-item">Mira WhatsApp subscription for family audience (post-report upsell)</div>
+            <div class="phase-item">Enterprise white-label licensing at $12k+/month for major platforms</div>
+            <div class="phase-item">NDIS Mira licensing (long-term, significant approval barriers — revisit when Mira is proven)</div>
+            <div class="phase-item">Full ecosystem: two funnels (performance + parenting) feeding one private advisory</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- LICENSING -->
+<section id="licensing" class="licensing-section">
+  <div class="wrapper">
+    <div class="section-header">
+      <p class="section-eyebrow">B2B Revenue · The Edge Index</p>
+      <h2>Community Licensing.<br/><em>Tiered by Scale.</em></h2>
+      <p>Trading groups, crypto Discords, energy and resources communities, and AI cohort programs license The Edge Index as an exclusive member tool. Flat monthly fee. Fully automated delivery. Anna stays invisible. The tool scales without limit — the only variable is how many communities license it.</p>
+    </div>
+
+    <!-- THE PITCH -->
+    <div style="background: linear-gradient(135deg, var(--navy), var(--blue)); border-radius:18px; padding:36px 40px; margin-bottom:36px; color:#fff;">
+      <p style="font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold2); margin-bottom:14px;">The Pitch to a Community Admin</p>
+      <p style="font-size:18px; font-family:'Cormorant Garamond',serif; font-style:italic; line-height:1.7; max-width:700px;">"Your members lose money not because the market is wrong — but because they're trading at the wrong personal timing. This tool tells each member when their decision window is optimal, based on their personal chart. It's a retention tool disguised as a performance tool. Members who get results don't leave your community."</p>
+    </div>
+
+    <!-- TIER TABLE -->
+    <div style="background:#fff; border-radius:18px; border:1px solid var(--border); overflow:hidden; box-shadow:var(--shadow2); margin-bottom:36px;">
+      <div style="background:var(--navy); padding:20px 32px; display:grid; grid-template-columns:2fr 1.5fr 1.5fr 2fr; gap:16px;">
+        <div style="color:rgba(255,255,255,0.5); font-size:12px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase;">Tier</div>
+        <div style="color:rgba(255,255,255,0.5); font-size:12px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase;">Community Size</div>
+        <div style="color:rgba(255,255,255,0.5); font-size:12px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase;">Monthly License</div>
+        <div style="color:rgba(255,255,255,0.5); font-size:12px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase;">Annual</div>
+      </div>
+      <div style="padding:0 32px;">
+        <div style="display:grid; grid-template-columns:2fr 1.5fr 1.5fr 2fr; gap:16px; padding:20px 0; border-bottom:1px solid var(--border); align-items:center;">
+          <div><strong style="color:var(--navy);">Starter</strong><div style="font-size:12px; color:#888; margin-top:2px;">Co-branded · Small communities</div></div>
+          <div style="font-size:14px; color:#555;">Up to 500 members</div>
+          <div style="font-size:18px; font-weight:600; color:var(--blue);">$800</div>
+          <div style="font-size:14px; color:#555;">$8,000 / year</div>
+        </div>
+        <div style="display:grid; grid-template-columns:2fr 1.5fr 1.5fr 2fr; gap:16px; padding:20px 0; border-bottom:1px solid var(--border); align-items:center;">
+          <div><strong style="color:var(--navy);">Growth</strong><div style="font-size:12px; color:#888; margin-top:2px;">Co-branded · Growing communities</div></div>
+          <div style="font-size:14px; color:#555;">501–5,000 members</div>
+          <div style="font-size:18px; font-weight:600; color:var(--blue);">$2,500</div>
+          <div style="font-size:14px; color:#555;">$25,000 / year</div>
+        </div>
+        <div style="display:grid; grid-template-columns:2fr 1.5fr 1.5fr 2fr; gap:16px; padding:20px 0; border-bottom:1px solid var(--border); align-items:center; background:rgba(201,168,76,0.04);">
+          <div><strong style="color:var(--navy);">Scale</strong><div style="font-size:12px; color:var(--gold); margin-top:2px;">⚡ Primary target tier</div></div>
+          <div style="font-size:14px; color:#555;">5,001–50,000 members</div>
+          <div style="font-size:18px; font-weight:700; color:var(--gold);">$6,000</div>
+          <div style="font-size:14px; color:#555;">$60,000 / year</div>
+        </div>
+        <div style="display:grid; grid-template-columns:2fr 1.5fr 1.5fr 2fr; gap:16px; padding:20px 0; border-bottom:1px solid var(--border); align-items:center;">
+          <div><strong style="color:var(--navy);">Enterprise</strong><div style="font-size:12px; color:#888; margin-top:2px;">Co-branded · Large platforms</div></div>
+          <div style="font-size:14px; color:#555;">50,000+ members</div>
+          <div style="font-size:18px; font-weight:600; color:var(--blue);">$12,000+</div>
+          <div style="font-size:14px; color:#555;">Custom</div>
+        </div>
+        <div style="display:grid; grid-template-columns:2fr 1.5fr 1.5fr 2fr; gap:16px; padding:20px 0; align-items:center; background:rgba(13,27,62,0.03);">
+          <div><strong style="color:var(--navy);">White Label</strong><div style="font-size:12px; color:#888; margin-top:2px;">Fully rebranded as their tool</div></div>
+          <div style="font-size:14px; color:#555;">Any size</div>
+          <div style="font-size:18px; font-weight:600; color:var(--navy);">Tier + 50%</div>
+          <div style="font-size:14px; color:#555;">Their brand. Your IP.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WHAT'S INCLUDED + TARGET CHANNELS -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:36px;">
+      <div style="background:var(--warm); border-radius:18px; padding:28px 32px; border:1px solid var(--border);">
+        <p style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--blue); margin-bottom:14px;">Every License Includes</p>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:14px; color:#444;">✓ &nbsp;Unlimited member report generation</div>
+          <div style="font-size:14px; color:#444;">✓ &nbsp;Telegram bot integration for the community</div>
+          <div style="font-size:14px; color:#444;">✓ &nbsp;Monthly timing intelligence digest (community-level)</div>
+          <div style="font-size:14px; color:#444;">✓ &nbsp;Member onboarding flow (automated)</div>
+          <div style="font-size:14px; color:#444;">✓ &nbsp;Co-branded access portal</div>
+          <div style="font-size:14px; color:#444;">✓ &nbsp;Ongoing updates as the tool develops</div>
+        </div>
+      </div>
+      <div style="background:var(--warm); border-radius:18px; padding:28px 32px; border:1px solid var(--border);">
+        <p style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold); margin-bottom:14px;">Primary Target Channels</p>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:14px; color:#444;">💬 &nbsp;Paid Telegram crypto + forex signal communities</div>
+          <div style="font-size:14px; color:#444;">📈 &nbsp;Forex / futures / S&P Discord communities</div>
+          <div style="font-size:14px; color:#444;">⚡ &nbsp;Energy + resources trading communities (electricity, oil, gas)</div>
+          <div style="font-size:14px; color:#444;">🤖 &nbsp;AI trading + quantitative investing cohort programs</div>
+          <div style="font-size:14px; color:#444;">🌐 &nbsp;Trading education platforms (e.g. Finelo, prop trading firms)</div>
+          <div style="font-size:14px; color:#444;">📺 &nbsp;YouTube trading group admins (50k–500k subs)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVENUE MODEL — B2B + B2C -->
+    <div id="revenue" style="background: linear-gradient(135deg, rgba(13,27,62,0.04), rgba(43,75,170,0.06)); border:1px solid rgba(43,75,170,0.2); border-radius:18px; padding:36px 40px; margin-top:0;">
+      <p style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--blue); margin-bottom:24px;">The Full Revenue Model — Two Channels, One Tool</p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:28px;">
+        <!-- B2B -->
+        <div style="background:#fff; border-radius:14px; padding:24px 28px; border:1px solid var(--border);">
+          <p style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--blue); margin-bottom:12px;">Channel 1 — B2B Licensing</p>
+          <p style="font-size:13px; color:#666; margin-bottom:16px;">Communities pay a flat monthly license. Their members get the tool. Anna is invisible.</p>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; justify-content:space-between; font-size:13.5px;"><span style="color:#444;">3–4 Scale licenses</span><span style="color:var(--coral); font-weight:600;">$18–24k/month</span></div>
+            <div style="display:flex; justify-content:space-between; font-size:13.5px;"><span style="color:#444;">10+ Scale + Enterprise</span><span style="color:var(--blue); font-weight:600;">$60–120k/month</span></div>
+            <div style="display:flex; justify-content:space-between; font-size:13.5px;"><span style="color:#444;">80+ licenses (global)</span><span style="color:var(--gold); font-weight:700;">$500k+/month</span></div>
+          </div>
+        </div>
+        <!-- B2C -->
+        <div style="background:#fff; border-radius:14px; padding:24px 28px; border:1px solid var(--border);">
+          <p style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--mint); margin-bottom:12px;">Channel 2 — B2C Direct Subscriptions</p>
+          <p style="font-size:13px; color:#666; margin-bottom:16px;">Individual traders subscribe directly. Weekly, daily, or live real-time alerts.</p>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; justify-content:space-between; font-size:13.5px;"><span style="color:#444;">Weekly Edge · $97/month</span><span style="color:#888; font-size:12px;">Swing traders</span></div>
+            <div style="display:flex; justify-content:space-between; font-size:13.5px;"><span style="color:#444;">Daily Edge · $197/month</span><span style="color:#888; font-size:12px;">Active traders</span></div>
+            <div style="display:flex; justify-content:space-between; font-size:13.5px;"><span style="color:#444;">Live Edge · $397/month</span><span style="color:var(--gold); font-weight:600;">Intraday / serious</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background: linear-gradient(135deg, var(--navy), var(--blue)); border-radius:14px; padding:24px 32px; text-align:center;">
+        <p style="color:rgba(255,255,255,0.6); font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:10px;">Combined Path to $1M/Month</p>
+        <p style="color:#fff; font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; line-height:1.5;">50 Scale licenses ($300k) + 1,750 Live Edge subscribers ($700k) = <strong style="color:var(--gold2);">$1,000,000/month.</strong></p>
+        <p style="color:rgba(255,255,255,0.5); font-size:13px; margin-top:8px;">Fully automated. Zero Anna involvement. One tool. Global scale.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ECOSYSTEM -->
+<section id="ecosystem" class="ecosystem">
+  <div class="wrapper">
+    <div class="section-header">
+      <p class="section-eyebrow">The Ecosystem</p>
+      <h2>One API. Everything Draws From It.</h2>
+      <p>Every product in the suite — consumer, B2B, subscription — calls the same Railway endpoints. No duplication of infrastructure. One engine powers the whole thing.</p>
+    </div>
+
+    <div class="eco-center">
+      <div class="eco-hub">
+        <div class="eco-hub-label">Central Engine · Railway</div>
+        <div class="eco-hub-name">Edge Index API</div>
+        <div class="eco-hub-sub">POST /chart · POST /moon · POST /hours</div>
+      </div>
+    </div>
+
+    <div class="eco-arrow-row">↙ &nbsp; ↓ &nbsp; ↓ &nbsp; ↘</div>
+
+    <div class="eco-flows">
+      <div class="eco-node">
+        <div class="eco-node-icon">📘</div>
+        <div class="eco-node-name">Children's &amp; Teen</div>
+        <div class="eco-node-desc">Uses /chart<br/>Acquisition funnel<br/>→ upsells to adult products</div>
+      </div>
+      <div class="eco-node">
+        <div class="eco-node-icon">🌿</div>
+        <div class="eco-node-name">Adult Female</div>
+        <div class="eco-node-desc">Uses /chart<br/>Primary upsell for mothers<br/>→ upsells to Mira</div>
+      </div>
+      <div class="eco-node">
+        <div class="eco-node-icon">⚡</div>
+        <div class="eco-node-name">The Edge Index</div>
+        <div class="eco-node-desc">Uses all 3 endpoints<br/>Primary upsell for fathers<br/>→ upsells to Mira</div>
+      </div>
+      <div class="eco-node">
+        <div class="eco-node-icon">💬</div>
+        <div class="eco-node-name">Mira</div>
+        <div class="eco-node-desc">Uses /chart + /moon + /hours<br/>WhatsApp family subscription<br/>Highest LTV — recurring</div>
+      </div>
+    </div>
+
+    <div style="max-width:640px; margin: 0 auto 72px; text-align:center; color:rgba(255,255,255,0.45); font-size:13px; line-height:1.9;">
+      Consumer journey: <strong style="color:rgba(255,255,255,0.75);">Children's report → Adult report → Mira subscription</strong><br/>
+      B2B journey: <strong style="color:rgba(255,255,255,0.75);">Individual product licensing → School / practitioner / corporate</strong><br/>
+      Creator journey: <strong style="color:rgba(255,255,255,0.75);">Referral link → Commission → Passive income → loyal promoter</strong>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p><strong>Anna Massie Ventures</strong> · Internal Working Document · March 2026</p>
+  <p style="margin-top:8px;">Whop account live · Telegram bot built · Report prompt production-ready · Jupiter direct in Cancer · The window is open.</p>
+</footer>
+
+</body>
+</html>
