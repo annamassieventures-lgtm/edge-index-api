@@ -1,5 +1,7 @@
 import { Router } from 'express';
-import * as Astronomy from 'astronomy-engine';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const Astronomy = require('astronomy-engine');
 
 const router = Router();
 
