@@ -31,6 +31,23 @@ app.use('/moon',    moonRouter);
 app.use('/hours',   hoursRouter);
 app.use('/webhook', webhookRouter);
 
+// Temporary debug endpoint — remove after testing
+app.get('/debug', (req, res) => {
+  const token = req.query.token;
+  if (token !== process.env.ANNA_CHAT_ID) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  const paidEmails = (process.env.PAID_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
+  res.json({
+    ANNA_CHAT_ID: process.env.ANNA_CHAT_ID || '(not set)',
+    PAID_EMAILS_RAW: process.env.PAID_EMAILS || '(not set)',
+    PAID_EMAILS_PARSED: paidEmails,
+    RESEND_API_KEY: process.env.RESEND_API_KEY ? '✓ set' : '(not set)',
+    TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN ? '✓ set' : '(not set)',
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ? '✓ set' : '(not set)',
+  });
+});
+
 app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
 
 app.listen(PORT, () => {
