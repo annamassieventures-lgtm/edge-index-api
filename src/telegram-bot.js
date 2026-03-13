@@ -346,17 +346,7 @@ bot.onText(/\/start/, async (msg) => {
   saveUser(chatId, { chatId, firstName, telegramUsername: msg.from?.username });
   state[chatId] = 'awaiting_date';
 
-  await bot.sendMessage(chatId, `⚠️ Error: ${err.message}`);⚡
-
-I'm your personalised trading timing intelligence system.
-
-To generate your Edge Index report, I need three things:
-
-1. Your **date of birth** (DD/MM/YYYY)
-2. Your **time of birth** (HH:MM — approximate is fine)
-3. Your **city and country of birth**
-
-Reply with your **date of birth** to begin.`, { parse_mode: 'Markdown' });
+  await bot.sendMessage(chatId, `⚡ Welcome to The Edge Index, ${firstName}!\n\nI'm your personalised trading timing intelligence system.\n\nTo generate your Edge Index report, I need three things:\n\n1. Your **date of birth** (DD/MM/YYYY)\n2. Your **time of birth** (HH:MM — approximate is fine)\n3. Your **city and country of birth**\n\nReply with your **date of birth** to begin.`, { parse_mode: 'Markdown' });
 });
 
 // /report — generate report on demand
