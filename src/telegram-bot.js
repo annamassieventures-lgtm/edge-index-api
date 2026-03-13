@@ -8,7 +8,7 @@
  *
  * Required environment variables (set in Railway or .env):
  *  TELEGRAM_BOT_TOKEN   — from @BotFather
- *  RAILWAY_API_URL      — your Railway API base URL, e.g. https://edge-index-api.up.railway.app
+ *  const RAILWAY_URL = `http://localhost:${process.env.PORT || 8080}`;
  *  ANTHROPIC_API_KEY    — from console.anthropic.com
  *
  * Install dependencies before running:
@@ -27,7 +27,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // ─── Configuration ────────────────────────────────────────────────────────────
 
 const BOT_TOKEN     = process.env.TELEGRAM_BOT_TOKEN;
-const RAILWAY_URL   = process.env.RAILWAY_API_URL || 'http://localhost:3000';
+const RAILWAY_URL = `http://localhost:${process.env.PORT || 8080}`;
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 
 if (!BOT_TOKEN)     throw new Error('TELEGRAM_BOT_TOKEN is required');
