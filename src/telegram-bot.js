@@ -597,6 +597,7 @@ function markdownBodyToHtml(md) {
   return html.split(/\n\n+/).map(para => {
     const t = para.trim();
     if (!t) return '';
+    if (/^-{3,}$/.test(t)) return ''; // strip horizontal rules
     if (t.startsWith('|')) {
       const tableRows = t.split('\n').filter(l => l.includes('|'));
       let th = '<table style="width:100%;border-collapse:collapse;margin:20px 0;">';
@@ -1187,6 +1188,8 @@ bot.onText(/\/start/, async (msg) => {
 // /report — regenerate report
 bot.onText(/\/report/, async (msg) => {
   const chatId = msg.chat.id;
+  // Always refresh firstName from Telegram profile in case it was wiped by redeploy
+  if (msg.from?.first_name) saveUser(chatId, { firstName: msg.from.first_name });
   const user   = getUser(chatId);
 
   if (!user || !user.email) {
