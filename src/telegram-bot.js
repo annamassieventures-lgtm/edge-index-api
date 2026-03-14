@@ -591,7 +591,7 @@ function markdownBodyToHtml(md) {
   if (!md) return '';
   let html = md
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/\*\*([^*\n]+?)\*\*/g,'<strong style="color:#EDF0F7;font-weight:normal;font-style:italic;">$1</strong>')
+    .replace(/\*\*([^*\n]+?)\*\*/g,'<strong style="color:#C9A84C;font-weight:600;">$1</strong>')
     .replace(/\*([^*\n]+?)\*/g,'<em>$1</em>');
 
   return html.split(/\n\n+/).map(para => {
@@ -605,21 +605,21 @@ function markdownBodyToHtml(md) {
         if (/^\|[-: |]+\|$/.test(row)) { firstData = false; continue; }
         const cells = row.split('|').map(c => c.trim()).filter(c => c);
         if (firstData) {
-          th += '<tr>' + cells.map(c => `<th style="padding:10px 14px;border-bottom:2px solid #C9A84C;text-align:left;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#6B7A99;">${c}</th>`).join('') + '</tr>';
+          th += '<tr>' + cells.map(c => `<th style="padding:10px 14px;border-bottom:2px solid #C9A84C;text-align:left;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#C9A84C;">${c}</th>`).join('') + '</tr>';
           firstData = false;
         } else {
-          th += '<tr>' + cells.map(c => `<td style="padding:10px 14px;border-bottom:1px solid #1E2845;font-size:13px;color:#9BA8C0;line-height:1.5;">${c}</td>`).join('') + '</tr>';
+          th += '<tr>' + cells.map(c => `<td style="padding:10px 14px;border-bottom:1px solid #2A2A2A;font-size:13px;color:#DDDDDD;line-height:1.5;">${c}</td>`).join('') + '</tr>';
         }
       }
       return th + '</table>';
     }
     if (t.startsWith('&gt;')) {
-      return `<div style="margin:20px 0;padding:16px 20px;border-left:3px solid #C9A84C;background:rgba(201,168,76,0.08);font-style:italic;color:#EDF0F7;font-size:15px;line-height:1.7;">${t.replace(/^&gt;\s*/gm,'')}</div>`;
+      return `<div style="margin:20px 0;padding:16px 20px;border-left:3px solid #C9A84C;background:rgba(201,168,76,0.08);font-style:italic;color:#FFFFFF;font-size:15px;line-height:1.7;">${t.replace(/^&gt;\s*/gm,'')}</div>`;
     }
     if (t.toUpperCase().startsWith('RIGHT NOW') || t.includes('**RIGHT NOW')) {
-      return `<div style="background:rgba(29,185,84,0.08);border:1px solid rgba(29,185,84,0.25);border-radius:4px;padding:20px 24px;margin:0 0 20px;"><p style="margin:0;color:#EDF0F7;line-height:1.8;font-size:15px;">${t.replace(/\n/g,'<br>')}</p></div>`;
+      return `<div style="background:rgba(29,185,84,0.1);border:1px solid rgba(29,185,84,0.3);border-radius:4px;padding:20px 24px;margin:0 0 20px;"><p style="margin:0;color:#FFFFFF;line-height:1.8;font-size:15px;">${t.replace(/\n/g,'<br>')}</p></div>`;
     }
-    return `<p style="margin:0 0 18px;color:#9BA8C0;line-height:1.85;font-size:15.5px;">${t.replace(/\n/g,'<br>')}</p>`;
+    return `<p style="margin:0 0 18px;color:#DDDDDD;line-height:1.85;font-size:15.5px;">${t.replace(/\n/g,'<br>')}</p>`;
   }).filter(p => p).join('\n');
 }
 
@@ -642,17 +642,17 @@ function mdToHtml(reportMarkdown, clientName, userData) {
   const patCallout  = extractCallout(sec.s12 || '');
 
   const timingRowsHtml = timing.rows.map(r => `
-      <div style="display:grid;grid-template-columns:110px 1fr 2fr;gap:16px;align-items:center;padding:14px 20px;border-bottom:1px solid #1E2845;">
-        <span style="font-size:13px;color:#EDF0F7;letter-spacing:0.05em;">${r.month}</span>
+      <div style="display:grid;grid-template-columns:110px 1fr 2fr;gap:16px;align-items:center;padding:14px 20px;border-bottom:1px solid #2A2A2A;">
+        <span style="font-size:13px;color:#FFFFFF;letter-spacing:0.05em;">${r.month}</span>
         <span style="${r.envClass === 'env-green' ? 'background:rgba(29,185,84,0.10);color:#1DB954;border:1px solid rgba(29,185,84,0.3);' : r.envClass === 'env-red' ? 'background:rgba(232,68,90,0.10);color:#E8445A;border:1px solid rgba(232,68,90,0.3);' : 'background:rgba(245,166,35,0.10);color:#F5A623;border:1px solid rgba(245,166,35,0.3);'}display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;padding:4px 10px;border-radius:3px;white-space:nowrap;"><span style="width:6px;height:6px;border-radius:50%;background:${r.envClass === 'env-green' ? '#1DB954' : r.envClass === 'env-red' ? '#E8445A' : '#F5A623'};flex-shrink:0;"></span>${r.envLabel}</span>
-        <span style="font-size:13px;color:#6B7A99;line-height:1.5;">${r.note}</span>
+        <span style="font-size:13px;color:#9BA8C0;line-height:1.5;">${r.note}</span>
       </div>`).join('');
 
   const rulesHtml = rules.map((r, i) => `
-      <div style="display:flex;gap:16px;align-items:flex-start;padding:18px 0;border-bottom:1px solid #1E2845;">
+      <div style="display:flex;gap:16px;align-items:flex-start;padding:18px 0;border-bottom:1px solid #2A2A2A;">
         <span style="font-family:Georgia,serif;font-size:22px;color:#C9A84C;opacity:0.5;line-height:1;min-width:28px;margin-top:2px;">0${i+1}</span>
         <div style="font-size:15px;color:#9BA8C0;line-height:1.7;">
-          <span style="display:block;font-size:14px;color:#EDF0F7;letter-spacing:0.03em;margin-bottom:4px;font-family:Georgia,serif;font-style:italic;">${r.title}</span>
+          <span style="display:block;font-size:14px;color:#FFFFFF;letter-spacing:0.03em;margin-bottom:4px;font-family:Georgia,serif;font-style:italic;">${r.title}</span>
           ${r.body}
         </div>
       </div>`).join('');
@@ -666,62 +666,68 @@ function mdToHtml(reportMarkdown, clientName, userData) {
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{font-size:16px}
-    body{background:#07091A;color:#EDF0F7;font-family:'Georgia','Times New Roman',serif;line-height:1.75;-webkit-font-smoothing:antialiased}
+    body{background:#000000;color:#FFFFFF;font-family:'Georgia','Times New Roman',serif;line-height:1.75;-webkit-font-smoothing:antialiased;margin:0;padding:0;}
     .wrap{max-width:760px;margin:0 auto;padding:0 24px}
-    .section-body p{margin-bottom:18px}
+    .section-body p{margin-bottom:18px;color:#E0E0E0;}
     .section-body p:last-child{margin-bottom:0}
-    .report-section{padding:52px 0;border-bottom:1px solid #1E2845}
+    .report-section{padding:52px 0;border-bottom:1px solid #2A2A2A}
     .report-section:last-of-type{border-bottom:none}
     .section-title::after{content:'';display:block;width:40px;height:2px;background:#C9A84C;margin-top:16px}
     @media(max-width:600px){.tools-grid{grid-template-columns:1fr!important}.discipline-grid{grid-template-columns:1fr!important}.dual-cta{grid-template-columns:1fr!important}}
   </style>
 </head>
-<body>
+<body bgcolor="#000000" style="background:#000000;margin:0;padding:0;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#000000" style="background-color:#000000;min-width:100%;">
+<tr><td bgcolor="#000000" style="background-color:#000000;">
 
 <!-- HEADER -->
-<header style="background:#0D1228;border-bottom:1px solid #1E2845;padding:48px 0 40px;text-align:center;">
+<header style="background:#0A0A0A;border-bottom:1px solid #2A2A2A;padding:48px 0 40px;text-align:center;">
   <div style="max-width:760px;margin:0 auto;padding:0 24px;">
     <span style="font-family:Georgia,serif;font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:#C9A84C;margin-bottom:28px;display:block;">The Edge Index</span>
-    <h1 style="font-family:Georgia,serif;font-size:clamp(28px,5vw,42px);font-weight:normal;letter-spacing:-0.02em;color:#EDF0F7;line-height:1.2;margin-bottom:10px;">Strategic Timing Intelligence</h1>
+    <h1 style="font-family:Georgia,serif;font-size:clamp(28px,5vw,42px);font-weight:normal;letter-spacing:-0.02em;color:#FFFFFF;line-height:1.2;margin-bottom:10px;">Strategic Timing Intelligence</h1>
     <p style="font-size:13px;letter-spacing:0.2em;text-transform:uppercase;color:#9BA8C0;margin-bottom:36px;">Decision Intelligence Brief — ${year}</p>
     <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);border-radius:4px;padding:10px 20px;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#E8C96A;">
       <span style="color:#9BA8C0;">Prepared for</span> ${clientName}
     </div>
-    <div style="display:flex;justify-content:center;gap:32px;margin-top:28px;padding-top:28px;border-top:1px solid #1E2845;flex-wrap:wrap;">
-      <div style="text-align:center;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#6B7A99;"><strong style="display:block;font-family:Georgia,serif;font-size:15px;letter-spacing:0;color:#EDF0F7;margin-bottom:4px;font-weight:normal;">${year}–${year+1}</strong>Report Period</div>
-      <div style="text-align:center;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#6B7A99;"><strong style="display:block;font-family:Georgia,serif;font-size:15px;letter-spacing:0;color:#EDF0F7;margin-bottom:4px;font-weight:normal;">17</strong>Sections</div>
-      <div style="text-align:center;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#6B7A99;"><strong style="display:block;font-family:Georgia,serif;font-size:15px;letter-spacing:0;color:#EDF0F7;margin-bottom:4px;font-weight:normal;">${timing.greenCount} / ${timing.amberCount} / ${timing.redCount}</strong>Green · Amber · Red</div>
-    </div>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px;padding-top:28px;border-top:1px solid #2A2A2A;"><tr>
+      <td width="33%" style="text-align:center;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#9BA8C0;padding:8px;"><strong style="display:block;font-family:Georgia,serif;font-size:15px;letter-spacing:0;color:#FFFFFF;margin-bottom:4px;font-weight:normal;">${year}–${year+1}</strong>Report Period</td>
+      <td width="33%" style="text-align:center;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#9BA8C0;padding:8px;"><strong style="display:block;font-family:Georgia,serif;font-size:15px;letter-spacing:0;color:#FFFFFF;margin-bottom:4px;font-weight:normal;">17</strong>Sections</td>
+      <td width="33%" style="text-align:center;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#9BA8C0;padding:8px;"><strong style="display:block;font-family:Georgia,serif;font-size:15px;letter-spacing:0;color:#FFFFFF;margin-bottom:4px;font-weight:normal;">${timing.greenCount} / ${timing.amberCount} / ${timing.redCount}</strong>Green · Amber · Red</td>
+    </tr></table>
   </div>
 </header>
 
 <!-- SIGNAL BAR -->
-<div style="background:#0D1228;border-bottom:1px solid #1E2845;padding:20px 0;">
-  <div style="max-width:760px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-    <span style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#6B7A99;">Active Signals</span>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      ${['Clarity','Action','Expansion','Pressure','Emotional Volatility','Risk','Opportunity Window'].map(s => `<span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;padding:5px 12px;border-radius:3px;background:rgba(155,168,192,0.08);color:#9BA8C0;border:1px solid rgba(155,168,192,0.2);">${s}</span>`).join('')}
-    </div>
+<div style="background:#0A0A0A;border-bottom:1px solid #C9A84C;border-top:1px solid #C9A84C;padding:20px 0;">
+  <div style="max-width:760px;margin:0 auto;padding:0 24px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#C9A84C;white-space:nowrap;padding-right:16px;">Active Signals</td>
+      <td style="text-align:right;">
+        ${['Clarity','Action','Expansion','Pressure','Emotional Volatility','Risk','Opportunity Window'].map(s => `<span style="display:inline-block;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;margin:2px;border-radius:2px;background:rgba(201,168,76,0.1);color:#C9A84C;border:1px solid rgba(201,168,76,0.3);">${s}</span>`).join('')}
+      </td>
+    </tr></table>
   </div>
 </div>
 
 <!-- DELIVERY INTRO -->
-<div style="background:#121830;border-bottom:1px solid #1E2845;padding:18px 0;">
-  <div style="max-width:760px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;">
-    <p style="font-size:13px;color:#6B7A99;line-height:1.65;max-width:540px;">Your Edge Index Brief is a complete decision timing intelligence system for <em style="color:#9BA8C0;font-style:normal;">${year}</em>. Most traders spend $3,000–$6,000 per year on tools that analyse the market — but never the decision maker.</p>
-    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.03);border:1px solid #1E2845;border-radius:3px;padding:8px 14px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#6B7A99;white-space:nowrap;flex-shrink:0;">
-      <span style="width:6px;height:6px;border-radius:50%;background:#E8445A;flex-shrink:0;"></span>PDF attached
-    </div>
+<div style="background:#000000;border-bottom:1px solid #2A2A2A;padding:20px 0;">
+  <div style="max-width:760px;margin:0 auto;padding:0 24px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="font-size:13px;color:#CCCCCC;line-height:1.65;">Your Edge Index Brief is a complete decision timing intelligence system for <strong style="color:#C9A84C;">${year}</strong>. Most traders spend $3,000–$6,000 per year on tools that analyse the market — but never the decision maker.</td>
+      <td width="120" style="text-align:right;padding-left:16px;white-space:nowrap;vertical-align:middle;">
+        <span style="display:inline-block;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:3px;padding:8px 12px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#C9A84C;">&#9679; PDF attached</span>
+      </td>
+    </tr></table>
   </div>
 </div>
 
 <!-- TABLE OF CONTENTS -->
 <div class="wrap">
-  <div style="padding:48px 0;border-bottom:1px solid #1E2845;">
+  <div style="padding:48px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:20px;display:block;">Contents</span>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 32px;">
-      ${[['01','Executive Overview'],['02','Your Decision Architecture'],['03','Behaviour Under Pressure'],['04','The Signal Framework'],['05','Your Personal Timing Profile'],['06','Your 12-Month Timing Map'],['07','Expansion Windows'],['08','Protection Periods'],['09','Opportunity Windows'],['10','Risk Environment Patterns'],['11','Emotional Volatility Cycles'],['12','Strategic Patience'],['13','Decision Discipline Framework'],['14','Behavioural Blind Spots'],['15','Strategic Operating Rules'],['16','Monitoring Your Timing'],['17','Final Insight']].map(([n,t]) => `<div style="display:flex;align-items:baseline;gap:10px;font-size:13px;color:#9BA8C0;padding:6px 0;border-bottom:1px solid #1E2845;"><span style="font-size:10px;color:#C9A84C;letter-spacing:0.1em;min-width:20px;">${n}</span>${t}</div>`).join('')}
-    </div>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      ${(()=>{const items=[['01','Executive Overview'],['02','Your Decision Architecture'],['03','Behaviour Under Pressure'],['04','The Signal Framework'],['05','Your Personal Timing Profile'],['06','Your 12-Month Timing Map'],['07','Expansion Windows'],['08','Protection Periods'],['09','Opportunity Windows'],['10','Risk Environment Patterns'],['11','Emotional Volatility Cycles'],['12','Strategic Patience'],['13','Decision Discipline Framework'],['14','Behavioural Blind Spots'],['15','Strategic Operating Rules'],['16','Monitoring Your Timing'],['17','Final Insight']];let rows='';for(let i=0;i<items.length;i+=2){const a=items[i],b=items[i+1];rows+=`<tr><td style="font-size:13px;color:#DDDDDD;padding:7px 16px 7px 0;border-bottom:1px solid #2A2A2A;width:50%;"><span style="font-size:10px;color:#C9A84C;letter-spacing:0.1em;margin-right:10px;">${a[0]}</span>${a[1]}</td><td style="font-size:13px;color:#DDDDDD;padding:7px 0 7px 16px;border-bottom:1px solid #2A2A2A;width:50%;">${b?`<span style="font-size:10px;color:#C9A84C;letter-spacing:0.1em;margin-right:10px;">${b[0]}</span>${b[1]}`:''}</td></tr>`;}return rows;})()}
+    </table>
   </div>
 </div>
 
@@ -731,18 +737,18 @@ function mdToHtml(reportMarkdown, clientName, userData) {
 <main class="wrap">
 
   <!-- S1 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 01</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Executive Overview</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Executive Overview</h2>
     <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s1}</div>
   </section>
 
   <!-- S2 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 02</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:16px;line-height:1.3;">Your Decision Architecture</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:16px;line-height:1.3;">Your Decision Architecture</h2>
     <div style="display:inline-flex;align-items:center;gap:12px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.2);border-radius:4px;padding:10px 18px;margin-bottom:26px;">
-      <span style="font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:#6B7A99;white-space:nowrap;">Decision Architecture</span>
+      <span style="font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:#9BA8C0;white-space:nowrap;">Decision Architecture</span>
       <span style="width:1px;height:14px;background:#263258;flex-shrink:0;"></span>
       <span style="font-family:Georgia,serif;font-size:14px;color:#E8C96A;font-style:italic;">${arch}</span>
     </div>
@@ -750,16 +756,16 @@ function mdToHtml(reportMarkdown, clientName, userData) {
   </section>
 
   <!-- S3 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 03</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Behaviour Under Pressure</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Behaviour Under Pressure</h2>
     <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s3}</div>
   </section>
 
   <!-- S4 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 04</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">The Edge Index Signal Framework</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">The Edge Index Signal Framework</h2>
     <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s4}</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:24px;">
       ${['Clarity','Action','Expansion','Pressure','Volatility','Risk','Opportunity Window'].map(s => `<span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;padding:5px 12px;border-radius:3px;background:rgba(155,168,192,0.08);color:#9BA8C0;border:1px solid rgba(155,168,192,0.2);">${s}</span>`).join('')}
@@ -767,147 +773,147 @@ function mdToHtml(reportMarkdown, clientName, userData) {
   </section>
 
   <!-- S5 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 05</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Your Personal Timing Profile</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Your Personal Timing Profile</h2>
     <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s5}</div>
   </section>
 
   <!-- S6 — TIMING MAP -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 06</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Your 12-Month Timing Map</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Your 12-Month Timing Map</h2>
     <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s6intro}</div>
-    <div style="margin-top:32px;border:1px solid #1E2845;border-radius:6px;overflow:hidden;">
-      <div style="background:#121830;padding:14px 20px;display:grid;grid-template-columns:110px 1fr 2fr;gap:16px;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#6B7A99;border-bottom:1px solid #1E2845;">
+    <div style="margin-top:32px;border:1px solid #2A2A2A;border-radius:6px;overflow:hidden;">
+      <div style="background:#0D0D0D;padding:14px 20px;display:grid;grid-template-columns:110px 1fr 2fr;gap:16px;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#9BA8C0;border-bottom:1px solid #2A2A2A;">
         <span>Month</span><span>Environment</span><span>Key Conditions</span>
       </div>
-      ${timingRowsHtml || '<div style="padding:20px;color:#6B7A99;font-size:13px;">Timing data not available</div>'}
+      ${timingRowsHtml || '<div style="padding:20px;color:#9BA8C0;font-size:13px;">Timing data not available</div>'}
     </div>
     <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;margin-top:28px;">${S.s6summary}</div>
   </section>
 
   <!-- S7 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 07</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Expansion Windows</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Expansion Windows</h2>
     <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s7}</div>
-    ${expCallout ? `<div style="margin:28px 0;padding:24px 28px;border-left:3px solid #1DB954;background:rgba(29,185,84,0.10);border-radius:0 4px 4px 0;"><p style="font-size:15px;color:#EDF0F7;line-height:1.7;margin:0;font-style:italic;">${expCallout}</p></div>` : ''}
+    ${expCallout ? `<div style="margin:28px 0;padding:24px 28px;border-left:3px solid #1DB954;background:rgba(29,185,84,0.10);border-radius:0 4px 4px 0;"><p style="font-size:15px;color:#FFFFFF;line-height:1.7;margin:0;font-style:italic;">${expCallout}</p></div>` : ''}
   </section>
 
   <!-- S8 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 08</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Protection Periods</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Protection Periods</h2>
     <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s8}</div>
-    ${protCallout ? `<div style="margin:28px 0;padding:24px 28px;border-left:3px solid #E8445A;background:rgba(232,68,90,0.10);border-radius:0 4px 4px 0;"><p style="font-size:15px;color:#EDF0F7;line-height:1.7;margin:0;font-style:italic;">${protCallout}</p></div>` : ''}
+    ${protCallout ? `<div style="margin:28px 0;padding:24px 28px;border-left:3px solid #E8445A;background:rgba(232,68,90,0.10);border-radius:0 4px 4px 0;"><p style="font-size:15px;color:#FFFFFF;line-height:1.7;margin:0;font-style:italic;">${protCallout}</p></div>` : ''}
   </section>
 
   <!-- S9 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 09</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Opportunity Windows</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Opportunity Windows</h2>
     <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s9}</div>
   </section>
 
   <!-- S10 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 10</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Risk Environment Patterns</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Risk Environment Patterns</h2>
     <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s10}</div>
   </section>
 
   <!-- S11 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 11</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Emotional Volatility Cycles</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Emotional Volatility Cycles</h2>
     <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s11 || S.s10}</div>
   </section>
 
   <!-- S12 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 12</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Strategic Patience</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Strategic Patience</h2>
     <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s12}</div>
-    ${patCallout ? `<div style="margin:28px 0;padding:24px 28px;border-left:3px solid #C9A84C;background:rgba(201,168,76,0.12);border-radius:0 4px 4px 0;"><p style="font-size:15px;color:#EDF0F7;line-height:1.7;margin:0;font-style:italic;">${patCallout}</p></div>` : ''}
+    ${patCallout ? `<div style="margin:28px 0;padding:24px 28px;border-left:3px solid #C9A84C;background:rgba(201,168,76,0.12);border-radius:0 4px 4px 0;"><p style="font-size:15px;color:#FFFFFF;line-height:1.7;margin:0;font-style:italic;">${patCallout}</p></div>` : ''}
   </section>
 
   <!-- S13 — DISCIPLINE FRAMEWORK -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 13</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Decision Discipline Framework</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Decision Discipline Framework</h2>
     <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s13}</div>
     <div class="discipline-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px;">
       <div style="background:rgba(29,185,84,0.10);border:1px solid rgba(29,185,84,0.25);border-radius:6px;padding:24px 20px;text-align:center;">
         <div style="font-size:10px;letter-spacing:0.25em;text-transform:uppercase;margin-bottom:12px;color:#1DB954;">Green — Expansion</div>
-        <div style="font-family:Georgia,serif;font-size:16px;color:#EDF0F7;margin-bottom:10px;line-height:1.3;">Act Decisively</div>
-        <div style="font-size:12px;color:#6B7A99;line-height:1.5;">Prioritise high-conviction moves. Size up. Trust the conditions.</div>
+        <div style="font-family:Georgia,serif;font-size:16px;color:#FFFFFF;margin-bottom:10px;line-height:1.3;">Act Decisively</div>
+        <div style="font-size:12px;color:#9BA8C0;line-height:1.5;">Prioritise high-conviction moves. Size up. Trust the conditions.</div>
       </div>
       <div style="background:rgba(245,166,35,0.10);border:1px solid rgba(245,166,35,0.25);border-radius:6px;padding:24px 20px;text-align:center;">
         <div style="font-size:10px;letter-spacing:0.25em;text-transform:uppercase;margin-bottom:12px;color:#F5A623;">Amber — Selective</div>
-        <div style="font-family:Georgia,serif;font-size:16px;color:#EDF0F7;margin-bottom:10px;line-height:1.3;">Act with Precision</div>
-        <div style="font-size:12px;color:#6B7A99;line-height:1.5;">Raise entry criteria. Smaller size. Tighter discipline.</div>
+        <div style="font-family:Georgia,serif;font-size:16px;color:#FFFFFF;margin-bottom:10px;line-height:1.3;">Act with Precision</div>
+        <div style="font-size:12px;color:#9BA8C0;line-height:1.5;">Raise entry criteria. Smaller size. Tighter discipline.</div>
       </div>
       <div style="background:rgba(232,68,90,0.10);border:1px solid rgba(232,68,90,0.25);border-radius:6px;padding:24px 20px;text-align:center;">
         <div style="font-size:10px;letter-spacing:0.25em;text-transform:uppercase;margin-bottom:12px;color:#E8445A;">Red — Protection</div>
-        <div style="font-family:Georgia,serif;font-size:16px;color:#EDF0F7;margin-bottom:10px;line-height:1.3;">Protect Capital</div>
-        <div style="font-size:12px;color:#6B7A99;line-height:1.5;">Reduce exposure. Wait for the next window. Patience is a position.</div>
+        <div style="font-family:Georgia,serif;font-size:16px;color:#FFFFFF;margin-bottom:10px;line-height:1.3;">Protect Capital</div>
+        <div style="font-size:12px;color:#9BA8C0;line-height:1.5;">Reduce exposure. Wait for the next window. Patience is a position.</div>
       </div>
     </div>
   </section>
 
   <!-- S14 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 14</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Behavioural Blind Spots</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Behavioural Blind Spots</h2>
     <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s14}</div>
   </section>
 
   <!-- S15 — OPERATING RULES -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 15</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Strategic Operating Rules</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Strategic Operating Rules</h2>
     <div style="margin-top:24px;">${rulesHtml}</div>
   </section>
 
   <!-- S16 — MONITORING -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #1E2845;">
+  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 16</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#EDF0F7;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Monitoring Your Timing</h2>
+    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Monitoring Your Timing</h2>
     <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s16}</div>
     <div class="tools-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:32px;">
       ${[['◎','Weekly Edge','Every Week','Weekly signal review and environment assessment for the week ahead. $97/month'],['◉','Daily Edge','Every Day','Daily timing conditions and decision guidance delivered each morning. $197/month'],['●','Live Edge','Real-Time','Live signal monitoring as timing conditions shift throughout the day. $397/month']].map(([icon,name,freq,desc]) => `
-      <div style="background:#121830;border:1px solid #1E2845;border-radius:6px;padding:28px 22px;text-align:center;">
+      <div style="background:#0D0D0D;border:1px solid #2A2A2A;border-radius:6px;padding:28px 22px;text-align:center;">
         <div style="width:40px;height:40px;border-radius:50%;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:16px;">${icon}</div>
-        <div style="font-family:Georgia,serif;font-size:15px;color:#EDF0F7;margin-bottom:8px;">${name}</div>
+        <div style="font-family:Georgia,serif;font-size:15px;color:#FFFFFF;margin-bottom:8px;">${name}</div>
         <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:12px;">${freq}</div>
-        <div style="font-size:12.5px;color:#6B7A99;line-height:1.6;">${desc}</div>
+        <div style="font-size:12.5px;color:#9BA8C0;line-height:1.6;">${desc}</div>
       </div>`).join('')}
     </div>
     <div style="margin:32px 0 0;padding:24px 28px;border-left:3px solid #C9A84C;background:rgba(201,168,76,0.12);border-radius:0 4px 4px 0;">
-      <p style="font-size:15px;color:#EDF0F7;line-height:1.7;margin:0;font-style:italic;">Most traders who receive this Brief choose Daily Edge. They've already paid $2,500 to know their windows. Monitoring is how they don't miss them.</p>
+      <p style="font-size:15px;color:#FFFFFF;line-height:1.7;margin:0;font-style:italic;">Most traders who receive this Brief choose Daily Edge. They've already paid $2,500 to know their windows. Monitoring is how they don't miss them.</p>
     </div>
   </section>
 
 </main>
 
 <!-- CTA -->
-<div style="background:#0D1228;border-top:1px solid #1E2845;border-bottom:1px solid #1E2845;padding:56px 0;text-align:center;margin-top:16px;">
+<div style="background:#0A0A0A;border-top:1px solid #2A2A2A;border-bottom:1px solid #2A2A2A;padding:56px 0;text-align:center;margin-top:16px;">
   <div style="max-width:660px;margin:0 auto;padding:0 24px;">
     <p style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:16px;">Continue Your Edge</p>
-    <h2 style="font-family:Georgia,serif;font-size:clamp(22px,4vw,30px);font-weight:normal;color:#EDF0F7;line-height:1.3;margin-bottom:16px;">Track your timing signals in real time</h2>
+    <h2 style="font-family:Georgia,serif;font-size:clamp(22px,4vw,30px);font-weight:normal;color:#FFFFFF;line-height:1.3;margin-bottom:16px;">Track your timing signals in real time</h2>
     <p style="font-size:14px;color:#9BA8C0;line-height:1.7;margin-bottom:32px;">Your yearly map is the strategic foundation. Timing conditions shift week to week and day to day within that structure.</p>
-    <div class="dual-cta" style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #1E2845;border-radius:6px;overflow:hidden;max-width:600px;margin:0 auto;">
-      <div style="padding:32px 28px;text-align:center;background:#121830;border-right:1px solid #1E2845;">
+    <div class="dual-cta" style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #2A2A2A;border-radius:6px;overflow:hidden;max-width:600px;margin:0 auto;">
+      <div style="padding:32px 28px;text-align:center;background:#0D0D0D;border-right:1px solid #2A2A2A;">
         <span style="font-size:9px;letter-spacing:0.3em;text-transform:uppercase;margin-bottom:10px;display:block;color:#1DB954;">For Individual Traders</span>
-        <div style="font-family:Georgia,serif;font-size:16px;font-weight:normal;color:#EDF0F7;line-height:1.35;margin-bottom:10px;">Weekly, Daily &amp; Live Monitoring</div>
-        <p style="font-size:12px;color:#6B7A99;line-height:1.6;margin-bottom:22px;">Stay aligned with your timing windows as they open and close throughout ${year}.</p>
-        <a href="https://edgeindex.io/monitoring" style="display:inline-block;background:#C9A84C;color:#07091A;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;padding:11px 22px;border-radius:3px;text-decoration:none;font-family:Georgia,serif;">Explore Monitoring →</a>
+        <div style="font-family:Georgia,serif;font-size:16px;font-weight:normal;color:#FFFFFF;line-height:1.35;margin-bottom:10px;">Weekly, Daily &amp; Live Monitoring</div>
+        <p style="font-size:12px;color:#9BA8C0;line-height:1.6;margin-bottom:22px;">Stay aligned with your timing windows as they open and close throughout ${year}.</p>
+        <a href="https://edgeindex.io/monitoring" style="display:inline-block;background:#C9A84C;color:#000000;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;padding:11px 22px;border-radius:3px;text-decoration:none;font-family:Georgia,serif;font-weight:bold;">Explore Monitoring →</a>
       </div>
-      <div style="padding:32px 28px;text-align:center;background:#0D1228;">
+      <div style="padding:32px 28px;text-align:center;background:#0A0A0A;">
         <span style="font-size:9px;letter-spacing:0.3em;text-transform:uppercase;margin-bottom:10px;display:block;color:#C9A84C;">For Community Operators</span>
-        <div style="font-family:Georgia,serif;font-size:16px;font-weight:normal;color:#EDF0F7;line-height:1.35;margin-bottom:10px;">Community Licensing</div>
-        <p style="font-size:12px;color:#6B7A99;line-height:1.6;margin-bottom:22px;">Add the Edge Index Brief to your community as a premium timing intelligence product.</p>
+        <div style="font-family:Georgia,serif;font-size:16px;font-weight:normal;color:#FFFFFF;line-height:1.35;margin-bottom:10px;">Community Licensing</div>
+        <p style="font-size:12px;color:#9BA8C0;line-height:1.6;margin-bottom:22px;">Add the Edge Index Brief to your community as a premium timing intelligence product.</p>
         <a href="https://edgeindex.io/community" style="display:inline-block;background:transparent;color:#C9A84C;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;padding:10px 22px;border-radius:3px;text-decoration:none;font-family:Georgia,serif;border:1px solid rgba(201,168,76,0.35);">Learn About Licensing →</a>
       </div>
     </div>
@@ -919,7 +925,7 @@ function mdToHtml(reportMarkdown, clientName, userData) {
   <div style="padding:64px 0 72px;text-align:center;">
     <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;display:block;margin-bottom:12px;">Section 17</span>
     <p style="font-family:Georgia;font-size:clamp(14px,2vw,16px);letter-spacing:0.12em;text-transform:uppercase;color:#9BA8C0;margin:0 0 40px;">Final Insight</p>
-    <p style="font-family:Georgia,serif;font-size:clamp(18px,3vw,24px);color:#EDF0F7;font-style:italic;line-height:1.6;max-width:580px;margin:0 auto 32px;">"In high-performance environments, the edge rarely comes from superior information alone. It comes from knowing when conditions support decisive action — and having the discipline to wait when they do not."</p>
+    <p style="font-family:Georgia,serif;font-size:clamp(18px,3vw,24px);color:#FFFFFF;font-style:italic;line-height:1.6;max-width:580px;margin:0 auto 32px;">"In high-performance environments, the edge rarely comes from superior information alone. It comes from knowing when conditions support decisive action — and having the discipline to wait when they do not."</p>
     <div style="width:60px;height:1px;background:#C9A84C;margin:32px auto;opacity:0.5;"></div>
     <div style="font-size:14.5px;color:#9BA8C0;line-height:1.8;max-width:520px;margin:0 auto;">${S.s17}</div>
     <div style="width:60px;height:1px;background:#C9A84C;margin:32px auto;opacity:0.5;"></div>
@@ -928,14 +934,15 @@ function mdToHtml(reportMarkdown, clientName, userData) {
 </div>
 
 <!-- FOOTER -->
-<footer style="background:#0D1228;border-top:1px solid #1E2845;padding:36px 0;">
+<footer style="background:#0A0A0A;border-top:1px solid #2A2A2A;padding:36px 0;">
   <div style="max-width:760px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
     <span style="font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:#C9A84C;">The Edge Index</span>
-    <p style="font-size:11.5px;color:#6B7A99;line-height:1.6;">This report was prepared exclusively for ${clientName}.<br/>Strategic Timing Intelligence &amp; Decision Psychology.<br/>edgeindex.io</p>
-    <p style="font-size:11.5px;color:#6B7A99;line-height:1.6;text-align:right;">&copy; ${year} The Edge Index.<br/>All rights reserved.</p>
+    <p style="font-size:11.5px;color:#9BA8C0;line-height:1.6;">This report was prepared exclusively for ${clientName}.<br/>Strategic Timing Intelligence &amp; Decision Psychology.<br/>edgeindex.io</p>
+    <p style="font-size:11.5px;color:#9BA8C0;line-height:1.6;text-align:right;">&copy; ${year} The Edge Index.<br/>All rights reserved.</p>
   </div>
 </footer>
 
+</td></tr></table>
 </body>
 </html>`;
 }
