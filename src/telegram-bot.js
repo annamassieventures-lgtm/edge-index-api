@@ -167,11 +167,33 @@ This is a premium intelligence document. The client has paid $2,500 for it. It s
 LANGUAGE RULES — strictly follow these:
 - Never use astrology terminology (no "transit," "conjunction," "natal chart," "retrograde," "ascendant")
 - Never use spiritual or wellness language (no "energy," "vibration," "universe," "alignment" in the mystical sense)
+- NEVER use Human Design type names in the report. The client must never read "Generator," "Manifesting Generator," "Projector," "Manifestor," "Reflector," "Sacral," "Splenic," "Emotional Authority" as raw HD labels. These are internal calculation inputs only.
+- Instead, always use the proprietary Edge Index architecture names from the translation table below. These are the ONLY names that appear in the report.
 - Use operational language: "decision posture," "timing conditions," "expansion environment," "compression environment," "signal alignment," "distortion risk," "opportunity window," "pressure cycle," "behavioural pattern"
 - Write like a strategist briefing a CEO, not a coach motivating a client
 - Be specific. Name the months. Name the quarters. State what the conditions mean for THIS person based on their decision architecture.
-- Use "Your [type] decision architecture means..." not "As a [type]..."
+- Use "Your [Architecture Name] means..." not "As a [type]..."
 - Minimum 4,500 words across all sections
+
+EDGE INDEX ARCHITECTURE TRANSLATION TABLE — use these names exclusively in the report:
+HD Type → Edge Index Architecture Name:
+  Generator             → "Sustained Momentum Architecture"
+  Manifesting Generator → "Rapid-Response Multi-Track Architecture"
+  Projector             → "Strategic Recognition Architecture"
+  Manifestor            → "Independent Initiation Architecture"
+  Reflector             → "Environmental Calibration Architecture"
+
+HD Authority → Edge Index Decision Mode Name:
+  Sacral Authority               → "Instinct-First Decision Mode"
+  Emotional Authority            → "Wave-Cycle Decision Mode"
+  Splenic Authority              → "First-Signal Decision Mode"
+  Ego Authority                  → "Conviction-Led Decision Mode"
+  Self-Projected Authority       → "Verbal Processing Decision Mode"
+  Mental/Environmental Authority → "Environmental Shift Decision Mode"
+  Lunar Authority                → "Full-Cycle Decision Mode"
+
+Example usage: "Your Sustained Momentum Architecture combined with Wave-Cycle Decision Mode means correct decisions feel like sustained engagement, not excitement — and emotional peaks are your highest-risk deployment moments."
+Never write: "As a Generator with Emotional Authority..." Always write: "Your Sustained Momentum Architecture and Wave-Cycle Decision Mode..."
 
 THE SIGNAL SYSTEM — use this internally to derive timing conditions:
 The system evaluates seven signals. Users never see the signal calculations — they only see Green / Amber / Red and the strategic guidance that explains it.
@@ -255,8 +277,19 @@ Identify specifically for this type and authority: strengths (where this decisio
 SECTION 6 — THE EDGE TIMING SYSTEM (200-250 words)
 Explain how Green / Amber / Red environments interact with their specific decision architecture. Make this specific to them — a Red window does not mean the same thing for a Projector as for a Manifesting Generator. Provide concrete examples of what good decision behaviour looks like for this person in each environment.
 
-SECTION 7 — 12-MONTH TIMING PROFILE (300-350 words)
-Starting from the report date, map the full 12 months. Identify the overall rhythm of the year, major expansion phases (name the months), major transitional periods (name the months), and major compression or protection phases (name the months). Include a monthly signal calendar table formatted as: Month | Environment | Strategic Notes. Be specific. "April through June represents the strongest expansion window of this cycle" is far more valuable than "Q2 looks positive."
+SECTION 7 — 12-MONTH TIMING PROFILE (300-400 words)
+Open with a RIGHT NOW callout box — a bolded paragraph that starts with "RIGHT NOW — [current month and year]:" and tells this specific client exactly what environment they are currently in, what it means for their decision architecture today, and what their immediate priority is for the next 2-4 weeks. This should feel like a strategist picking up the phone and telling them what to do right now.
+
+Then map the full 12 months. Identify the overall rhythm of the year, major expansion phases (name the months), major transitional periods (name the months), and major compression or protection phases (name the months).
+
+Include a monthly signal calendar table formatted as: Month | Environment | Strategic Notes.
+
+CRITICAL FOR THE TABLE: Every single row in the Strategic Notes column must reference the client's specific HD type and authority. Generic notes like "Full Green conditions. Active deployment." are not acceptable. Notes must be personalised — they must name the client's specific behavioural pattern, their authority mechanics, or their vulnerability under that environment. Examples of the required personalisation level:
+- Green row for Emotional Authority Generator: "Primary Golden Window opens. Your Emotional Authority wave is in its neutral settling phase — clearest decision window of the year. Generator response most reliable here. Positions you've been tracking: commit now."
+- Red row for Emotional Authority: "Pressure deepens. Emotional Authority traders amplify pressure cycles — you will feel urgency to act to relieve the tension. That urgency is the distortion signal. Your pattern here is forcing decisions before the wave settles. Sit on your hands."
+- Amber row: "Conditions transitional. Your [authority] requires [specific instruction]. Selective positioning only — filter against your gut response, not FOMO."
+
+Every row must feel like it was written specifically for this person, not for a generic trading calendar.
 
 SECTION 8 — QUARTERLY STRATEGIC OUTLOOK (400-500 words)
 Break the 12 months into four quarters starting from the report date. For each quarter: dominant timing environment (Green / Amber / Red), signal dynamics (which signals are most active in plain language), recommended decision posture, strategic opportunities to watch for, and risks specific to this person's behavioural patterns. Write each quarter as its own strategic briefing paragraph using specific months.
