@@ -4,7 +4,7 @@
  * Flow:
  *  1. /start → ask for email
  *  2. Email → verify payment (isPaidEmail) → if not paid, send Whop link
- *  3. If paid → collect date of birth → time → location
+ *  3. If paid → collect date of birth → time → location → HD auto-calculated
  *  4. Generate 17-section annual brief via Claude
  *  5. Email report via Resend (HTML, styled)
  *  6. Confirm in Telegram: "Sent to your email"
@@ -300,6 +300,10 @@ async function generateReport(userData) {
     birthLocation: userData.location,
     lat:           userData.lat,
     lon:           userData.lon,
+    hdType:        userData.hdType       || 'Generator',
+    hdAuthority:   userData.hdAuthority  || 'Sacral Authority',
+    hdProfile:     userData.hdProfile    || null,
+    hdDefinition:  userData.hdDefinition || null,
     reportDate:    new Date().toISOString().split('T')[0],
   };
 
@@ -897,7 +901,27 @@ bot.on('message', async (msg) => {
       return;
     }
 
-    saveUser(chatId, { location: text, lat: geo.lat, lon: geo.lon });
+    // Calculate Human Design automatically from birth data
+    const dobParts  = (getUser(chatId)?.dob || '').split('-');
+    const timeParts = (getUser(chatId)?.time || '00:00').split(':');
+    let hdChart = null;
+    try {
+      const { calculateHumanDesign } = await import('natalengine');
+      hdChart = calculateHumanDesign(
+        parseInt(dobParts[0]), parseInt(dobParts[1]), parseInt(dobParts[2]),
+        parseInt(timeParts[0]), parseInt(timeParts[1]),
+        geo.lat, geo.lon
+      );
+    } catch (e) {
+      console.warn('HD calculation failed:', e.message);
+    }
+
+    const hdType      = hdChart?.type?.name      || 'Generator';
+    const hdAuthority = hdChart?.authority?.name  || 'Sacral Authority';
+    const hdProfile   = hdChart?.profile?.name    || null;
+    const hdDefinition = hdChart?.definition      || null;
+
+    saveUser(chatId, { location: text, lat: geo.lat, lon: geo.lon, hdType, hdAuthority, hdProfile, hdDefinition });
     state[chatId] = 'complete';
 
     await bot.sendMessage(chatId,
