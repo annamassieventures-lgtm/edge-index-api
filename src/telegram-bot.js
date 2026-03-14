@@ -47,7 +47,7 @@ const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 const RESEND_KEY    = process.env.RESEND_API_KEY;
 const ANNA_CHAT_ID  = String(process.env.ANNA_CHAT_ID || '5838005991');
 const WHOP_URL      = process.env.WHOP_URL || 'https://whop.com/edge-index';
-const FROM_EMAIL    = 'The Edge Index <reports@edgeindex.io>';
+const FROM_EMAIL    = 'The Edge Index <onboarding@resend.dev>'; // TODO: switch to reports@edgeindex.io once domain fully verified
 const RAILWAY_URL   = `http://localhost:${process.env.PORT || 8080}`;
 
 if (!BOT_TOKEN)     throw new Error('TELEGRAM_BOT_TOKEN is required');
