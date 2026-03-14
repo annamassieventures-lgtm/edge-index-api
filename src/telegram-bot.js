@@ -35,6 +35,7 @@ import cron        from 'node-cron';
 import Anthropic   from '@anthropic-ai/sdk';
 import fs          from 'fs';
 import path        from 'path';
+import PDFDocument from 'pdfkit';
 import { fileURLToPath } from 'url';
 import { isPaidEmail, addPaidEmail, getAllPaidEmails } from './shared/paidUsers.js';
 
@@ -304,7 +305,7 @@ async function generateReport(userData) {
 
   const message = await anthropic.messages.create({
     model:      'claude-sonnet-4-6',
-    max_tokens: 6000,
+    max_tokens: 16000,
     system:     SYSTEM_PROMPT,
     messages: [{
       role:    'user',
@@ -402,6 +403,68 @@ function mdToHtml(md, clientName) {
 </html>`;
 }
 
+// ─── PDF generation ────────────────────────────────────────────────────────────
+
+function generatePDF(reportMarkdown, clientName, reportDate) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 60, size: 'A4' });
+    const chunks = [];
+    doc.on('data', chunk => chunks.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
+
+    // Header
+    doc.rect(0, 0, doc.page.width, 120).fill('#0a0a0a');
+    doc.fillColor('#c9a84c').fontSize(9).font('Helvetica')
+       .text('PERSONALISED DECISION-TIMING INTELLIGENCE', 60, 35, { align: 'center', width: doc.page.width - 120, characterSpacing: 2 });
+    doc.fillColor('#ffffff').fontSize(28).font('Helvetica-Bold')
+       .text('THE EDGE INDEX', 60, 52, { align: 'center', width: doc.page.width - 120 });
+    doc.fillColor('#888888').fontSize(11).font('Helvetica-Oblique')
+       .text(`Annual Brief — ${clientName}`, 60, 88, { align: 'center', width: doc.page.width - 120 });
+
+    doc.moveDown(3);
+    doc.fillColor('#333333');
+
+    // Parse and render markdown sections
+    const lines = reportMarkdown.split('\n');
+    for (const line of lines) {
+      if (line.startsWith('# ')) {
+        doc.addPage();
+        doc.fillColor('#0a0a0a').fontSize(20).font('Helvetica-Bold')
+           .text(line.replace('# ', ''), { paragraphGap: 8 });
+        doc.moveTo(60, doc.y).lineTo(doc.page.width - 60, doc.y)
+           .strokeColor('#c9a84c').lineWidth(1).stroke();
+        doc.moveDown(0.5);
+      } else if (line.startsWith('## ')) {
+        doc.moveDown(0.5);
+        doc.fillColor('#1a1a1a').fontSize(14).font('Helvetica-Bold')
+           .text(line.replace('## ', ''), { paragraphGap: 4 });
+      } else if (line.startsWith('### ')) {
+        doc.fillColor('#333333').fontSize(12).font('Helvetica-Bold')
+           .text(line.replace('### ', ''), { paragraphGap: 3 });
+      } else if (line.startsWith('**') && line.endsWith('**')) {
+        doc.fillColor('#1a1a1a').fontSize(11).font('Helvetica-Bold')
+           .text(line.replace(/\*\*/g, ''), { paragraphGap: 2 });
+      } else if (line.startsWith('- ') || line.startsWith('• ')) {
+        doc.fillColor('#333333').fontSize(10).font('Helvetica')
+           .text(`  • ${line.replace(/^[-•] /, '')}`, { indent: 10, paragraphGap: 2 });
+      } else if (line.trim() === '') {
+        doc.moveDown(0.3);
+      } else if (line.trim()) {
+        const clean = line.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1');
+        doc.fillColor('#333333').fontSize(10).font('Helvetica')
+           .text(clean, { align: 'justify', paragraphGap: 3 });
+      }
+    }
+
+    // Footer
+    doc.fillColor('#888888').fontSize(8)
+       .text(`The Edge Index Brief | ${clientName} | ${reportDate}`, 60, doc.page.height - 40, { align: 'center', width: doc.page.width - 120 });
+
+    doc.end();
+  });
+}
+
 // ─── Email delivery via Resend ─────────────────────────────────────────────────
 
 async function sendReportEmail(toEmail, toName, reportMarkdown) {
@@ -410,8 +473,10 @@ async function sendReportEmail(toEmail, toName, reportMarkdown) {
     return { skipped: true };
   }
 
-  const htmlBody = mdToHtml(reportMarkdown, toName);
-  const subject  = `Your Edge Index Brief — ${toName}`;
+  const htmlBody  = mdToHtml(reportMarkdown, toName);
+  const subject   = `Your Edge Index Brief — ${toName}`;
+  const reportDate = new Date().toISOString().split('T')[0];
+  const pdfBuffer = await generatePDF(reportMarkdown, toName, reportDate);
 
   const res = await fetch('https://api.resend.com/emails', {
     method:  'POST',
@@ -424,6 +489,10 @@ async function sendReportEmail(toEmail, toName, reportMarkdown) {
       to:      toEmail,
       subject,
       html:    htmlBody,
+      attachments: [{
+        filename: `Edge-Index-Brief-${toName}-${reportDate}.pdf`,
+        content:  pdfBuffer.toString('base64'),
+      }],
     }),
   });
 
