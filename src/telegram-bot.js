@@ -54,7 +54,10 @@ if (!BOT_TOKEN)     throw new Error('TELEGRAM_BOT_TOKEN is required');
 if (!ANTHROPIC_KEY) throw new Error('ANTHROPIC_API_KEY is required');
 if (!RESEND_KEY)    console.warn('⚠️  RESEND_API_KEY not set — email delivery disabled');
 
-const bot       = new TelegramBot(BOT_TOKEN, { polling: true });
+// Drop any existing webhook/polling conflict before starting
+await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/deleteWebhook?drop_pending_updates=true`).catch(() => {});
+
+const bot       = new TelegramBot(BOT_TOKEN, { polling: { interval: 2000, autoStart: true, params: { timeout: 10 } } });
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_KEY });
 
 // ─── User data persistence ─────────────────────────────────────────────────────
