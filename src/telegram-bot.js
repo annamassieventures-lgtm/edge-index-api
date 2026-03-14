@@ -230,6 +230,9 @@ Client: [Client Name]
 Report Period: [12 months from report date]
 Prepared by: The Edge Index
 
+YOUR GOLDEN WINDOWS — THIS YEAR'S HIGHEST-LEVERAGE PERIODS (place this immediately after the cover page, before Section 1)
+This is the first thing the client reads. Format it as a bold, scannable box. List exactly 3-5 specific date ranges where ALL key signals align — the periods where this person should move with maximum conviction. For each window give: the exact months (e.g. "Late April — Mid June 2026"), a one-line description of why it's high-leverage for THIS person specifically, and one action instruction (e.g. "Deploy capital. Initiate. Scale."). Then list 2-3 PROTECTION PERIODS — specific months to reduce risk and hold. Format these as a clear visual contrast. This section should feel like the most valuable page in the document — the answer to "when do I make my moves this year?"
+
 SECTION 1 — CONFIDENTIAL BRIEFING NOTE (150-200 words)
 Open with the purpose of this document. Explain that this is a decision-timing intelligence report — not a prediction, not a personality profile, but a strategic map of how this individual naturally makes decisions and how timing conditions will interact with their decision architecture over the next 12 months. State clearly that the system improves timing awareness and decision discipline, not predicts specific outcomes. Set the tone: this is a strategic intelligence document prepared for a high-performance decision maker.
 
@@ -272,11 +275,11 @@ Provide 7-10 clear operating principles for this person specifically. Derived fr
 SECTION 14 — STRATEGIC CLOSING SUMMARY (150-200 words)
 Summarise the year in one clear strategic paragraph. Name: their decision edge, their biggest opportunity this year, the most important behavioural principle they should follow, and the one thing that will determine whether this year delivers on its potential. End with a calm, authoritative closing line.
 
-SECTION 15 — WHY ONGOING MONITORING MATTERS (150-200 words)
-Explain that the Brief provides the strategic map but timing conditions move continuously. Use this exact sentence: "This report shows your yearly decision architecture. To track these timing windows as they open and close in real time, The Edge Index provides weekly, daily, and live monitoring." This is where subscriptions are introduced — as the logical conclusion of the report intelligence, not as a sales pitch.
+SECTION 15 — THE GAP BETWEEN KNOWING AND ACTING (200-250 words)
+This section builds the bridge between the annual map and ongoing monitoring. Open by referencing their specific Golden Windows identified earlier in the report — name the months. Then explain the critical problem: knowing a window is coming is not the same as knowing exactly when it opens. Golden Windows don't arrive on the first of the month — they open and close within days, sometimes hours, depending on signal alignment in real time. A trader who knows April-June is their strongest window but acts two weeks early or two weeks late misses the edge entirely. This is the gap between strategic awareness and tactical precision. The Brief gives them the map. Monitoring gives them the moment. End with: "The difference between knowing your best window and catching it is real-time signal tracking."
 
-SECTION 16 — THE EDGE MONITORING SUITE (150-200 words)
-Describe the three monitoring products: Weekly Edge (strategic planning and weekly decision tone, $97/month), Daily Edge (daily signal tracking for active decision making, $197/month), Live Edge (real-time signal alerts for high-frequency decisions, $397/month). Frame these as monitoring layers that track the terrain the Brief revealed.
+SECTION 16 — THE EDGE MONITORING SUITE (200-250 words)
+Introduce the three monitoring tiers as the natural next step — not a sales pitch, but a logical continuation of what the Brief started. Frame each tier around the specific Golden Windows identified in this report. Weekly Edge ($97/month): every Monday, your decision tone for the week ahead — are conditions building toward your window or pulling back. Daily Edge ($197/month): daily signal tracking so you know exactly when your window opens and when to stand down. Live Edge ($397/month): real-time alerts the moment all signals align — for traders who need to act within hours, not days. Close with: "Most traders who receive this Brief choose Daily Edge. They've already paid $2,500 to know their windows. Monitoring is how they don't miss them."
 
 SECTION 17 — CLOSING STRATEGIC SUMMARY (150-200 words)
 Final page. Five statements: "Your decision quality improves when...", "Your risk increases when...", "Your biggest opportunity this year sits around...", "Your greatest advantage comes from...", "The key principle for the next 12 months is..." End on forward momentum and quiet confidence.
