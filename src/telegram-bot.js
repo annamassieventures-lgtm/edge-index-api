@@ -1421,7 +1421,7 @@ bot.on('message', async (msg) => {
     saveUser(chatId, { tradeType: text });
     state[chatId] = 'sales_q2';
     await bot.sendMessage(chatId,
-      `Got it.\n\nWith everything happening in global markets right now — the volatility, sudden swings, geopolitical noise — are you finding it harder to trust your own calls? Knowing when to act and when to hold back?`
+      `Got it.\n\nWith everything happening in global markets right now — are you finding it harder to stick to your own rules? Knowing when to act, when to hold back — and actually following your risk-to-reward ratio instead of letting emotion override it?`
     );
     return;
   }
