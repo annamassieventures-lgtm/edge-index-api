@@ -48,7 +48,7 @@ const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 const RESEND_KEY    = process.env.RESEND_API_KEY;
 const ANNA_CHAT_ID  = String(process.env.ANNA_CHAT_ID || '5838005991');
 const WHOP_URL      = process.env.WHOP_URL || 'https://whop.com/edge-index';
-const FROM_EMAIL    = 'The Edge Index <onboarding@resend.dev>'; // TODO: switch to reports@edgeindex.io once domain fully verified
+const FROM_EMAIL    = 'The Edge Index <reports@edgeindex.io>';
 const RAILWAY_URL   = `http://localhost:${process.env.PORT || 8080}`;
 
 if (!BOT_TOKEN)     throw new Error('TELEGRAM_BOT_TOKEN is required');
@@ -714,7 +714,7 @@ function mdToHtml(reportMarkdown, clientName, userData) {
 <div style="background:#000000;border-bottom:1px solid #2A2A2A;padding:20px 0;">
   <div style="max-width:760px;margin:0 auto;padding:0 24px;">
     <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-      <td style="font-size:13px;color:#CCCCCC;line-height:1.65;">Your Edge Index Brief is a complete decision timing intelligence system for <strong style="color:#C9A84C;">${year}</strong>. Most traders spend $3,000–$6,000 per year on tools that analyse the market — but never the decision maker.</td>
+      <td style="font-size:13px;color:#CCCCCC;line-height:1.65;">Your Edge Index Brief is a complete decision timing intelligence system for <strong style="color:#C9A84C;">${year}</strong>. Most traders spend $3,000–$6,000 per year on tools that analyse the market — but never personally analyse the decision maker.</td>
       <td width="120" style="text-align:right;padding-left:16px;white-space:nowrap;vertical-align:middle;">
         <span style="display:inline-block;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:3px;padding:8px 12px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#C9A84C;">&#9679; PDF attached</span>
       </td>
@@ -970,9 +970,14 @@ function generatePDF(reportMarkdown, clientName, reportDate) {
     doc.moveDown(3);
     doc.fillColor('#333333');
 
+    // Strip emojis helper — pdfkit can't render them and shows garbage
+    const stripEmoji = (str) => str.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27FF}\u{2300}-\u{23FF}\u{FE00}-\u{FEFF}\u{1F000}-\u{1F02F}\u{1F0A0}-\u{1F0FF}\u{1F100}-\u{1F1FF}\u{1F200}-\u{1F2FF}\u{1F004}\u{1F0CF}\u{2702}\u{2705}\u{2708}-\u{270D}\u{270F}\u{2712}\u{2714}\u{2716}\u{271D}\u{2721}\u{2728}\u{2733}-\u{2734}\u{2744}\u{2747}\u{274C}\u{274E}\u{2753}-\u{2755}\u{2757}\u{2763}-\u{2764}\u{2795}-\u{2797}\u{27A1}\u{27B0}\u{27BF}\u{2934}-\u{2935}\u{25AA}-\u{25AB}\u{25B6}\u{25C0}\u{25FB}-\u{25FE}\u{2614}-\u{2615}\u{2648}-\u{2653}\u{26AA}-\u{26AB}\u{26BD}-\u{26BE}\u{26C4}-\u{26C5}\u{26CE}\u{26D4}\u{26EA}\u{26F2}-\u{26F3}\u{26F5}\u{26FA}\u{26FD}\u{2702}\u{231A}-\u{231B}\u{23E9}-\u{23F3}\u{23F8}-\u{23FA}]/gu, '');
+
     // Parse and render markdown sections
     const lines = reportMarkdown.split('\n');
-    for (const line of lines) {
+    for (const rawLine of lines) {
+      const line = stripEmoji(rawLine);
+      if (/^-{3,}$/.test(line.trim())) continue; // skip horizontal rules
       if (line.startsWith('# ')) {
         doc.addPage();
         doc.fillColor('#0a0a0a').fontSize(20).font('Helvetica-Bold')
@@ -1090,6 +1095,27 @@ function isAnna(chatId) {
   return ANNA_CHAT_ID && String(chatId) === ANNA_CHAT_ID;
 }
 
+// ─── AI Sales agent — personalised close by asset class ───────────────────────
+
+function getPersonalisedClose(tradeType) {
+  const t = (tradeType || '').toLowerCase();
+  let assetLine = '';
+
+  if (t.includes('crypto') || t.includes('bitcoin') || t.includes('btc')) {
+    assetLine = `With crypto moving 24/7 and sentiment shifting faster than any other market, knowing when YOUR judgement is sharpest — and when fear is most likely to make you exit early or hold too long — is the difference between compounding and giving back gains.`;
+  } else if (t.includes('stock') || t.includes('share') || t.includes('equit')) {
+    assetLine = `In stocks, the biggest losses rarely come from wrong analysis — they come from the right analysis executed at the wrong emotional moment. Panic selling at the bottom. Chasing at the top. Your emotional cycle drives both.`;
+  } else if (t.includes('forex') || t.includes('fx') || t.includes('currency')) {
+    assetLine = `Forex is unforgiving of emotional decisions — leverage amplifies every hesitation and every impulse. Knowing which days your decision clarity is highest, and which days you're most susceptible to distortion, is a structural edge most forex traders never access.`;
+  } else if (t.includes('commodit') || t.includes('oil') || t.includes('gas') || t.includes('energy') || t.includes('electr')) {
+    assetLine = `Energy and commodities are driven by macro forces that create intense emotional pressure — geopolitical shocks, supply disruptions, AI-driven demand swings. Knowing when your own judgement is clearest — and when emotion will override your read — is the edge that separates disciplined traders from reactive ones.`;
+  } else {
+    assetLine = `Whatever you trade, the biggest losses rarely come from bad analysis. They come from the right analysis executed at the wrong emotional moment. Your emotional cycle is predictable — and mappable.`;
+  }
+
+  return `That's The Edge Index Brief.\n\n${assetLine}\n\nIt's a personalised annual report built from your individual data — mapping your optimal decision windows and your highest emotional-risk periods. Not a market signal tool. A map of you.\n\nSo instead of looking back thinking "I knew better" — you're looking ahead, trading with that knowledge built in.\n\nOne payment. Yours for life.\n\n👉 ${WHOP_URL}\n\nOnce you've purchased, come back here and send /start — I'll set up your personalised brief.`;
+}
+
 // ─── Outreach briefing builder ─────────────────────────────────────────────────
 
 const OUTREACH_MSG_1 = (name) =>
@@ -1171,17 +1197,36 @@ bot.onText(/\/myid/, async (msg) => {
   await bot.sendMessage(msg.chat.id, `Your Telegram chat ID is: \`${msg.chat.id}\``, { parse_mode: 'Markdown' });
 });
 
-// /start — begin onboarding
+// /start — begin onboarding (opens with AI sales conversation for new users)
 bot.onText(/\/start/, async (msg) => {
   const chatId    = msg.chat.id;
   const firstName = msg.from?.first_name || 'there';
 
   saveUser(chatId, { chatId, firstName, telegramUsername: msg.from?.username });
-  state[chatId] = 'awaiting_email';
 
+  // If already a paid user with complete profile, skip sales flow
+  const user = getUser(chatId);
+  if (user?.email && isPaidEmail(user.email) && user.dob) {
+    await bot.sendMessage(chatId,
+      `Welcome back, ${firstName}! Your profile is already set up.\n\nSend /report to generate your latest Edge Index Brief.`
+    );
+    return;
+  }
+
+  // If already paid but no profile yet, go straight to onboarding
+  if (user?.email && isPaidEmail(user.email)) {
+    state[chatId] = 'awaiting_date';
+    await bot.sendMessage(chatId,
+      `Welcome back, ${firstName}! Your purchase is confirmed.\n\nLet's complete your profile. Reply with your **date of birth** (DD/MM/YYYY):`,
+      { parse_mode: 'Markdown' }
+    );
+    return;
+  }
+
+  // New user — start sales conversation
+  state[chatId] = 'sales_q1';
   await bot.sendMessage(chatId,
-    `⚡ Welcome to The Edge Index, ${firstName}!\n\nI'm your personalised trading timing intelligence system.\n\nTo get started, I need to verify your purchase. Please reply with the *email address you used to purchase your Edge Index report*.`,
-    { parse_mode: 'Markdown' }
+    `Hey ${firstName} — welcome.\n\nBefore I get you set up, a couple of quick questions.\n\nWhat do you primarily trade?\n\n• Crypto & Bitcoin\n• Stocks & shares\n• Forex\n• Commodities (oil, gas, energy)\n• Something else`
   );
 });
 
@@ -1371,6 +1416,34 @@ bot.on('message', async (msg) => {
 
   const currentState = state[chatId] || 'unknown';
 
+  // ── Sales Q1: What do you trade? ──
+  if (currentState === 'sales_q1') {
+    saveUser(chatId, { tradeType: text });
+    state[chatId] = 'sales_q2';
+    await bot.sendMessage(chatId,
+      `Got it.\n\nWith everything happening in global markets right now — the volatility, sudden swings, geopolitical noise — are you finding it harder to trust your own calls? Knowing when to act and when to hold back?`
+    );
+    return;
+  }
+
+  // ── Sales Q2: Market impact ──
+  if (currentState === 'sales_q2') {
+    state[chatId] = 'sales_q3';
+    await bot.sendMessage(chatId,
+      `Every trader has that moment. A position they sold in a panic — and watched recover the next day. Or held too long because the emotional pull was too strong to exit.\n\nThat's not bad strategy. That's your emotional pattern — and it repeats on a predictable cycle throughout the year.\n\nScientists call it the amygdala response — your brain literally cannot tell the difference between a market crash and a physical threat. It hijacks your decision-making at exactly the wrong moment. It's why smart, experienced traders still make expensive mistakes.\n\nWhat if you had a personalised map of YOUR highest-risk days — the days when your brain is most likely to override your own judgement — so you could see them coming before they hit?\n\nWould that change how you trade?`
+    );
+    return;
+  }
+
+  // ── Sales Q3: Deliver personalised close → Whop link ──
+  if (currentState === 'sales_q3') {
+    const user = getUser(chatId);
+    const close = getPersonalisedClose(user?.tradeType || text);
+    state[chatId] = 'awaiting_email';
+    await bot.sendMessage(chatId, close);
+    return;
+  }
+
   // ── Step 0: Email verification ──
   if (currentState === 'awaiting_email') {
     const emailMatch = text.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
@@ -1477,8 +1550,11 @@ bot.on('message', async (msg) => {
     return;
   }
 
-  // ── Catch-all ──
-  await bot.sendMessage(chatId, "Send /start to set up your Edge Index profile, or /report if you're already set up.");
+  // ── Catch-all — pull unknown-state users into sales flow ──
+  state[chatId] = 'sales_q1';
+  await bot.sendMessage(chatId,
+    `Hey — quick question before we go further.\n\nWhat do you primarily trade?\n\n• Crypto & Bitcoin\n• Stocks & shares\n• Forex\n• Commodities (oil, gas, energy)\n• Something else`
+  );
 });
 
 // ─── Cron: Weekly report delivery ─────────────────────────────────────────────

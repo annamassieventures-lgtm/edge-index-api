@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Edge Index — Decision Timing Intelligence</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black:  #080808;
+    --black2: #0f0f0f;
+    --black3: #161616;
+    --gold:   #C9A84C;
+    --gold2:  #F0D07A;
+    --gold3:  #8a6f2e;
+    --white:  #ffffff;
+    --grey:   rgba(255,255,255,0.55);
+    --grey2:  rgba(255,255,255,0.25);
+    --grey3:  rgba(255,255,255,0.08);
+    --border: rgba(201,168,76,0.18);
+    --green:  #3DAA7C;
+    --amber:  #E8C84A;
+    --red:    #D94040;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 48px;
+    background: linear-gradient(to bottom, rgba(8,8,8,0.98) 0%, rgba(8,8,8,0) 100%);
+  }
+  .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.1em; color: var(--gold); }
+  .nav-cta {
+    background: var(--gold); color: var(--black);
+    padding: 10px 24px; border-radius: 2px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; text-decoration: none; transition: background 0.2s;
+  }
+  .nav-cta:hover { background: var(--gold2); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 120px 48px 80px;
+    background: radial-gradient(ellipse at 60% 40%, rgba(201,168,76,0.06) 0%, transparent 60%);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 900px; position: relative; }
+  .hero-eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 28px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .hero-eyebrow::before { content: ''; display: inline-block; width: 32px; height: 1px; background: var(--gold); }
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 8.5vw, 114px);
+    line-height: 0.92; letter-spacing: 0.02em;
+    color: var(--white); margin-bottom: 32px;
+  }
+  .hero h1 em { color: var(--gold); font-style: normal; }
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 20px); color: var(--grey);
+    max-width: 600px; margin-bottom: 16px; font-weight: 300; line-height: 1.7;
+  }
+  .hero-sub strong { color: rgba(255,255,255,0.88); font-weight: 500; }
+  .hero-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(17px, 2vw, 22px); font-style: italic; font-weight: 300;
+    color: rgba(255,255,255,0.65); max-width: 580px; margin-bottom: 48px; line-height: 1.65;
+    border-left: 2px solid var(--gold3); padding-left: 20px;
+  }
+  .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--gold); color: var(--black);
+    padding: 16px 36px; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    text-decoration: none; border-radius: 2px; transition: background 0.2s; display: inline-block;
+  }
+  .btn-primary:hover { background: var(--gold2); }
+  .btn-secondary {
+    border: 1px solid var(--border); color: rgba(255,255,255,0.65);
+    padding: 16px 36px; font-size: 12px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    text-decoration: none; border-radius: 2px; transition: all 0.2s; display: inline-block;
+  }
+  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+  .hero-stats {
+    display: flex; gap: 48px; margin-top: 72px;
+    border-top: 1px solid var(--border); padding-top: 36px; flex-wrap: wrap;
+  }
+  .hero-stat .val {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px; font-weight: 300; color: var(--gold); line-height: 1;
+  }
+  .hero-stat .lbl { font-size: 11px; color: var(--grey2); letter-spacing: 0.08em; margin-top: 4px; }
+
+  /* ── MARQUEE ── */
+  .marquee-wrap {
+    overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    background: var(--black2); padding: 14px 0;
+  }
+  .marquee-track {
+    display: flex; gap: 0; white-space: nowrap;
+    animation: marquee 30s linear infinite;
+  }
+  .marquee-track span { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold3); padding: 0 32px; }
+  .marquee-track span.sep { color: var(--gold); opacity: 0.4; }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* ── SECTION UTILS ── */
+  .section { padding: 100px 48px; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-inner.narrow { max-width: 820px; }
+  .section-inner.wide { max-width: 1200px; }
+  .eyebrow {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .eyebrow::before { content: ''; display: inline-block; width: 20px; height: 1px; background: var(--gold); }
+  h2.display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 5vw, 72px);
+    line-height: 0.95; letter-spacing: 0.02em; color: var(--white); margin-bottom: 24px;
+  }
+  h2.display em { color: var(--gold); font-style: normal; }
+  .section-lead { font-size: 17px; color: var(--grey); max-width: 600px; font-weight: 300; line-height: 1.75; }
+
+  /* ── MARKET REALITY (PROBLEM) ── */
+  .reality-section { background: var(--black2); }
+  .reality-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; margin-top: 64px; }
+  .reality-left {}
+  .reality-left p { font-size: 16px; color: var(--grey); line-height: 1.85; margin-bottom: 24px; }
+  .reality-left p strong { color: rgba(255,255,255,0.9); font-weight: 500; }
+  .reality-cycle {
+    background: var(--black3); border: 1px solid var(--border);
+    padding: 32px 36px; margin-top: 8px;
+  }
+  .reality-cycle-label { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold3); margin-bottom: 20px; }
+  .cycle-steps { display: flex; flex-direction: column; gap: 0; }
+  .cycle-step {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .cycle-step:last-child { border-bottom: none; }
+  .cycle-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+  .cycle-dot.green { background: var(--green); }
+  .cycle-dot.amber { background: var(--amber); }
+  .cycle-dot.red { background: var(--red); }
+  .cycle-dot.grey { background: rgba(255,255,255,0.2); }
+  .cycle-step-text { font-size: 13.5px; color: rgba(255,255,255,0.7); line-height: 1.6; }
+  .cycle-step-text strong { color: var(--white); }
+
+  .reality-right {}
+  .reality-patterns { display: flex; flex-direction: column; gap: 2px; }
+  .reality-pattern {
+    background: var(--black3); border: 1px solid rgba(255,255,255,0.04);
+    padding: 28px 32px; transition: border-color 0.2s;
+  }
+  .reality-pattern:hover { border-color: var(--border); }
+  .reality-pattern h4 { font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 6px; }
+  .reality-pattern p { font-size: 13px; color: var(--grey); line-height: 1.65; }
+
+  /* ── PATTERN INTELLIGENCE ── */
+  .pattern-section { background: var(--black); }
+  .dimensions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 64px; }
+  .dimension-card {
+    padding: 44px 36px; border: 1px solid var(--border);
+    background: var(--black3); position: relative;
+  }
+  .dimension-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px; color: rgba(201,168,76,0.1); line-height: 1; margin-bottom: 16px;
+  }
+  .dimension-card h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px; font-weight: 400; color: var(--white); margin-bottom: 12px;
+  }
+  .dimension-card p { font-size: 13.5px; color: var(--grey); line-height: 1.75; }
+
+  /* ── SIGNAL SYSTEM ── */
+  .signals-section { background: var(--black2); }
+  .signals-intro { max-width: 620px; margin-bottom: 56px; }
+  .signals-intro p { font-size: 16px; color: var(--grey); line-height: 1.8; margin-bottom: 12px; }
+  .signal-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 48px;
+  }
+  .signal-card {
+    background: var(--black3); border: 1px solid rgba(255,255,255,0.05);
+    padding: 24px 18px; text-align: center; transition: border-color 0.2s;
+  }
+  .signal-card:hover { border-color: var(--border); }
+  .signal-icon { font-size: 18px; margin-bottom: 10px; opacity: 0.6; }
+  .signal-name { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold3); line-height: 1.4; }
+
+  .conditions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+  .condition-card { padding: 36px 32px; }
+  .condition-card.green-card { background: rgba(61,170,124,0.06); border: 1px solid rgba(61,170,124,0.2); }
+  .condition-card.amber-card { background: rgba(232,200,74,0.06); border: 1px solid rgba(232,200,74,0.2); }
+  .condition-card.red-card { background: rgba(217,64,64,0.06); border: 1px solid rgba(217,64,64,0.2); }
+  .condition-indicator {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  }
+  .condition-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .condition-dot.green { background: var(--green); box-shadow: 0 0 8px rgba(61,170,124,0.5); }
+  .condition-dot.amber { background: var(--amber); box-shadow: 0 0 8px rgba(232,200,74,0.5); }
+  .condition-dot.red { background: var(--red); box-shadow: 0 0 8px rgba(217,64,64,0.5); }
+  .condition-label { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  .condition-card.green-card .condition-label { color: var(--green); }
+  .condition-card.amber-card .condition-label { color: var(--amber); }
+  .condition-card.red-card .condition-label { color: var(--red); }
+  .condition-title { font-size: 18px; font-weight: 600; color: var(--white); margin-bottom: 8px; }
+  .condition-desc { font-size: 13.5px; color: var(--grey); line-height: 1.7; }
+
+  /* ── THE BRIEF ── */
+  .brief-section { background: var(--black); }
+  .brief-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; margin-top: 64px; }
+  .brief-left {}
+  .brief-left p { font-size: 16px; color: var(--grey); line-height: 1.85; margin-bottom: 28px; }
+  .brief-left p strong { color: rgba(255,255,255,0.9); font-weight: 500; }
+  .brief-reveals { display: flex; flex-direction: column; gap: 0; margin-bottom: 36px; }
+  .brief-reveal {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; color: rgba(255,255,255,0.75);
+  }
+  .brief-reveal:last-child { border-bottom: none; }
+  .brief-reveal-icon { color: var(--gold3); flex-shrink: 0; font-size: 13px; margin-top: 2px; }
+
+  .brief-right {}
+  .brief-doc {
+    background: var(--black3); border: 1px solid var(--border); border-radius: 3px;
+    overflow: hidden;
+  }
+  .brief-doc-header {
+    background: linear-gradient(135deg, #111 0%, #191700 100%);
+    padding: 24px 32px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .brief-doc-title-label { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold3); margin-bottom: 4px; }
+  .brief-doc-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--gold); letter-spacing: 0.05em; }
+  .brief-doc-badge {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    background: rgba(201,168,76,0.12); border: 1px solid var(--border);
+    color: var(--gold3); padding: 5px 12px; border-radius: 2px;
+  }
+  .brief-sections { padding: 0; }
+  .brief-section-row {
+    display: flex; align-items: flex-start; gap: 20px;
+    padding: 22px 32px; border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+  }
+  .brief-section-row:hover { background: rgba(255,255,255,0.02); }
+  .brief-section-row:last-child { border-bottom: none; }
+  .brief-section-num { font-size: 11px; color: var(--gold3); font-weight: 700; flex-shrink: 0; width: 20px; padding-top: 2px; }
+  .brief-section-content {}
+  .brief-section-name { font-size: 13px; font-weight: 600; color: var(--white); margin-bottom: 2px; }
+  .brief-section-desc { font-size: 12px; color: var(--grey2); line-height: 1.5; }
+
+  /* ── SAMPLE REPORT ── */
+  .report-section { background: var(--black2); }
+  .report-card {
+    max-width: 720px; margin: 64px auto 0;
+    background: var(--black3); border: 1px solid var(--border);
+    border-radius: 4px; overflow: hidden;
+  }
+  .report-header {
+    background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
+    padding: 28px 36px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .report-title-label { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold3); margin-bottom: 4px; }
+  .report-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--gold); letter-spacing: 0.05em; }
+  .report-meta { text-align: right; }
+  .report-meta-label { font-size: 9px; color: var(--grey2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2px; }
+  .report-meta-val { font-size: 13px; color: rgba(255,255,255,0.6); }
+  .report-scores { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-bottom: 1px solid var(--border); }
+  .score-block { padding: 24px 28px; border-right: 1px solid var(--border); }
+  .score-block:last-child { border-right: none; }
+  .score-label { font-size: 9px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--grey2); margin-bottom: 8px; }
+  .score-val { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--gold); line-height: 1; }
+  .score-delta { font-size: 11px; color: var(--green); margin-top: 3px; }
+  .score-bar-wrap { height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; margin-top: 10px; }
+  .score-bar { height: 3px; background: var(--gold); border-radius: 2px; transition: width 1.2s ease; }
+  .report-windows { padding: 20px 36px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; flex-wrap: wrap; }
+  .window-pill {
+    padding: 6px 14px; border-radius: 2px; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .window-pill.green { background: rgba(61,170,124,0.15); color: var(--green); border: 1px solid rgba(61,170,124,0.3); }
+  .window-pill.amber { background: rgba(232,200,74,0.12); color: var(--amber); border: 1px solid rgba(232,200,74,0.25); }
+  .window-pill.gold  { background: rgba(201,168,76,0.12); color: var(--gold); border: 1px solid var(--border); }
+  .report-timing-map { padding: 28px 36px; border-bottom: 1px solid var(--border); }
+  .timing-map-label { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold3); margin-bottom: 16px; }
+  .timing-map-rows { display: flex; flex-direction: column; gap: 0; }
+  .timing-row {
+    display: grid; grid-template-columns: 90px 80px 1fr; gap: 16px;
+    padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); align-items: center;
+  }
+  .timing-row:last-child { border-bottom: none; }
+  .timing-month { font-size: 12px; color: rgba(255,255,255,0.6); }
+  .timing-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 2px; text-align: center;
+  }
+  .timing-badge.green { background: rgba(61,170,124,0.15); color: var(--green); }
+  .timing-badge.amber { background: rgba(232,200,74,0.12); color: var(--amber); }
+  .timing-badge.red   { background: rgba(217,64,64,0.1); color: var(--red); }
+  .timing-insight { font-size: 12px; color: var(--grey); line-height: 1.5; }
+  .report-insights { padding: 28px 36px; display: flex; flex-direction: column; gap: 20px; }
+  .insight-block {}
+  .insight-label { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+  .insight-text { font-size: 13.5px; color: rgba(255,255,255,0.7); line-height: 1.75; }
+  .insight-text strong { color: var(--white); }
+
+  /* ── HOOKS ── */
+  .hooks-section { background: var(--black); }
+  .hooks-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 64px; }
+  .hook-card {
+    padding: 40px 36px; background: var(--black3); border: 1px solid rgba(255,255,255,0.04);
+    transition: border-color 0.2s;
+  }
+  .hook-card:hover { border-color: var(--border); }
+  .hook-num { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: rgba(201,168,76,0.1); line-height: 1; margin-bottom: 14px; }
+  .hook-card h3 { font-size: 16px; font-weight: 700; color: var(--white); margin-bottom: 10px; line-height: 1.3; }
+  .hook-card p { font-size: 13.5px; color: var(--grey); line-height: 1.75; }
+  .hook-punchline { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15px; color: rgba(255,255,255,0.5); margin-top: 12px; }
+
+  /* ── BRIDGE / MONITORING ── */
+  .bridge-section { background: var(--black2); }
+  .bridge-inner { display: grid; grid-template-columns: 5fr 7fr; gap: 80px; align-items: start; margin-top: 64px; }
+  .bridge-left p { font-size: 16px; color: var(--grey); line-height: 1.85; margin-bottom: 24px; }
+  .bridge-left p strong { color: rgba(255,255,255,0.9); font-weight: 500; }
+  .bridge-arrow {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gold3); margin-top: 8px; margin-bottom: 8px;
+  }
+  .bridge-arrow::before { content: ''; display: block; width: 24px; height: 1px; background: var(--gold3); }
+  .monitoring-tiers { display: flex; flex-direction: column; gap: 2px; }
+  .monitoring-tier {
+    background: var(--black3); border: 1px solid rgba(255,255,255,0.05);
+    padding: 28px 32px; transition: border-color 0.2s;
+  }
+  .monitoring-tier:hover { border-color: var(--border); }
+  .monitoring-tier-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .monitoring-tier-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--white); letter-spacing: 0.04em; }
+  .monitoring-tier-price { font-size: 14px; font-weight: 600; color: var(--gold); }
+  .monitoring-tier-desc { font-size: 13px; color: var(--grey); line-height: 1.6; }
+
+  /* ── WHAT YOU RECEIVE ── */
+  .features-section { background: var(--black); }
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 64px; }
+  .feature {
+    padding: 36px 32px; border: 1px solid rgba(255,255,255,0.05); background: var(--black3);
+  }
+  .feature-icon { font-size: 22px; margin-bottom: 16px; opacity: 0.7; }
+  .feature h4 { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 8px; line-height: 1.3; }
+  .feature p { font-size: 13px; color: var(--grey); line-height: 1.7; }
+
+  /* ── AUTHORITY ── */
+  .authority-section { background: var(--black2); }
+  .authority-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(22px, 3vw, 32px); font-style: italic; font-weight: 300;
+    color: rgba(255,255,255,0.75); max-width: 800px; line-height: 1.6;
+    margin: 40px 0 48px; border-left: 2px solid var(--gold3); padding-left: 28px;
+  }
+  .authority-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px; margin-top: 0; }
+  .authority-card {
+    background: var(--black3); border: 1px solid rgba(255,255,255,0.04);
+    padding: 36px 36px; display: flex; gap: 20px;
+  }
+  .authority-card-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px; color: rgba(201,168,76,0.15); line-height: 1; flex-shrink: 0;
+  }
+  .authority-card-body {}
+  .authority-card-title { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+  .authority-card-desc { font-size: 13.5px; color: var(--grey); line-height: 1.7; }
+
+  /* ── NOT / IS ── */
+  .clarity-section { background: var(--black3); }
+  .clarity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 64px; }
+  .clarity-col { padding: 48px 40px; }
+  .clarity-col.not { background: var(--black2); }
+  .clarity-col.is  { background: #0d1a12; border: 1px solid rgba(61,170,124,0.2); }
+  .clarity-head {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.15em;
+    text-transform: uppercase; margin-bottom: 28px; display: flex; align-items: center; gap: 8px;
+  }
+  .clarity-col.not .clarity-head { color: rgba(255,255,255,0.3); }
+  .clarity-col.is  .clarity-head { color: var(--green); }
+  .clarity-row {
+    font-size: 14px; color: rgba(255,255,255,0.55); padding: 11px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: flex-start; gap: 10px;
+  }
+  .clarity-col.is .clarity-row { color: rgba(255,255,255,0.8); }
+  .clarity-row:last-child { border-bottom: none; }
+  .clarity-row .mark { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── PRICING ── */
+  .pricing-section { background: var(--black); }
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 64px; }
+  .price-card {
+    padding: 48px 36px; background: var(--black3); border: 1px solid rgba(255,255,255,0.06);
+    display: flex; flex-direction: column; position: relative; transition: border-color 0.2s;
+  }
+  .price-card:hover { border-color: var(--border); }
+  .price-card.featured { background: #0f0d06; border: 1px solid var(--gold); }
+  .price-card.featured::before {
+    content: 'MOST POPULAR';
+    position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
+    background: var(--gold); color: var(--black);
+    font-size: 9px; font-weight: 700; letter-spacing: 0.15em; padding: 5px 16px;
+  }
+  .price-tier { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold3); margin-bottom: 14px; }
+  .price-name { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 0.05em; color: var(--white); margin-bottom: 8px; line-height: 1; }
+  .price-desc { font-size: 13px; color: var(--grey); margin-bottom: 28px; line-height: 1.6; min-height: 52px; }
+  .price-val { display: flex; align-items: flex-end; gap: 6px; margin-bottom: 8px; }
+  .price-amount { font-family: 'Bebas Neue', sans-serif; font-size: 56px; color: var(--gold); line-height: 1; }
+  .price-per { font-size: 13px; color: var(--grey2); margin-bottom: 8px; }
+  .price-cancel { font-size: 11px; color: var(--grey2); margin-bottom: 32px; }
+  .price-features { display: flex; flex-direction: column; margin-bottom: 36px; flex: 1; }
+  .price-feat {
+    font-size: 13px; color: rgba(255,255,255,0.6); padding: 9px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex; align-items: flex-start; gap: 10px; line-height: 1.4;
+  }
+  .price-feat:last-child { border-bottom: none; }
+  .price-feat .arrow { color: var(--gold3); flex-shrink: 0; }
+  .price-btn {
+    display: block; text-align: center; padding: 14px 24px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    text-decoration: none; border-radius: 2px; transition: all 0.2s; margin-top: auto;
+  }
+  .price-card .price-btn { background: transparent; border: 1px solid var(--border); color: rgba(255,255,255,0.6); }
+  .price-card .price-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .price-card.featured .price-btn { background: var(--gold); border: none; color: var(--black); }
+  .price-card.featured .price-btn:hover { background: var(--gold2); }
+  .price-note { text-align: center; margin-top: 32px; font-size: 13px; color: var(--grey2); line-height: 1.8; }
+  .price-note a { color: var(--gold); text-decoration: none; }
+
+  /* ── B2B ── */
+  .community-section { background: var(--black2); }
+  .community-inner {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+    align-items: center; margin-top: 64px;
+  }
+  .community-left p { font-size: 15px; color: var(--grey); line-height: 1.8; margin-bottom: 28px; }
+  .community-tiers { display: flex; flex-direction: column; }
+  .community-tier {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 14px;
+  }
+  .community-tier:last-child { border-bottom: none; }
+  .community-tier-name { color: rgba(255,255,255,0.75); }
+  .community-tier-size { color: var(--grey2); font-size: 12px; }
+  .community-tier-price { color: var(--gold); font-weight: 600; }
+  .community-right { background: var(--black3); border: 1px solid var(--border); padding: 44px 40px; }
+  .community-pitch-label { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold3); margin-bottom: 16px; }
+  .community-pitch {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-style: italic; font-weight: 300;
+    color: rgba(255,255,255,0.85); line-height: 1.7; margin-bottom: 28px;
+  }
+  .community-benefits { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+  .community-benefit { font-size: 13.5px; color: var(--grey); display: flex; gap: 10px; align-items: flex-start; }
+  .community-benefit::before { content: '→'; color: var(--gold3); flex-shrink: 0; }
+
+  /* ── GUARANTEE ── */
+  .guarantee-strip {
+    background: var(--black3); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    padding: 60px 48px; text-align: center;
+  }
+  .guarantee-inner { max-width: 640px; margin: 0 auto; }
+  .guarantee-num { font-family: 'Bebas Neue', sans-serif; font-size: 80px; line-height: 1; color: var(--gold); margin-bottom: 8px; }
+  .guarantee-inner h3 { font-size: 20px; font-weight: 600; color: var(--white); margin-bottom: 14px; }
+  .guarantee-inner p { font-size: 14px; color: var(--grey); line-height: 1.8; }
+
+  /* ── FINAL CTA ── */
+  .final-cta {
+    padding: 120px 48px;
+    background: radial-gradient(ellipse at 50% 60%, rgba(201,168,76,0.07) 0%, transparent 65%);
+    text-align: center;
+  }
+  .final-cta h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 0.92; letter-spacing: 0.02em; color: var(--white); margin-bottom: 28px;
+  }
+  .final-cta h2 em { color: var(--gold); font-style: normal; }
+  .final-cta p { font-size: 18px; color: var(--grey); margin-bottom: 48px; max-width: 540px; margin-left: auto; margin-right: auto; font-weight: 300; line-height: 1.7; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--black2); border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 40px 48px; display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.1em; color: var(--gold3); }
+  .footer-right { font-size: 12px; color: var(--grey2); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .hero { padding: 100px 24px 60px; }
+    .section { padding: 72px 24px; }
+    .reality-grid, .dimensions, .brief-inner, .bridge-inner,
+    .hooks-grid, .features, .clarity-grid, .pricing-grid,
+    .authority-grid, .community-inner, .conditions-grid { grid-template-columns: 1fr; }
+    .signal-grid { grid-template-columns: repeat(4, 1fr); }
+    .report-scores { grid-template-columns: 1fr 1fr; }
+    .timing-row { grid-template-columns: 70px 70px 1fr; }
+    .hero-stats { gap: 28px; }
+    footer { flex-direction: column; text-align: center; padding: 32px 24px; }
+    .guarantee-strip { padding: 60px 24px; }
+    .reality-grid { gap: 40px; }
+    .brief-inner { gap: 48px; }
+    .bridge-inner { gap: 48px; }
+  }
+  @media (max-width: 500px) {
+    .signal-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">THE EDGE INDEX</div>
+  <a href="#brief" class="nav-cta">Get Your Brief — $2,500</a>
+</nav>
+
+<!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+<header class="hero">
+  <div class="hero-inner">
+    <p class="hero-eyebrow">Decision Timing Intelligence</p>
+    <h1>MOST PEOPLE<br/>STUDY MARKETS.<br/><em>FEW UNDERSTAND<br/>TIMING.</em></h1>
+    <p class="hero-sub">
+      The Edge Index is a <strong>decision timing intelligence system</strong> that reveals when behavioural patterns and environmental cycles align — and when discipline protects capital.
+    </p>
+    <p class="hero-quote">
+      "Elite decision makers rarely act randomly. They wait for moments when multiple conditions align. Those moments create the highest-probability decisions."
+    </p>
+    <div class="hero-btns">
+      <a href="#brief" class="btn-primary">Get Your Edge Index Brief — $2,500</a>
+      <a href="#signals" class="btn-secondary">See How It Works</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="val">70%</div>
+        <div class="lbl">of trading losses caused by emotional decisions, not bad strategy</div>
+      </div>
+      <div class="hero-stat">
+        <div class="val">100%</div>
+        <div class="lbl">personalised. No two reports are the same.</div>
+      </div>
+      <div class="hero-stat">
+        <div class="val">0</div>
+        <div class="lbl">humans in the loop. Fully automated delivery.</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span>Decision Intelligence</span><span class="sep">✦</span>
+    <span>Timing Discipline</span><span class="sep">✦</span>
+    <span>Behavioural Patterns</span><span class="sep">✦</span>
+    <span>Opportunity Windows</span><span class="sep">✦</span>
+    <span>Signal Architecture</span><span class="sep">✦</span>
+    <span>Timing Cycles</span><span class="sep">✦</span>
+    <span>Capital Protection</span><span class="sep">✦</span>
+    <span>Weekly Edge Reports</span><span class="sep">✦</span>
+    <span>Decision Intelligence</span><span class="sep">✦</span>
+    <span>Timing Discipline</span><span class="sep">✦</span>
+    <span>Behavioural Patterns</span><span class="sep">✦</span>
+    <span>Opportunity Windows</span><span class="sep">✦</span>
+    <span>Signal Architecture</span><span class="sep">✦</span>
+    <span>Timing Cycles</span><span class="sep">✦</span>
+    <span>Capital Protection</span><span class="sep">✦</span>
+    <span>Weekly Edge Reports</span><span class="sep">✦</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ MARKET REALITY ═══════════════════════════════ -->
+<section class="section reality-section" id="problem">
+  <div class="section-inner">
+    <p class="eyebrow">The Market Reality</p>
+    <h2 class="display">THE PROBLEM ISN'T<br/><em>YOUR STRATEGY.</em></h2>
+    <div class="reality-grid">
+      <div class="reality-left">
+        <p>The same strategy can produce <strong>dramatically different outcomes</strong> depending on when it is executed.</p>
+        <p>Markets move through distinct phases — expansion, volatility, pressure, opportunity. Yet most traders behave as if every moment carries the same probability of success.</p>
+        <p>This creates a predictable emotional cycle that destroys capital — not through bad analysis, but through <strong>timing misalignment</strong>.</p>
+        <div class="reality-cycle">
+          <div class="reality-cycle-label">The Emotional Trading Cycle</div>
+          <div class="cycle-steps">
+            <div class="cycle-step">
+              <div class="cycle-dot green"></div>
+              <div class="cycle-step-text"><strong>Win</strong> — confidence increases, risk tolerance rises</div>
+            </div>
+            <div class="cycle-step">
+              <div class="cycle-dot amber"></div>
+              <div class="cycle-step-text"><strong>Market shifts</strong> — same strategy, different environment</div>
+            </div>
+            <div class="cycle-step">
+              <div class="cycle-dot red"></div>
+              <div class="cycle-step-text"><strong>Loss</strong> — frustration activates. Impulse trades follow.</div>
+            </div>
+            <div class="cycle-step">
+              <div class="cycle-dot grey"></div>
+              <div class="cycle-step-text"><strong>Assumption</strong> — "I need better strategy." The real problem remains invisible.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reality-right">
+        <div class="reality-patterns">
+          <div class="reality-pattern">
+            <h4>You make decisions from logic alone</h4>
+            <p>Logic only sees what you already know. Your blind spots — the patterns you repeat, the moments you hesitate — live below the level of analysis.</p>
+          </div>
+          <div class="reality-pattern">
+            <h4>You have no read on your personal timing</h4>
+            <p>You push when you should rest. You wait when you should move. You execute in a reactive window and wonder why the result doesn't match the setup.</p>
+          </div>
+          <div class="reality-pattern">
+            <h4>Your wealth cycle is invisible to you</h4>
+            <p>Every trader has periods when capital flows easily and periods when every trade is a grind. Most push harder in the wrong cycle.</p>
+          </div>
+          <div class="reality-pattern">
+            <h4>Generic timing misses the personal layer</h4>
+            <p>Financial analysis tracks the market. Nobody is asking when <em>you specifically</em> are optimal to act, given your wiring and the current environment. That is the gap.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ PATTERN INTELLIGENCE ═══════════════════════════════ -->
+<section class="section pattern-section" id="how-it-works">
+  <div class="section-inner">
+    <p class="eyebrow">The Framework</p>
+    <h2 class="display">UNDERSTANDING THE<br/><em>PATTERNS BEHIND<br/>DECISIVE MOMENTS.</em></h2>
+    <p class="section-lead">Elite performers recognise patterns across three dimensions. The Edge Index combines all three into a structured decision intelligence framework.</p>
+    <div class="dimensions">
+      <div class="dimension-card">
+        <div class="dimension-num">01</div>
+        <h3>Behaviour Patterns</h3>
+        <p>How you respond to pressure, risk, and opportunity. Your decision architecture: where your authority lives, when it goes offline under stress, and the exact behavioural signatures that run every trade you make.</p>
+      </div>
+      <div class="dimension-card">
+        <div class="dimension-num">02</div>
+        <h3>Timing Cycles</h3>
+        <p>Environmental conditions that influence clarity, volatility, and momentum. Your individual wealth-making timeframes mapped week by week — when to act decisively and when to protect capital.</p>
+      </div>
+      <div class="dimension-card">
+        <div class="dimension-num">03</div>
+        <h3>Opportunity Alignment</h3>
+        <p>The rare moments when multiple conditions converge. When your personal cycles compound with global energetic wealth windows, the result is not additive — it is exponential.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ SIGNAL SYSTEM ═══════════════════════════════ -->
+<section class="section signals-section" id="signals">
+  <div class="section-inner">
+    <p class="eyebrow">The Signal Architecture</p>
+    <h2 class="display">COMPLEXITY TRANSLATED<br/><em>INTO CLEAR SIGNALS.</em></h2>
+    <div class="signals-intro">
+      <p>Behind the scenes, the Edge Index evaluates multiple timing indicators across your behavioural patterns and environmental cycles. All intelligence is translated into seven core signals.</p>
+      <p>The goal is not prediction. The goal is <strong>decision discipline</strong>.</p>
+    </div>
+    <div class="signal-grid">
+      <div class="signal-card">
+        <div class="signal-icon">◎</div>
+        <div class="signal-name">Clarity</div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-icon">▶</div>
+        <div class="signal-name">Action</div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-icon">↗</div>
+        <div class="signal-name">Expansion</div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-icon">◈</div>
+        <div class="signal-name">Pressure</div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-icon">⚡</div>
+        <div class="signal-name">Emotional Volatility</div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-icon">⬡</div>
+        <div class="signal-name">Risk</div>
+      </div>
+      <div class="signal-card" style="border-color: var(--border);">
+        <div class="signal-icon" style="opacity:1; color: var(--gold);">✦</div>
+        <div class="signal-name" style="color: var(--gold);">Opportunity Window</div>
+      </div>
+    </div>
+    <div class="conditions-grid">
+      <div class="condition-card green-card">
+        <div class="condition-indicator">
+          <div class="condition-dot green"></div>
+          <div class="condition-label">Green — Expansion</div>
+        </div>
+        <div class="condition-title">Conditions support decisive action.</div>
+        <div class="condition-desc">Multiple signals align. Clarity is high. Momentum favours entry. Capital decisions, positions, and high-stakes moves initiated here compound forward.</div>
+      </div>
+      <div class="condition-card amber-card">
+        <div class="condition-indicator">
+          <div class="condition-dot amber"></div>
+          <div class="condition-label">Amber — Selective</div>
+        </div>
+        <div class="condition-title">Mixed signals. Proceed with discipline.</div>
+        <div class="condition-desc">Some conditions align, others do not. Selective execution only. Reduce position size. Hold existing positions; avoid initiating from impulse.</div>
+      </div>
+      <div class="condition-card red-card">
+        <div class="condition-indicator">
+          <div class="condition-dot red"></div>
+          <div class="condition-label">Red — Protection</div>
+        </div>
+        <div class="condition-title">Patience protects capital.</div>
+        <div class="condition-desc">High-probability emotional decision environment. Stand still. Protect existing capital. The edge is not in acting — it is in not acting.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ THE EDGE INDEX BRIEF ═══════════════════════════════ -->
+<section class="section brief-section" id="brief">
+  <div class="section-inner">
+    <p class="eyebrow">The Product</p>
+    <h2 class="display">THE EDGE INDEX<br/><em>BRIEF.</em></h2>
+    <div class="brief-inner">
+      <div class="brief-left">
+        <p>The Edge Index Brief is your <strong>personalised intelligence document</strong> — a strategic timing blueprint that maps your decision architecture and timing profile for the year ahead.</p>
+        <p>Think of it the way elite macro advisory firms think about strategic frameworks: it explains the environment you operate in, the patterns that run your decisions, and when conditions are structurally aligned in your favour. That layer has historically been available only through high-end advisory relationships. The Brief automates it.</p>
+        <p>This is not generic. No two reports are the same. It is built from your specific behavioural signature and timing profile, interpreted through the Edge Index signal engine.</p>
+        <div class="brief-reveals">
+          <div class="brief-reveal"><span class="brief-reveal-icon">→</span>Your natural decision behaviour under pressure</div>
+          <div class="brief-reveal"><span class="brief-reveal-icon">→</span>How you respond to opportunity vs risk cycles</div>
+          <div class="brief-reveal"><span class="brief-reveal-icon">→</span>Your personal 12-month timing map</div>
+          <div class="brief-reveal"><span class="brief-reveal-icon">→</span>Expansion windows — when capital flows easily</div>
+          <div class="brief-reveal"><span class="brief-reveal-icon">→</span>Protection periods — when discipline matters most</div>
+          <div class="brief-reveal"><span class="brief-reveal-icon">→</span>Behavioural blind spots affecting performance</div>
+          <div class="brief-reveal"><span class="brief-reveal-icon">→</span>Your wealth archetype and compounding mechanism</div>
+        </div>
+
+        <!-- PRICE BLOCK -->
+        <div style="background: var(--black3); border: 1px solid var(--border); padding: 28px 32px; margin-bottom: 28px; border-radius: 2px;">
+          <div style="font-size:10px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold3); margin-bottom:10px;">One-Time Investment</div>
+          <div style="display:flex; align-items:flex-end; gap:8px; margin-bottom:10px;">
+            <span style="font-family:'Bebas Neue',sans-serif; font-size:64px; color:var(--gold); line-height:1;">$2,500</span>
+            <span style="font-size:13px; color:var(--grey2); margin-bottom:10px;">one-time · annual update included</span>
+          </div>
+          <div style="font-size:13px; color:var(--grey); line-height:1.7; border-top:1px solid rgba(255,255,255,0.06); padding-top:14px;">
+            Most traders spend $3,000–$6,000 per year on tools that analyse the market — but never personally analyse the decision maker. The Edge Index Brief is a single $2,500 investment that maps your complete behavioural and timing architecture for the year ahead.
+          </div>
+        </div>
+
+        <a href="https://whop.com/checkout/plan_3ylvni6cL0ir1" target="_blank" class="btn-primary" style="margin-bottom:12px; display:inline-block;">Get Your Edge Index Brief</a>
+        <div style="font-size:12px; color:var(--grey2); margin-top:8px;">Covered by the 90-day clarity guarantee. Full refund if you don't see measurable results.</div>
+      </div>
+      <div class="brief-right">
+        <div class="brief-doc">
+          <div class="brief-doc-header">
+            <div>
+              <div class="brief-doc-title-label">Edge Index Brief</div>
+              <div class="brief-doc-title">DECISION TIMING INTELLIGENCE</div>
+            </div>
+            <div class="brief-doc-badge">Personalised</div>
+          </div>
+          <div class="brief-sections">
+            <div class="brief-section-row">
+              <div class="brief-section-num">01</div>
+              <div class="brief-section-content">
+                <div class="brief-section-name">Decision Architecture Profile</div>
+                <div class="brief-section-desc">Your authority structure, decision patterns, and timing signature. Where your edge lives and when it goes offline.</div>
+              </div>
+            </div>
+            <div class="brief-section-row">
+              <div class="brief-section-num">02</div>
+              <div class="brief-section-content">
+                <div class="brief-section-name">Blind Spot Pressure Map</div>
+                <div class="brief-section-desc">The patterns that activate under high stakes. How to recognise and override them in real time.</div>
+              </div>
+            </div>
+            <div class="brief-section-row">
+              <div class="brief-section-num">03</div>
+              <div class="brief-section-content">
+                <div class="brief-section-name">12-Month Timing Map</div>
+                <div class="brief-section-desc">Your expansion windows, protection periods, and wealth arc for the year. Know before it opens.</div>
+              </div>
+            </div>
+            <div class="brief-section-row">
+              <div class="brief-section-num">04</div>
+              <div class="brief-section-content">
+                <div class="brief-section-name">Wealth Archetype Profile</div>
+                <div class="brief-section-desc">How you are built to generate capital. The vehicle, the style, the compounding mechanism mapped to your profile.</div>
+              </div>
+            </div>
+            <div class="brief-section-row">
+              <div class="brief-section-num">05</div>
+              <div class="brief-section-content">
+                <div class="brief-section-name">Signal Calibration</div>
+                <div class="brief-section-desc">Your personal Green/Amber/Red thresholds. What each condition means for decisions in your specific profile.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ SAMPLE REPORT ═══════════════════════════════ -->
+<section class="section report-section" id="sample">
+  <div class="section-inner narrow">
+    <p class="eyebrow">Live Intelligence</p>
+    <h2 class="display">YOUR EDGE INDEX.<br/><em>WEEKLY.</em></h2>
+    <p class="section-lead" style="margin-bottom:0">Once your Brief is set, the Edge Index delivers ongoing timing intelligence every week. This is what that looks like.</p>
+    <div class="report-card">
+      <div class="report-header">
+        <div>
+          <div class="report-title-label">Edge Index Report</div>
+          <div class="report-title">WEEKLY EDGE: WC 16 MARCH</div>
+        </div>
+        <div class="report-meta">
+          <div class="report-meta-label">Report Type</div>
+          <div class="report-meta-val">Weekly Edge · Daily Edition</div>
+        </div>
+      </div>
+      <div class="report-scores">
+        <div class="score-block">
+          <div class="score-label">Decision Layer</div>
+          <div class="score-val">74</div>
+          <div class="score-delta">↑12 from last week</div>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:74%"></div></div>
+        </div>
+        <div class="score-block">
+          <div class="score-label">Timing Layer</div>
+          <div class="score-val">61</div>
+          <div class="score-delta">↑8 from last week</div>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:61%"></div></div>
+        </div>
+        <div class="score-block">
+          <div class="score-label">Wealth Layer</div>
+          <div class="score-val">88</div>
+          <div class="score-delta">↑21 from last week</div>
+          <div class="score-bar-wrap"><div class="score-bar" style="width:88%"></div></div>
+        </div>
+      </div>
+      <div class="report-windows">
+        <span class="window-pill green">● Current Window: Green</span>
+        <span class="window-pill gold">Expansion Phase Active ✦</span>
+        <span class="window-pill amber">Caution: Wed–Thu Afternoon</span>
+      </div>
+      <div class="report-timing-map">
+        <div class="timing-map-label">4-Week Timing Outlook</div>
+        <div class="timing-map-rows">
+          <div class="timing-row">
+            <div class="timing-month">WC 16 Mar</div>
+            <div class="timing-badge green">Green</div>
+            <div class="timing-insight">Expansion conditions. Strong alignment. Act decisively Mon–Tue and Thu morning.</div>
+          </div>
+          <div class="timing-row">
+            <div class="timing-month">WC 23 Mar</div>
+            <div class="timing-badge amber">Amber</div>
+            <div class="timing-insight">Selective conditions. Mixed signals mid-week. Reduce new exposure after Wednesday.</div>
+          </div>
+          <div class="timing-row">
+            <div class="timing-month">WC 30 Mar</div>
+            <div class="timing-badge red">Red</div>
+            <div class="timing-insight">Protection period. High emotional volatility signal. Stand still and protect capital.</div>
+          </div>
+          <div class="timing-row">
+            <div class="timing-month">WC 6 Apr</div>
+            <div class="timing-badge green">Green</div>
+            <div class="timing-insight">Opportunity window opening. Wealth arc re-enters expansion. Position ahead of cycle.</div>
+          </div>
+        </div>
+      </div>
+      <div class="report-insights">
+        <div class="insight-block">
+          <div class="insight-label">Biggest Leak This Week</div>
+          <div class="insight-text">Decision avoidance under pressure. You defer at the exact moments that require authority, not because the setup is wrong, but because <strong>conflict activates an old pattern</strong>. Wednesday afternoon is your highest-risk reactive window. Protect capital after 2pm.</div>
+        </div>
+        <div class="insight-block">
+          <div class="insight-label">Your 10X Alignment Window</div>
+          <div class="insight-text">Thursday 9–11am UTC. <strong>Your personal decision cycle syncs with current expansion conditions at this exact window.</strong> Capital decisions, entries, and closings initiated here compound forward. This is the window. Use it or let it pass, but know it exists.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ FOUR QUESTIONS ═══════════════════════════════ -->
+<section class="section hooks-section" id="questions">
+  <div class="section-inner wide">
+    <p class="eyebrow">What Traders Ask</p>
+    <h2 class="display">THE QUESTIONS<br/><em>THAT MATTER.</em></h2>
+    <div class="hooks-grid" style="grid-template-columns: repeat(2, 1fr);">
+      <div class="hook-card">
+        <div class="hook-num">01</div>
+        <h3>How is this different from trading signals?</h3>
+        <p>Signals tell you <em>what</em> to trade. The Edge Index tells you something more fundamental: <strong>is this an environment where your decisions are likely to perform?</strong></p>
+        <p style="margin-top:12px; font-size:13.5px; color: var(--grey); line-height:1.75;">You are not replacing your analysis. You are adding the one layer every indicator misses — your personal decision environment and whether it is aligned with current conditions.</p>
+        <div class="hook-punchline">"The edge isn't more signals. It's knowing when to trust the ones you already have."</div>
+      </div>
+      <div class="hook-card">
+        <div class="hook-num">02</div>
+        <h3>How can timing apply to me personally?</h3>
+        <p>Most traders understand market cycles. Few think about their <strong>personal decision timing</strong> — the internal conditions that shift clarity, emotional volatility, and risk tolerance week by week.</p>
+        <p style="margin-top:12px; font-size:13.5px; color: var(--grey); line-height:1.75;">When internal conditions interact with external market phases, moments of high alignment appear. Those are your windows. The Edge Index maps them before they open.</p>
+        <div class="hook-punchline">"The market is the same for everyone. Your timing is unique to you."</div>
+      </div>
+      <div class="hook-card">
+        <div class="hook-num">03</div>
+        <h3>How does this help me avoid mistakes?</h3>
+        <p>Most trading mistakes are not strategy failures. They are <strong>timing environment failures</strong> — decisions made when clarity is low, emotional volatility is high, and conditions are stacked against you.</p>
+        <p style="margin-top:12px; font-size:13.5px; color: var(--grey); line-height:1.75;">When you can see a Red window approaching, you stop fighting invisible pressure. You understand why the moment is wrong, and you simply wait.</p>
+        <div class="hook-punchline">"Discipline is easier when you have the data to back it."</div>
+      </div>
+      <div class="hook-card" style="border-color: var(--border);">
+        <div class="hook-num" style="color: rgba(201,168,76,0.25);">04</div>
+        <h3>What is this actually based on?</h3>
+        <p>The Edge Index synthesises <strong>three established pattern libraries</strong>: behavioural decision architecture, personal timing cycles, and macro environmental signals. Each has independent analytical roots.</p>
+        <p style="margin-top:12px; font-size:13.5px; color: var(--grey); line-height:1.75;">The framework is not astrology. It is not a market predictor. It is a <strong>decision environment diagnostic</strong> — the same cyclical logic that macro advisory firms apply at the institutional level, personalised to the individual and automated by AI.</p>
+        <div class="hook-punchline">"Built on the same cyclical framework used by macro advisors. Automated. Personalised. Delivered to your Telegram."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ BRIDGE / MONITORING ═══════════════════════════════ -->
+<section class="section bridge-section" id="monitoring">
+  <div class="section-inner">
+    <p class="eyebrow">Ongoing Intelligence</p>
+    <h2 class="display">TIMING CONDITIONS<br/><em>CONSTANTLY EVOLVE.</em></h2>
+    <div class="bridge-inner">
+      <div class="bridge-left">
+        <p>Your Edge Index Brief maps your decision architecture and annual timing structure. It is the <strong>strategic foundation</strong>.</p>
+        <p>But timing conditions shift week to week. Markets move. Cycles turn. Pressure builds and releases. <strong>Staying current requires ongoing intelligence.</strong></p>
+        <p>The Edge Index monitoring tools track these shifts in real time — delivered automatically to Telegram, zero humans, zero delays.</p>
+        <div class="bridge-arrow">Your Brief is the map. The monitoring tools are the compass.</div>
+      </div>
+      <div class="bridge-right">
+        <div class="monitoring-tiers">
+          <div class="monitoring-tier">
+            <div class="monitoring-tier-head">
+              <div class="monitoring-tier-name">WEEKLY EDGE</div>
+              <div class="monitoring-tier-price">$97 / month</div>
+            </div>
+            <div class="monitoring-tier-desc">Your weekly timing intelligence report every Monday. Decision windows, reactive zones, and 10X alignment window for the week ahead.</div>
+          </div>
+          <div class="monitoring-tier" style="border-color: var(--border);">
+            <div class="monitoring-tier-head">
+              <div class="monitoring-tier-name">DAILY EDGE</div>
+              <div class="monitoring-tier-price">$197 / month</div>
+            </div>
+            <div class="monitoring-tier-desc">Everything in Weekly plus a daily decision briefing each morning: optimal windows, signal intelligence, and day-specific risk flags.</div>
+          </div>
+          <div class="monitoring-tier">
+            <div class="monitoring-tier-head">
+              <div class="monitoring-tier-name">LIVE EDGE</div>
+              <div class="monitoring-tier-price">$397 / month</div>
+            </div>
+            <div class="monitoring-tier-desc">Everything in Daily plus real-time Telegram alerts the moment your personal peak window is active. Built for intraday traders and high-frequency decision makers.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ WHAT YOU RECEIVE ═══════════════════════════════ -->
+<section class="section features-section" id="features">
+  <div class="section-inner">
+    <p class="eyebrow">What You Receive</p>
+    <h2 class="display">YOUR DATA.<br/><em>PRECISELY INTERPRETED.</em></h2>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">◉</div>
+        <h4>Decision Architecture Profile</h4>
+        <p>Your behavioural timing signature: decision patterns, blind spots, and where your authority lives. Mapped through a trading and wealth lens. Performance analysis, not personal development.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">▣</div>
+        <h4>Weekly Timing Windows</h4>
+        <p>Green, Amber, and Red decision conditions mapped across each week. When to initiate, when to close, when to hold, and when to stand completely still.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <h4>10X Alignment Window</h4>
+        <p>The single moment each week when your personal decision cycle aligns with the macro environment. The highest-probability window for significant capital decisions.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">◈</div>
+        <h4>Blind Spot Pressure Map</h4>
+        <p>What happens to your decision-making when stakes are high. The patterns that activate under pressure and how to override them in real time, not after the fact.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⬡</div>
+        <h4>Wealth Archetype Profile</h4>
+        <p>How you are built to generate wealth. The vehicle, the style, the compounding mechanism — mapped from your specific decision architecture and timing profile.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⊕</div>
+        <h4>Delivered via Telegram</h4>
+        <p>Reports delivered automatically: weekly, daily, or real-time alerts the moment your window opens. Zero humans. Zero delays. Zero dependency on someone else's schedule.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ AUTHORITY ═══════════════════════════════ -->
+<section class="section authority-section" id="authority">
+  <div class="section-inner">
+    <p class="eyebrow">The Model</p>
+    <h2 class="display">A FRAMEWORK USED BY<br/><em>ELITE DECISION MAKERS.</em></h2>
+    <div class="authority-quote">
+      "High-level macro advisors have always operated using two components: a strategic framework explaining the timing environment, and ongoing signal intelligence to monitor conditions as they evolve. The Edge Index automates that model — personalised to the individual."
+    </div>
+    <div class="authority-grid">
+      <div class="authority-card">
+        <div class="authority-card-num">01</div>
+        <div class="authority-card-body">
+          <div class="authority-card-title">The Strategic Framework</div>
+          <div class="authority-card-desc">Your Edge Index Brief explains the decision environment you operate in. Your patterns, your cycles, your architecture. The map for the year ahead. Elite investors don't act without this layer.</div>
+        </div>
+      </div>
+      <div class="authority-card">
+        <div class="authority-card-num">02</div>
+        <div class="authority-card-body">
+          <div class="authority-card-title">Ongoing Signal Intelligence</div>
+          <div class="authority-card-desc">Weekly, daily, and real-time monitoring of timing conditions as they shift. The compass that keeps the map current. How top decision makers maintain timing discipline across changing environments.</div>
+        </div>
+      </div>
+      <div class="authority-card">
+        <div class="authority-card-num">03</div>
+        <div class="authority-card-body">
+          <div class="authority-card-title">Fully Automated Delivery</div>
+          <div class="authority-card-desc">No analysts. No subscription to a human's opinion. The signal engine runs continuously. Your intelligence arrives when your window opens — not when someone remembers to send it.</div>
+        </div>
+      </div>
+      <div class="authority-card">
+        <div class="authority-card-num">04</div>
+        <div class="authority-card-body">
+          <div class="authority-card-title">Decision Discipline as the Edge</div>
+          <div class="authority-card-desc">The difference between consistent performers and reactive traders is rarely strategy. It is timing discipline — knowing when to act and when to wait. That discipline is now a system.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ WHAT THIS IS NOT ═══════════════════════════════ -->
+<section class="section clarity-section" id="clarity">
+  <div class="section-inner">
+    <p class="eyebrow">Clarity</p>
+    <h2 class="display">WHAT THIS<br/><em>IS NOT.</em></h2>
+    <div class="clarity-grid">
+      <div class="clarity-col not">
+        <div class="clarity-head">✗ &nbsp; This is not</div>
+        <div class="clarity-row"><span class="mark">✗</span> Advice about what to trade</div>
+        <div class="clarity-row"><span class="mark">✗</span> Market signals or price predictions</div>
+        <div class="clarity-row"><span class="mark">✗</span> Generic horoscope content</div>
+        <div class="clarity-row"><span class="mark">✗</span> Coaching or therapy</div>
+        <div class="clarity-row"><span class="mark">✗</span> Spiritual or healing language</div>
+        <div class="clarity-row"><span class="mark">✗</span> A human in the loop</div>
+        <div class="clarity-row"><span class="mark">✗</span> Someone else's opinion on your trades</div>
+      </div>
+      <div class="clarity-col is">
+        <div class="clarity-head">✓ &nbsp; This is</div>
+        <div class="clarity-row"><span class="mark" style="color:var(--green)">✓</span> Decision timing intelligence — personalised</div>
+        <div class="clarity-row"><span class="mark" style="color:var(--green)">✓</span> A mirror with a timing scorecard</div>
+        <div class="clarity-row"><span class="mark" style="color:var(--green)">✓</span> Your data, interpreted precisely</div>
+        <div class="clarity-row"><span class="mark" style="color:var(--green)">✓</span> Fully automated. Zero humans.</div>
+        <div class="clarity-row"><span class="mark" style="color:var(--green)">✓</span> Updated weekly, daily, or in real time</div>
+        <div class="clarity-row"><span class="mark" style="color:var(--green)">✓</span> Yours to act on, or not</div>
+        <div class="clarity-row"><span class="mark" style="color:var(--green)">✓</span> Delivered to Telegram automatically</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ PRICING ═══════════════════════════════ -->
+<section class="section pricing-section" id="pricing">
+  <div class="section-inner">
+    <p class="eyebrow">Ongoing Monitoring</p>
+    <h2 class="display">STAY CURRENT<br/><em>WEEK BY WEEK.</em></h2>
+    <p class="section-lead">Your Brief sets the foundation. These tiers keep your timing intelligence live — delivered to Telegram automatically, every week, every day, or in real time. Cancel any time.</p>
+    <div style="background: var(--black3); border: 1px solid var(--border); padding: 20px 28px; margin: 32px 0; display:inline-flex; align-items:center; gap:20px; border-radius:2px; flex-wrap:wrap;">
+      <div style="font-size:10px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--gold3);">The Full Stack</div>
+      <div style="display:flex; align-items:center; gap:10px; font-size:13px; color:var(--grey);">
+        <span style="color:var(--gold); font-weight:600;">Edge Index Brief</span>
+        <span style="color:var(--gold3);">$2,500 once</span>
+        <span style="color:rgba(255,255,255,0.2);">+</span>
+        <span style="color:rgba(255,255,255,0.75);">Ongoing monitoring tier</span>
+        <span style="color:var(--gold3);">from $97/mo</span>
+        <span style="color:rgba(255,255,255,0.2);">=</span>
+        <span style="color:var(--white); font-weight:500;">Complete decision timing intelligence</span>
+      </div>
+    </div>
+    <div class="pricing-grid">
+
+      <div class="price-card">
+        <div class="price-tier">Tier 01</div>
+        <div class="price-name">WEEKLY EDGE</div>
+        <div class="price-desc">Your Edge Index Brief plus weekly timing intelligence. Decision windows, reactive zones, and 10X alignment window every Monday. The foundation.</div>
+        <div class="price-val">
+          <div class="price-amount">$97</div>
+          <div class="price-per">/month</div>
+        </div>
+        <div class="price-cancel">Cancel any time</div>
+        <div class="price-features">
+          <div class="price-feat"><span class="arrow">→</span>Edge Index Brief (your decision architecture)</div>
+          <div class="price-feat"><span class="arrow">→</span>Weekly timing windows (Green / Amber / Red)</div>
+          <div class="price-feat"><span class="arrow">→</span>10X alignment window each week</div>
+          <div class="price-feat"><span class="arrow">→</span>Blind spot pressure map</div>
+          <div class="price-feat"><span class="arrow">→</span>Wealth archetype profile</div>
+          <div class="price-feat"><span class="arrow">→</span>Delivered via Telegram every Monday</div>
+        </div>
+        <a href="https://whop.com/checkout/plan_3ylvni6cL0ir1" target="_blank" class="price-btn">Get Weekly Edge</a>
+      </div>
+
+      <div class="price-card featured">
+        <div class="price-tier">Tier 02</div>
+        <div class="price-name">DAILY EDGE</div>
+        <div class="price-desc">Everything in Weekly plus a daily decision briefing every morning: optimal windows, signal intelligence, and your day-specific risk flags.</div>
+        <div class="price-val">
+          <div class="price-amount">$197</div>
+          <div class="price-per">/month</div>
+        </div>
+        <div class="price-cancel">Cancel any time</div>
+        <div class="price-features">
+          <div class="price-feat"><span class="arrow">→</span>Everything in Weekly Edge</div>
+          <div class="price-feat"><span class="arrow">→</span>Daily decision briefing each morning</div>
+          <div class="price-feat"><span class="arrow">→</span>Daily signal intelligence</div>
+          <div class="price-feat"><span class="arrow">→</span>Day-specific reactive window flags</div>
+          <div class="price-feat"><span class="arrow">→</span>Retrograde window alerts</div>
+          <div class="price-feat"><span class="arrow">→</span>Weekly vs daily pattern tracking</div>
+        </div>
+        <a href="https://whop.com/checkout/plan_3ylvni6cL0ir1" target="_blank" class="price-btn">Get Daily Edge</a>
+      </div>
+
+      <div class="price-card">
+        <div class="price-tier">Tier 03</div>
+        <div class="price-name">LIVE EDGE</div>
+        <div class="price-desc">Everything in Daily plus real-time alerts the moment your personal peak window is active. Built for intraday traders and high-frequency decision makers.</div>
+        <div class="price-val">
+          <div class="price-amount">$397</div>
+          <div class="price-per">/month</div>
+        </div>
+        <div class="price-cancel">Cancel any time</div>
+        <div class="price-features">
+          <div class="price-feat"><span class="arrow">→</span>Everything in Daily Edge</div>
+          <div class="price-feat"><span class="arrow">→</span>Real-time signal alerts via Telegram</div>
+          <div class="price-feat"><span class="arrow">→</span>Live 10X window notifications</div>
+          <div class="price-feat"><span class="arrow">→</span>Intraday reactive window warnings</div>
+          <div class="price-feat"><span class="arrow">→</span>Full annual wealth arc report</div>
+          <div class="price-feat"><span class="arrow">→</span>Golden window alerts: highest-probability moments</div>
+        </div>
+        <a href="https://whop.com/checkout/plan_3ylvni6cL0ir1" target="_blank" class="price-btn">Get Live Edge</a>
+      </div>
+
+    </div>
+    <p class="price-note">
+      Running a trading community? <a href="#communities">Licensing options available for 500–50,000+ members.</a><br/>
+      All tiers include a 90-day guarantee. If you don't see measurable clarity in your timing, full refund.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ COMMUNITIES ═══════════════════════════════ -->
+<section class="section community-section" id="communities">
+  <div class="section-inner">
+    <p class="eyebrow">For Trading Communities</p>
+    <h2 class="display">LICENSE THE<br/><em>EDGE INDEX.</em></h2>
+    <div class="community-inner">
+      <div class="community-left">
+        <p>Trading group admins license The Edge Index as an exclusive member tool. Flat monthly fee. Every member receives their own personalised timing intelligence via Telegram. You do nothing after a 15-minute setup.</p>
+        <p>No two member reports are the same. The tool runs without you. Members who get results don't leave your community.</p>
+        <div class="community-tiers">
+          <div class="community-tier">
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <span class="community-tier-name">Starter</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.35)">Small group, Discord, private Telegram</span>
+            </div>
+            <span class="community-tier-size">Up to 500 members</span>
+            <span class="community-tier-price">$800/month</span>
+          </div>
+          <div class="community-tier">
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <span class="community-tier-name">Growth</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.35)">Established paid community or newsletter</span>
+            </div>
+            <span class="community-tier-size">501–5,000 members</span>
+            <span class="community-tier-price">$2,500/month</span>
+          </div>
+          <div class="community-tier">
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <span class="community-tier-name">Scale</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.35)">Large platform, fund, multi-channel community</span>
+            </div>
+            <span class="community-tier-size">5,001–50,000 members</span>
+            <span class="community-tier-price">$6,000/month</span>
+          </div>
+          <div class="community-tier">
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <span class="community-tier-name">Enterprise</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.35)">Network of communities or institutional platform</span>
+            </div>
+            <span class="community-tier-size">50,000+ members</span>
+            <span class="community-tier-price">Custom</span>
+          </div>
+        </div>
+        <p style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:16px;line-height:1.7;">Not sure which tier? Count your active paid members. Over 50,000 or need a custom integration? Select Enterprise and we will scope it together.</p>
+        <a href="https://whop.com" target="_blank" class="btn-secondary" style="margin-top:28px; display:inline-block;">View Community Licensing</a>
+      </div>
+      <div class="community-right">
+        <div class="community-pitch-label">The Pitch</div>
+        <div class="community-pitch">"Your members lose money not because the market is wrong. They lose because they're trading at the wrong personal timing. This tool tells each member exactly when their window is open."</div>
+        <div class="community-benefits">
+          <div class="community-benefit">Retention: members who get results don't leave</div>
+          <div class="community-benefit">Differentiation: no other community offers this</div>
+          <div class="community-benefit">Engagement: members discuss their timing windows daily</div>
+          <div class="community-benefit">Zero workload: 15-minute setup, runs without you</div>
+          <div class="community-benefit">Founding partner pricing available for the first 10 communities</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ GUARANTEE ═══════════════════════════════ -->
+<div class="guarantee-strip">
+  <div class="guarantee-inner">
+    <div class="guarantee-num">90</div>
+    <h3>Day Guarantee</h3>
+    <p>If you don't see measurable clarity in your decision timing within 90 days, you receive a full refund. No questions. No process. We are confident enough in the outcome to carry the full risk.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ FINAL CTA ═══════════════════════════════ -->
+<section class="final-cta">
+  <h2>UNDERSTAND YOUR<br/><em>TIMING EDGE.</em></h2>
+  <p>See when conditions support decisive action — and when discipline protects capital. Your Edge Index Brief maps it all for the year ahead.</p>
+  <a href="https://whop.com/checkout/plan_3ylvni6cL0ir1" target="_blank" class="btn-primary" style="margin-bottom:14px; display:inline-block;">Get Your Edge Index Brief — $2,500</a>
+  <div style="font-size:12px; color:var(--grey2); margin-top:4px;">One-time. Annual update included. 90-day guarantee.</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">THE EDGE INDEX</div>
+  <div class="footer-right">Decision Timing Intelligence · Zero coaching · Zero staff · Zero fluff · © 2026</div>
+</footer>
+
+<script>
+  // Animate score bars on scroll
+  const barObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.width = entry.target.dataset.width;
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('.score-bar').forEach(bar => {
+    const w = bar.style.width;
+    bar.dataset.width = w;
+    bar.style.width = '0%';
+    barObserver.observe(bar);
+  });
+
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // Subtle entrance animations
+  const fadeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+        fadeObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll(
+    '.dimension-card, .signal-card, .condition-card, .brief-section-row, ' +
+    '.hook-card, .monitoring-tier, .feature, .authority-card, .reality-pattern'
+  ).forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    fadeObserver.observe(el);
+  });
+</script>
+</body>
+</html>
