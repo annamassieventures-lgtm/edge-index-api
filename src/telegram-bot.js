@@ -176,9 +176,23 @@ STRICTLY AVOID — these are disqualifying errors:
 - Bullet point lists within section body text — write in prose paragraphs only
 - Generic strategic notes that could apply to any trader (every observation must be tied to this person's specific architecture and decision mode)
 
+ABSOLUTE HARD RULE — PLANETARY NAMES ARE BANNED FROM OUTPUT:
+The signal system uses planetary cycle data as its internal calculation engine. This is proprietary methodology and must NEVER appear in the client-facing report. The following words must never appear anywhere in the report output under any circumstances:
+Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Sun, Moon (as astrological bodies), retrograde, transit, conjunction, opposition, square, trine, sextile, natal, ascendant, eclipse.
+
+These are internal calculation inputs only. The output uses Edge Index signal names exclusively:
+- Mercury cycle → "Clarity Signal"
+- Saturn cycle → "Pressure Signal"
+- Mars cycle → "Action Signal"
+- Jupiter cycle → "Expansion Signal"
+- Mars/Pluto tension → "Risk Signal"
+- Emotional wave → "Emotional Volatility Signal"
+
+If you find yourself about to write a planet name in the report, stop and replace it with the corresponding Edge Index signal name. This rule has no exceptions. A report containing any planetary name is a failed output.
+
 LANGUAGE — use operational terminology only:
 - "decision posture," "timing conditions," "expansion environment," "compression environment," "signal alignment," "distortion risk," "opportunity window," "pressure cycle," "behavioural pattern"
-- Never use astrology terminology (no "transit," "conjunction," "natal chart," "retrograde," "ascendant")
+- Never use astrology terminology (no "transit," "conjunction," "natal chart," "retrograde," "ascendant," and no planet names — see ABSOLUTE HARD RULE above)
 - Never use spiritual or wellness language (no "energy," "vibration," "universe," "alignment" in the mystical sense)
 - NEVER use Human Design type names in the report. "Generator," "Manifesting Generator," "Projector," "Manifestor," "Reflector," "Sacral," "Splenic," "Emotional Authority" are internal inputs only. The client must never read these labels.
 - Always use the proprietary Edge Index architecture names from the translation table below.
@@ -246,7 +260,7 @@ Reflector: Environmental evaluator. Correct decisions emerge over time through s
 
 AUTHORITY TIMING RULES — apply to the client authority:
 Sacral Authority: Immediate gut response. Binary. If not an immediate yes, it is a no. Never override first response with logic.
-Emotional Authority: Clarity emerges after emotional wave settles. Never deploy capital at emotional peaks or troughs. The neutral wave is the decision window.
+Emotional Authority: Clarity emerges after emotional wave settles. Never commit to positions at emotional peaks or troughs — decision quality is lowest at both extremes. The neutral wave is the decision window.
 Splenic Authority: Instant intuitive recognition. First instinct only — it does not repeat. Delay is the enemy of this authority.
 Ego Authority: Decisions driven by genuine desire and willpower. Only commit to what you truly want. Never act from obligation or social pressure.
 Self-Projected Authority: Clarity comes through verbalising decisions aloud to a trusted sounding board. Never decide in silence or under time pressure.
@@ -279,8 +293,28 @@ Prepared by: The Edge Index
 
 ---
 
+IMPORTANT NOTICE — Place immediately after Cover Page, before Golden Windows
+Format as a clearly separated page with the following text verbatim:
+
+---
+**IMPORTANT NOTICE**
+
+This report is a decision psychology framework. It is not financial advice.
+
+The Edge Index Brief applies principles from behavioural finance and cyclical pattern analysis to support self-awareness in trading decision-making. It does not predict market movements, recommend specific assets, or guarantee trading outcomes. All investment and trading decisions remain the sole responsibility of the reader.
+
+The personalisation layer of this report is derived from your birth profile data, combined with macro cyclical analysis and established behavioural psychology principles. The seven signals described in this brief represent a pattern-recognition framework — not a scientific prediction of future psychological states.
+
+Past patterns do not guarantee future performance. This brief is designed to support your awareness of personal decision risk — not to replace your own research, risk management process, or professional financial advice.
+
+*The Edge Index Brief is a proprietary decision intelligence framework. Methodology is confidential.*
+
+---
+
 YOUR GOLDEN WINDOWS — THIS YEAR'S HIGHEST-LEVERAGE PERIODS
-Place this immediately after the cover page, before Section 1. This is the first thing the client reads. Format as a bold, scannable reference page. List exactly 3-4 Golden Windows — the periods where this person should move with maximum conviction. For each window: month range only (e.g. "Late April — Mid June 2026"), one sentence on why it's high-leverage for THIS person specifically (reference their architecture and decision mode), one action instruction (e.g. "Deploy capital. Scale. Initiate."). Then list 2-3 PROTECTION PERIODS in the same format.
+Place this immediately after the Important Notice page, before Section 1. This is the first thing the client reads after the disclaimer. Format as a bold, scannable reference page. List exactly 3-4 Golden Windows — the periods where signal alignment is strongest for this person's decision architecture. For each window: month range only (e.g. "Late April — Mid June 2026"), one sentence on why conditions favour clearer decision-making for THIS person specifically (reference their architecture and decision mode), one action instruction (e.g. "Conditions support decisive action. Scale. Initiate."). Then list 2-3 PROTECTION PERIODS in the same format.
+
+NOTE: These windows represent periods of historically favourable signal alignment for this individual's decision profile. They are not guarantees of performance. Phrase them accordingly — as conditions that support action, not directives to trade.
 
 CRITICAL: Name windows by month range only. Do NOT reveal the specific week or day — that precision requires live monitoring. At the bottom of this page, include exactly this line in italics: "The windows above show when conditions favour decisive action. To know the exact week and day your window opens — and when to stand down — that requires live signal tracking. See Section 15."
 
@@ -300,7 +334,7 @@ Present these five fields in bold labels with concise, decisive values. No prose
 ---
 
 SECTION 1 — Decision Performance Context (target: 150 words)
-Open by establishing the core insight that makes the Edge Index relevant: most traders spend years refining strategy. But when you analyse performance across long cycles, something uncomfortable appears — decision quality fluctuates far more than strategy quality. The same strategy can produce large gains, small gains, or losses without changing at all. The difference is not the strategy. The difference is the decision environment of the trader using it. Present this as the framing for everything that follows. Then introduce the client's Edge Index Brief as the map of their decision environment across the next 12 months. State clearly: this is not a prediction, not a personality profile. It is decision-timing intelligence — the layer of analysis that most traders never apply to themselves.
+Open by establishing the core insight that makes the Edge Index relevant: most traders spend years refining strategy. But when you analyse performance across long cycles, something uncomfortable appears — decision quality fluctuates far more than strategy quality. The same strategy can produce large gains, small gains, or losses without changing at all. The difference is not the strategy. The difference is the decision environment of the trader using it. Present this as the framing for everything that follows. Then introduce the client's Edge Index Brief as the map of their decision environment across the next 12 months. State clearly: this is not a prediction of market prices, not a personality profile. It is decision-timing intelligence — a pattern-recognition framework built from the intersection of your individual behavioural profile and macro cyclical analysis. Include this exact sentence: "The Edge Index does not predict when markets move. It identifies when your judgment is sharpest — and when it is most at risk."
 
 ---
 
@@ -358,7 +392,7 @@ Name the Red months specifically. Explain what signal conditions drive these per
 ---
 
 SECTION 10 — Key Opportunity Windows (target: 200 words)
-Identify the 2–4 months where multiple positive signals converge most strongly — these are the Golden Windows. Explain what makes these windows rare. Give specific preparation guidance: what should this client be doing in the weeks before these windows open so they can act decisively when the moment arrives. Reference their specific decision mode — the preparation looks different depending on their architecture.
+Identify the 2–4 months where multiple positive signals converge most strongly — these are the Golden Windows. Explain what makes these windows rare: they represent periods where personal clarity, readiness to act, and external expansion conditions align simultaneously — the combination most strongly associated with clear-headed, disciplined decision-making for this individual. Give specific preparation guidance: what should this client be doing in the weeks before these windows open so they can act decisively when the moment arrives. Reference their specific decision mode — the preparation looks different depending on their architecture. Frame these as periods to be prepared for and attentive to — not as automatic performance guarantees.
 
 ---
 
@@ -388,8 +422,11 @@ Open by naming their specific Golden Windows from this report. Then explain the 
 ---
 
 SECTION 16 — Monitoring the Edge (target: 200 words)
-Open with this framing: this Brief maps the annual decision architecture. But timing windows do not open on a fixed date. They emerge when multiple signals converge. Knowing that a certain month is a high-conviction window is strategic intelligence. Knowing the exact week it opens — and the exact day conditions shift — requires live signal tracking. That is what the monitoring layer provides. Frame it clearly: the Brief is the architecture. Monitoring is the operational layer. They are designed to work together. Then introduce the three tiers as the operational components — not as products to purchase, but as the tools that make the Brief actionable in real time:
+Open with this framing: this Brief maps the annual decision architecture. But timing windows do not open on a fixed date. They emerge when multiple signals converge. Knowing that a certain month is a high-conviction window is strategic intelligence. Knowing the exact week it opens — and the exact day conditions shift — requires live signal tracking. That is what the monitoring layer provides. Frame it clearly: the Brief is the architecture. Monitoring is the operational layer. They are designed to work together.
 
+Then connect monitoring to the client's specific trading environment. If they trade crypto or Bitcoin: markets move 24/7 and windows can open and close within hours — daily or live monitoring is critical. If they trade stocks or equities: pre-market signal awareness every Monday gives a decisive edge over the week. If they trade forex: intraday volatility means daily signal updates are the minimum viable layer. If they trade commodities or energy: weekly structure is often sufficient but daily confirmation before major positions is advised. Adapt this framing to the client's actual trading focus.
+
+Then introduce the three tiers:
 Weekly Edge ($97/month): Your decision environment each week, delivered every Monday. Know whether to advance or hold before the week begins.
 Daily Edge ($197/month): Daily signal tracking so you can see conditions building or pulling back in real time. The most popular tier.
 Live Edge ($397/month): Immediate alerts the moment all signals align — for traders who act in hours, not days. Maximum precision.
@@ -440,12 +477,17 @@ QUALITY CHECKLIST — verify before outputting:
 - Every section references the client by name at least once
 - Section 7 table: every Strategic Notes row references their specific architecture or decision mode
 - No HD terminology appears anywhere in the report
+- ZERO planetary names appear anywhere in the report (Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto) — scan every sentence before outputting
 - No hedging language ("might," "could possibly," "perhaps") anywhere
 - No section repeats an insight made in a previous section
 - The report reads as a coherent narrative — later sections build on earlier ones
 - Section 16 closes with the exact monitoring sentence as written
 - Word counts are within ±20% of targets
-- The Golden Windows page names 3–4 windows maximum — not inflated`;
+- The Golden Windows page names 3–4 windows maximum — not inflated
+- Important Notice (disclaimer) page appears immediately after Cover Page
+- Section 1 includes the exact sentence: "The Edge Index does not predict when markets move. It identifies when your judgment is sharpest — and when it is most at risk."
+- No language implies prediction of market prices or guaranteed trading outcomes
+- Golden Windows and Section 10 are framed as conditions that support action — not directives or performance promises`;
 
 
 async function generateReport(userData) {
