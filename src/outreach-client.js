@@ -6,6 +6,7 @@
 // After auth, TELEGRAM_SESSION env var persists the session across redeploys.
 
 import { TelegramClient }  from 'telegram';
+import { Api }             from 'telegram';
 import { StringSession }   from 'telegram/sessions/index.js';
 import { NewMessage }      from 'telegram/events/index.js';
 import path                from 'path';
@@ -18,7 +19,8 @@ const API_ID   = 38833025;
 const API_HASH = 'f33a4fa1b3fad3a68c585556c6cf5358';
 const PHONE    = '+61438703922';
 
-const SESSION_FILE = path.join(__dirname, '..', 'data', 'telegram-session.txt');
+const SESSION_FILE  = path.join(__dirname, '..', 'data', 'telegram-session.txt');
+const HASH_FILE     = path.join(__dirname, '..', 'data', 'tg-pending-hash.txt');
 
 // ─── Session persistence ────────────────────────────────────────────────────
 
@@ -81,18 +83,19 @@ export async function requestOtp() {
   const result = await tempClient.sendCode({ apiId: API_ID, apiHash: API_HASH }, PHONE);
   pendingHash = result.phoneCodeHash;
 
-  // Store hash in file so it survives if process restarts between steps
-  fs.writeFileSync('/tmp/tg_pending_hash.txt', pendingHash);
+  // Store hash in data/ so it survives between bot requests
+  fs.mkdirSync(path.dirname(HASH_FILE), { recursive: true });
+  fs.writeFileSync(HASH_FILE, pendingHash);
 
   await tempClient.disconnect();
   return true;
 }
 
 export async function verifyOtp(code) {
-  // Recover hash
+  // Recover hash from in-memory or from data/ file
   if (!pendingHash) {
-    if (fs.existsSync('/tmp/tg_pending_hash.txt')) {
-      pendingHash = fs.readFileSync('/tmp/tg_pending_hash.txt', 'utf8').trim();
+    if (fs.existsSync(HASH_FILE)) {
+      pendingHash = fs.readFileSync(HASH_FILE, 'utf8').trim();
     } else {
       throw new Error('No pending OTP request found. Run /admin tgauth start first.');
     }
@@ -104,12 +107,11 @@ export async function verifyOtp(code) {
   await tempClient.connect();
 
   try {
-    await tempClient.invoke({
-      className: 'auth.SignIn',
+    await tempClient.invoke(new Api.auth.SignIn({
       phoneNumber: PHONE,
       phoneCodeHash: pendingHash,
       phoneCode: code.trim(),
-    });
+    }));
   } catch (err) {
     if (err.message.includes('SESSION_PASSWORD_NEEDED')) {
       throw new Error('2FA is enabled on this account. Disable 2FA in Telegram settings first, then retry.');
@@ -125,6 +127,7 @@ export async function verifyOtp(code) {
   client.addEventHandler(handleIncomingMessage, new NewMessage({}));
 
   pendingHash = null;
+  if (fs.existsSync(HASH_FILE)) fs.unlinkSync(HASH_FILE);
   return sessionString;
 }
 
