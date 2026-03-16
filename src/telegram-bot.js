@@ -290,8 +290,21 @@ CRITICAL: Name windows by month range only. Do NOT reveal the specific week or d
 
 ---
 
-SECTION 1 — Executive Overview (target: 150 words)
-Open with the central insight: in high-performance environments, the edge rarely comes from superior information — it comes from knowing when conditions support decisive action and having the discipline to wait when they do not. Introduce the client's Edge Index Brief as a strategic map of their timing conditions across the next 12 months. State clearly: this is not a prediction, not a personality profile. It is decision-timing intelligence. Set the tone: strategic, precise, prepared for a serious decision maker. Begin directly — no preamble.
+EXECUTIVE INTELLIGENCE SUMMARY — Place immediately after Golden Windows page (target: 1 structured page)
+This is the most important page in the report. A serious buyer must be able to understand the entire brief in 60 seconds from this page alone. Format it as a structured intelligence panel — not prose. Use exactly these five fields:
+
+PRIMARY EDGE: [One sentence — the client's strongest decision advantage, specific to their architecture and decision mode]
+HIGHEST CONVICTION WINDOW: [Month range — e.g. "Late June – Late July 2026"]
+PRIMARY PROTECTION PHASE: [Month range — e.g. "November – December 2026"]
+CORE BEHAVIOURAL RISK: [One sentence — the specific pattern most likely to cost them capital, tied to their architecture]
+OPERATING RULE FOR THE YEAR: [One sentence — the single most important principle for this person. E.g. "Prepare during Amber. Scale during Green. Protect during Red."]
+
+Present these five fields in bold labels with concise, decisive values. No prose paragraphs on this page. After the five fields, include a single italicised sentence: "The sections that follow explain the architecture behind each of these conclusions."
+
+---
+
+SECTION 1 — Decision Performance Context (target: 150 words)
+Open by establishing the core insight that makes the Edge Index relevant: most traders spend years refining strategy. But when you analyse performance across long cycles, something uncomfortable appears — decision quality fluctuates far more than strategy quality. The same strategy can produce large gains, small gains, or losses without changing at all. The difference is not the strategy. The difference is the decision environment of the trader using it. Present this as the framing for everything that follows. Then introduce the client's Edge Index Brief as the map of their decision environment across the next 12 months. State clearly: this is not a prediction, not a personality profile. It is decision-timing intelligence — the layer of analysis that most traders never apply to themselves.
 
 ---
 
@@ -378,8 +391,8 @@ Open by naming their specific Golden Windows from this report. Then explain the 
 
 ---
 
-SECTION 16 — The Edge Monitoring Suite (target: 200 words)
-Introduce the three monitoring tiers as the logical continuation of what the Brief started — not a sales pitch, but the natural next step. Frame each tier around the specific Golden Windows named in this report. Weekly Edge ($97/month): every Monday, your decision tone for the week ahead — are conditions building toward your window or pulling back. Daily Edge ($197/month): daily signal tracking so you know exactly when your window opens and when to stand down. Live Edge ($397/month): real-time alerts the moment all signals align — for traders who need to act within hours, not days. Close with exactly this sentence: "Most traders who receive this Brief choose Daily Edge. They've already paid $2,500 to know their windows. Monitoring is how they don't miss them."
+SECTION 16 — Monitoring the Edge (target: 200 words)
+Open with this framing: this Brief maps the annual decision architecture. But timing windows do not open on a fixed date. They emerge when multiple signals converge. Knowing that June–August is a high-conviction window is strategic intelligence. Knowing the exact week it opens — and the exact day conditions shift — requires live signal tracking. That is what the monitoring layer provides. Frame it clearly: the Brief is the architecture. Monitoring is the operational layer. They are designed to work together. Then introduce the three tiers as the operational components — not as products to purchase, but as the tools that make the Brief actionable in real time. Weekly Edge: your decision environment each week, every Monday. Daily Edge: daily signal tracking so you can see conditions building or pulling back in real time. Live Edge: immediate alerts the moment all signals align — for traders who act in hours, not days. Close with exactly this sentence: "Most traders who receive this Brief choose Daily Edge. They've already paid $2,500 to know their windows. Monitoring is how they don't miss them."
 
 ---
 
@@ -394,12 +407,28 @@ End on quiet confidence and forward momentum.
 
 ---
 
+SECTION STRUCTURE — apply to sections 2 through 13:
+Each section must follow this four-part intelligence structure:
+**Insight** — the core finding for this section (1-2 sentences, bold)
+**What This Means** — analytical explanation in prose (2-3 paragraphs)
+**Strategic Implication** — what this means for decisions (1 paragraph)
+**Execution Guidance** — specific instruction for this client (1-2 sentences, direct)
+This structure makes the document scannable for decision makers. They can read only the Insight and Execution Guidance lines across all sections and immediately understand the full brief.
+
+BEHAVIOURAL INSIGHT PANELS — include 3-4 throughout the report:
+At key moments in the report, insert a callout panel using this exact markdown format:
+> **Behavioural Insight**
+> [One observation that describes a specific pattern this client exhibits — written as if you have studied them personally. This should create a "that's exactly me" reaction. Connect it to their architecture and decision mode. End with the highest-leverage improvement available to them.]
+
+Place these panels at natural pause points — after Section 2, after Section 6, after Section 9, and after Section 13. They must feel observed and precise, not generic.
+
 FORMATTING:
 - Return clean markdown
 - Use # for section titles
 - Use bold for key terms and named windows
 - Section 7 timing map as a markdown table
 - Write section body text in prose paragraphs — no bullet points inside sections
+- Use > blockquote format for Behavioural Insight panels
 - Footer on final section: "The Edge Index Brief | [Client Name] | [Report Date]"
 - Total target: 4,500–5,500 words
 
@@ -697,6 +726,22 @@ function mdToHtml(reportMarkdown, clientName, userData) {
     </tr></table>
   </div>
 </header>
+
+<!-- INTRO LETTER -->
+<div style="background:#0A0A0A;border-bottom:1px solid #2A2A2A;padding:48px 0;">
+  <div style="max-width:760px;margin:0 auto;padding:0 24px;">
+    <p style="font-size:16px;color:#E0E0E0;line-height:1.85;margin-bottom:20px;">Hello ${clientName},</p>
+    <p style="font-size:16px;color:#E0E0E0;line-height:1.85;margin-bottom:20px;">Your Edge Index Brief has been completed.</p>
+    <p style="font-size:16px;color:#E0E0E0;line-height:1.85;margin-bottom:28px;">This document maps your personal decision timing architecture across the next 12 months — identifying the periods where conviction tends to compound and the periods where discipline protects capital.</p>
+    <div style="background:#111;border:1px solid #2A2A2A;border-left:3px solid #C9A84C;padding:24px 28px;margin-bottom:28px;">
+      <p style="font-size:12px;font-family:Arial,sans-serif;letter-spacing:0.18em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;">Inside this brief</p>
+      <p style="font-size:14px;color:#9BA8C0;line-height:1.8;margin-bottom:0;">Your highest-probability capital deployment windows &nbsp;·&nbsp; Protection and consolidation periods &nbsp;·&nbsp; Behavioural pressure points that affect decision quality &nbsp;·&nbsp; Your natural decision authority profile &nbsp;·&nbsp; A full 12-month timing map</p>
+    </div>
+    <p style="font-size:15px;color:#E0E0E0;line-height:1.85;margin-bottom:20px;">The Edge Index is not designed to predict markets. Its purpose is to help you recognise when your decision environment is strongest — so strategy and execution align.</p>
+    <p style="font-size:14px;color:#9BA8C0;line-height:1.85;margin-bottom:28px;font-style:italic;">When you open the report, begin with three sections: the Executive Intelligence Summary, your Golden Windows, and your Protection Periods. These three pages establish the structure for everything that follows.</p>
+    <p style="font-size:13px;color:#666;line-height:1.7;border-top:1px solid #2A2A2A;padding-top:20px;margin-bottom:0;">One important note: timing windows rarely open on a single date. They emerge as multiple signals converge. For traders who want to track these shifts in real time, the Edge Index provides ongoing monitoring — Weekly Edge, Daily Edge, and Live timing alerts. These tools track the moment your timing conditions begin to shift. Details are in Section 15 of your brief.</p>
+  </div>
+</div>
 
 <!-- SIGNAL BAR -->
 <div style="background:#0A0A0A;border-bottom:1px solid #C9A84C;border-top:1px solid #C9A84C;padding:20px 0;">
@@ -1024,7 +1069,7 @@ async function sendReportEmail(toEmail, toName, reportMarkdown, userData = {}) {
   }
 
   const htmlBody  = mdToHtml(reportMarkdown, toName, userData);
-  const subject   = `Your Edge Index Brief — ${toName}`;
+  const subject   = `Your Edge Index Brief is Ready`;
   const reportDate = new Date().toISOString().split('T')[0];
   const pdfBuffer = await generatePDF(reportMarkdown, toName, reportDate);
 
@@ -1113,30 +1158,34 @@ function getPersonalisedClose(tradeType) {
     assetLine = `Whatever you trade, the biggest losses rarely come from bad analysis. They come from the right analysis executed at the wrong emotional moment. Your emotional cycle is predictable — and mappable.`;
   }
 
-  return `That's The Edge Index Brief.\n\n${assetLine}\n\nIt's a personalised annual report built from your individual data — mapping your optimal decision windows and your highest emotional-risk periods. Not a market signal tool. A map of you.\n\nSo instead of looking back thinking "I knew better" — you're looking ahead, trading with that knowledge built in.\n\nOne payment. Yours for life.\n\n👉 ${WHOP_URL}\n\nOnce you've purchased, come back here and send /start — I'll set up your personalised brief.`;
+  return `That's The Edge Index Brief.\n\n${assetLine}\n\nThe Brief is a 17-section personalised intelligence document — built from your individual data. It maps your highest-conviction windows (where to move with scale and confidence), your protection periods (where capital discipline is the edge), and the specific behavioural patterns most likely to cost you.\n\nNot a signal tool. Not a market prediction. A map of your decision environment across the next 12 months.\n\nOne payment. No subscription. Delivered within 15 minutes.\n\n👉 ${WHOP_URL}\n\nOnce you've completed your purchase, come back here and I'll walk you through setting up your brief.`;
 }
 
 // ─── Outreach briefing builder ─────────────────────────────────────────────────
 
-const OUTREACH_MSG_1 = (name) =>
-  `Hey ${name},\n\nNoticed your trading community is solid. Quick question — what's your biggest pain point with retention right now?\n\nI built a decision-timing intelligence tool that's basically a retention engine disguised as a performance tool. Members get a personalised annual timing brief — their highest-leverage windows to act, and their highest-risk periods to stand down. When they use it, decision quality improves noticeably.\n\nWorth a 5-min chat to see if it fits? No pressure either way.`;
+const OUTREACH_MSG_1 = (name, communityName) =>
+  `Hi ${name},\n\nI built something that I think is genuinely useful for trading communities — and I wanted to reach out to ${communityName || 'your community'} specifically because of the calibre of your members.\n\nIt's called The Edge Index. Each member receives a personalised 17-section annual intelligence brief — mapping their individual decision-timing windows across the next 12 months. When to deploy capital. When to stand down. Where their decision quality is highest and where they're most exposed to behavioural errors.\n\nNot market signals. Not generic content. A personalised intelligence document — built from each member's individual data.\n\nI've seen communities use it as a premium benefit that meaningfully improves member results — which tends to solve the retention problem at the source.\n\nWould it be worth a quick conversation to see if it's a fit?`;
 
-const OUTREACH_MSG_2 = (name) =>
-  `Hey ${name},\n\nFollowing up — know you're busy.\n\nJust launched this with a few other communities (similar size to yours). Members are actually *using* it consistently, which is rare. The retention lift has been solid.\n\nIt's 100% hands-off on your end — Telegram bot, fully automated.\n\nIf decision-timing tools + retention interest you, lmk. Otherwise no worries — I'll stop pinging.`;
+const OUTREACH_MSG_2 = (name, communityName) =>
+  `Hi ${name},\n\nFollowing up on my message about The Edge Index.\n\nThe short version of why it's relevant for ${communityName || 'your community'}: most trading education gives members better strategy. The Edge Index gives them better decision-making — which is usually what's actually missing.\n\nMembers receive their own personalised annual brief. It tells them which months their decision architecture is sharpest, which periods carry the highest behavioural risk, and the exact pattern most likely to cost them capital. The intelligence is built from their individual data — it reads like a private briefing, not a report.\n\nFrom your end: fully automated, zero ongoing work after a 5-minute setup. Members access it through a private Telegram bot.\n\nHappy to share a sample brief if you'd like to see the quality of what members receive.\n\nLet me know if you want to talk through the details.`;
 
-const OUTREACH_MSG_3 = (name) =>
-  `Hey ${name},\n\nLast one, I promise.\n\nHere's the real value prop: most communities leak members because they don't get consistent results. This tool gives members *personalised decision-timing intelligence* — a 17-section annual brief that maps exactly when their decision quality is sharpest and when they're most exposed to behavioural errors. It's behavioural psychology + timing cycles, engineered into a strategic document.\n\nMembers who see results don't leave. That's the retention play.\n\nHow it works:\n- I handle everything. Telegram bot, fully automated.\n- Members enter their birth data once. They receive their personalised annual brief.\n- You do nothing after a 5-min setup.\n\nThe founding beta offer:\n$500/month for 3 months (normally $800–$6,000/month depending on community size). If it doesn't move the needle in 90 days, we part ways.\n\nWant to talk about your community's retention goals?`;
+const OUTREACH_MSG_3 = (name, communityName) =>
+  `Hi ${name},\n\nLast message — I'll keep it brief.\n\nThe retention problem in trading communities almost always comes down to the same thing: members who don't see consistent results don't stay. Better strategy content helps, but it doesn't solve the underlying issue — which is that most traders execute the right strategy at the wrong time.\n\nThe Edge Index solves that. Each member gets a personalised 17-section annual intelligence brief — mapping their individual decision windows and their highest-risk behavioural periods. When they use it, their decision quality improves because they stop acting at the wrong time. Members who improve their results don't leave.\n\nThe founding partnership terms for ${communityName || 'communities'} of your size:\n→ $500/month for the first 3 months (typically $2,500–$6,000/month at scale)\n→ I handle everything — bot infrastructure, brief generation, delivery\n→ Your members get their personal brief within 15 minutes of onboarding\n→ If it doesn't improve member engagement and retention within 90 days, we end it\n\nIf you're open to a 15-minute call, I'll show you a sample brief and walk through how it works. Otherwise — no worries, and appreciate your time.`;
 
 function buildOutreachBriefing() {
   const outreach  = loadOutreach();
   const today     = new Date();
   const todayStr  = today.toISOString().split('T')[0];
-  const lines     = [`📋 *Edge Index Outreach Briefing — ${todayStr}*\n`];
 
-  let actionCount = 0;
+  // Separate into action items and pipeline status
+  const actionItems   = [];
+  const pendingItems  = [];
+  const repliedItems  = [];
+  const completedItems = [];
 
   for (const target of outreach.targets) {
-    if (target.replied || target.stage >= 3) continue;
+    if (target.replied) { repliedItems.push(target); continue; }
+    if (target.stage >= 3) { completedItems.push(target); continue; }
 
     const lastDate  = target.lastMessageDate ? new Date(target.lastMessageDate) : null;
     const daysSince = lastDate
@@ -1145,49 +1194,90 @@ function buildOutreachBriefing() {
 
     let shouldSend = false;
     let msgNum     = null;
+    let daysUntil  = null;
 
     if (target.stage === 0 && !lastDate) {
-      // Never contacted — send Message 1
       shouldSend = true;
       msgNum     = 1;
-    } else if (target.stage === 1 && daysSince !== null && daysSince >= 3) {
-      // Message 1 sent, 3+ days ago, no reply — send Message 2
-      shouldSend = true;
-      msgNum     = 2;
-    } else if (target.stage === 2 && daysSince !== null && daysSince >= 5) {
-      // Message 2 sent, 5+ days ago, no reply — send Message 3
-      shouldSend = true;
-      msgNum     = 3;
+    } else if (target.stage === 1 && daysSince !== null) {
+      if (daysSince >= 3) { shouldSend = true; msgNum = 2; }
+      else daysUntil = 3 - daysSince;
+    } else if (target.stage === 2 && daysSince !== null) {
+      if (daysSince >= 5) { shouldSend = true; msgNum = 3; }
+      else daysUntil = 5 - daysSince;
     }
 
     if (shouldSend) {
-      actionCount++;
-      const platformEmoji = target.platform === 'Telegram' ? '✈️' : '💬';
-      const msgFn = msgNum === 1 ? OUTREACH_MSG_1 : msgNum === 2 ? OUTREACH_MSG_2 : OUTREACH_MSG_3;
-      const msg   = msgFn(target.name);
-
-      lines.push(
-        `${platformEmoji} *${target.name}* (${target.size} · ${target.tier})`,
-        `Contact: ${target.handle}`,
-        `Message ${msgNum}:`,
-        `\`\`\``,
-        msg,
-        `\`\`\``,
-        `After sending, reply to me: /admin sent ${target.id}`,
-        ``,
-      );
+      actionItems.push({ target, msgNum });
+    } else if (target.stage > 0 && !shouldSend) {
+      pendingItems.push({ target, daysUntil });
+    } else {
+      pendingItems.push({ target, daysUntil: null });
     }
   }
 
-  if (actionCount === 0) {
-    lines.push('✅ No outreach actions due today. Check back tomorrow.');
+  const lines = [`📋 *Edge Index Outreach — ${todayStr}*\n`];
+
+  // ── TODAY'S ACTIONS ──
+  if (actionItems.length === 0) {
+    lines.push('✅ *No messages to send today.*\n');
   } else {
-    lines.push(`\n📊 ${actionCount} message(s) to send today.`);
-    lines.push(`\nFor each one you've sent, reply: /admin sent <id>`);
-    lines.push(`For replies/interest, reply: /admin replied <id>`);
+    lines.push(`🎯 *${actionItems.length} message(s) to send today:*\n`);
+
+    for (const { target, msgNum } of actionItems) {
+      const platformEmoji = target.platform === 'Telegram' ? '✈️' : '💬';
+      const msgFn = msgNum === 1 ? OUTREACH_MSG_1 : msgNum === 2 ? OUTREACH_MSG_2 : OUTREACH_MSG_3;
+      const msg   = msgFn(target.name, target.name);
+      const tierLabel = target.tier === 'Enterprise' ? '⭐⭐⭐' : target.tier === 'Scale' ? '⭐⭐' : target.tier === 'Growth' ? '⭐' : '';
+
+      lines.push(
+        `${platformEmoji} *${target.name}* ${tierLabel}`,
+        `├ Size: ${target.size} · Platform: ${target.platform}`,
+        `├ Contact: \`${target.handle}\``,
+        target.notes ? `├ Note: ${target.notes}` : null,
+        `└ Send Message ${msgNum}:`,
+        ``,
+        `\`\`\``,
+        msg,
+        `\`\`\``,
+        ``,
+        `✔ After sending → /admin sent ${target.id}`,
+        `💬 If they reply → /admin replied ${target.id}`,
+        ``,
+        `────────────────────────`,
+        ``,
+      ).filter(l => l !== null);
+    }
   }
 
-  return lines.join('\n');
+  // ── PIPELINE STATUS ──
+  if (pendingItems.length > 0) {
+    lines.push(`⏳ *Waiting / In Pipeline:*`);
+    for (const { target, daysUntil } of pendingItems) {
+      const stageLabel = target.stage === 0 ? 'Not started' : `M${target.stage} sent`;
+      const waitLabel  = daysUntil ? ` — follow-up in ${daysUntil}d` : '';
+      lines.push(`• ${target.name} (${target.size}) — ${stageLabel}${waitLabel}`);
+    }
+    lines.push('');
+  }
+
+  // ── REPLIES / INTERESTED ──
+  if (repliedItems.length > 0) {
+    lines.push(`🟢 *Replied / Interested (${repliedItems.length}):*`);
+    for (const t of repliedItems) {
+      lines.push(`• ${t.name} — ${t.notes || 'follow up'}`);
+    }
+    lines.push('');
+  }
+
+  // ── PIPELINE SUMMARY ──
+  const total     = outreach.targets.length;
+  const contacted = outreach.targets.filter(t => t.stage > 0).length;
+  const replied   = repliedItems.length;
+  const done      = completedItems.length;
+  lines.push(`📊 *Pipeline: ${contacted}/${total} contacted · ${replied} replied · ${done} complete*`);
+
+  return lines.filter(l => l !== null).join('\n');
 }
 
 // ─── Bot commands ──────────────────────────────────────────────────────────────
@@ -1206,7 +1296,7 @@ bot.onText(/\/start/, async (msg) => {
 
   // If already a paid user with complete profile, skip sales flow
   const user = getUser(chatId);
-  if (user?.email && isPaidEmail(user.email) && user.dob) {
+  if (user?.email && await isPaidEmail(user.email) && user.dob) {
     await bot.sendMessage(chatId,
       `Welcome back, ${firstName}! Your profile is already set up.\n\nSend /report to generate your latest Edge Index Brief.`
     );
@@ -1214,7 +1304,7 @@ bot.onText(/\/start/, async (msg) => {
   }
 
   // If already paid but no profile yet, go straight to onboarding
-  if (user?.email && isPaidEmail(user.email)) {
+  if (user?.email && await isPaidEmail(user.email)) {
     state[chatId] = 'awaiting_date';
     await bot.sendMessage(chatId,
       `Welcome back, ${firstName}! Your purchase is confirmed.\n\nLet's complete your profile. Reply with your **date of birth** (DD/MM/YYYY):`,
@@ -1226,7 +1316,7 @@ bot.onText(/\/start/, async (msg) => {
   // New user — start sales conversation
   state[chatId] = 'sales_q1';
   await bot.sendMessage(chatId,
-    `Hey ${firstName} — welcome.\n\nBefore I get you set up, a couple of quick questions.\n\nWhat do you primarily trade?\n\n• Crypto & Bitcoin\n• Stocks & shares\n• Forex\n• Commodities (oil, gas, energy)\n• Something else`
+    `Welcome, ${firstName}.\n\nThis is The Edge Index — personalised decision-timing intelligence for serious traders.\n\nBefore I walk you through what's available, one quick question:\n\nWhat do you primarily trade?\n\n• Crypto & Bitcoin\n• Stocks & shares\n• Forex\n• Commodities (oil, gas, energy)\n• Something else`
   );
 });
 
@@ -1245,7 +1335,7 @@ bot.onText(/\/report/, async (msg) => {
     return;
   }
 
-  if (!isPaidEmail(user.email)) {
+  if (!await isPaidEmail(user.email)) {
     await bot.sendMessage(chatId,
       `⚠️ I can't find a purchase for *${user.email}*.\n\nTo get your Edge Index report, complete your purchase here:\n${WHOP_URL}\n\nOnce payment is confirmed, send /start to proceed.`,
       { parse_mode: 'Markdown' }
@@ -1421,16 +1511,16 @@ bot.on('message', async (msg) => {
     saveUser(chatId, { tradeType: text });
     state[chatId] = 'sales_q2';
     await bot.sendMessage(chatId,
-      `Got it.\n\nWith everything happening in global markets right now — are you finding it harder to stick to your own rules? Knowing when to act, when to hold back — and actually following your risk-to-reward ratio instead of letting emotion override it?`
+      `Got it.\n\nHere's a question most traders don't think about:\n\nYou've probably noticed that the same trade setup — same analysis, same entry rules — produces very different outcomes depending on when you place it.\n\nNot because the market changed. Because your decision quality changed.\n\nDo you track when your decision-making is sharpest — and when it's most at risk?`
     );
     return;
   }
 
-  // ── Sales Q2: Market impact ──
+  // ── Sales Q2: Decision quality framing ──
   if (currentState === 'sales_q2') {
     state[chatId] = 'sales_q3';
     await bot.sendMessage(chatId,
-      `Every trader has that moment. A position they sold in a panic — and watched recover the next day. Or held too long because the emotional pull was too strong to exit.\n\nThat's not bad strategy. That's your emotional pattern — and it repeats on a predictable cycle throughout the year.\n\nScientists call it the amygdala response — your brain literally cannot tell the difference between a market crash and a physical threat. It hijacks your decision-making at exactly the wrong moment. It's why smart, experienced traders still make expensive mistakes.\n\nWhat if you had a personalised map of YOUR highest-risk days — the days when your brain is most likely to override your own judgement — so you could see them coming before they hit?\n\nWould that change how you trade?`
+      `Most traders don't. And it's expensive.\n\nThe pattern is almost universal: excellent analysis, executed at the wrong moment. The position is right. The timing — the internal timing of the trader — is off. And the result doesn't reflect the quality of the work.\n\nWhat's rarely discussed is that decision quality isn't random. It follows a pattern that's specific to each person — their natural clarity cycles, their high-pressure windows, the periods when their risk tolerance quietly expands beyond where it should be.\n\nThose patterns are mappable. And once you can see them, you can trade around them.\n\nThat's what The Edge Index Brief is.`
     );
     return;
   }
@@ -1455,7 +1545,7 @@ bot.on('message', async (msg) => {
     const email = text.toLowerCase();
     saveUser(chatId, { email });
 
-    if (!isPaidEmail(email)) {
+    if (!await isPaidEmail(email)) {
       await bot.sendMessage(chatId,
         `⚠️ I can't find a purchase linked to *${email}*.\n\nTo access your Edge Index report, complete your purchase here:\n${WHOP_URL}\n\nOnce payment is confirmed, send /start again and enter this email address.`,
         { parse_mode: 'Markdown' }
@@ -1553,7 +1643,7 @@ bot.on('message', async (msg) => {
   // ── Catch-all — pull unknown-state users into sales flow ──
   state[chatId] = 'sales_q1';
   await bot.sendMessage(chatId,
-    `Hey — quick question before we go further.\n\nWhat do you primarily trade?\n\n• Crypto & Bitcoin\n• Stocks & shares\n• Forex\n• Commodities (oil, gas, energy)\n• Something else`
+    `Welcome to The Edge Index.\n\nLet me ask you one question before we go further:\n\nWhat do you primarily trade?\n\n• Crypto & Bitcoin\n• Stocks & shares\n• Forex\n• Commodities (oil, gas, energy)\n• Something else`
   );
 });
 
@@ -1566,7 +1656,7 @@ cron.schedule('0 8 * * 1', async () => {
 
   for (const [chatId, userData] of Object.entries(users)) {
     if (!userData.dob || !userData.time || !userData.location || !userData.email) continue;
-    if (!isPaidEmail(userData.email)) continue;
+    if (!await isPaidEmail(userData.email)) continue;
 
     console.log(`[CRON] Sending weekly report to ${chatId} (${userData.firstName || 'unknown'})`);
     await sendReportToUser(chatId, userData);

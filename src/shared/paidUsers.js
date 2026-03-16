@@ -2,17 +2,21 @@
  * Edge Index — Paid User Registry
  *
  * Checks whether an email address has a paid subscription.
- * Sources (both checked):
- *   1. PAID_EMAILS env var — comma-separated, manually managed by Anna in Railway
- *   2. data/paid-emails.json — populated by Whop webhook on payment events
+ * Sources checked in order:
+ *   1. PAID_EMAILS env var — comma-separated, manually managed in Railway
+ *   2. Supabase paid_emails table — populated by Whop webhook (primary persistent store)
+ *   3. data/paid-emails.json — local fallback if Supabase unavailable
  */
 
 import fs   from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { supabase, dbEnabled } from './supabase.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PAID_FILE = path.join(__dirname, '..', '..', 'data', 'paid-emails.json');
+
+// ── JSON file fallback ─────────────────────────────────────────────────────
 
 function loadPaidEmailsFromFile() {
   try {
@@ -31,49 +35,87 @@ function savePaidEmailsToFile(list) {
   fs.writeFileSync(PAID_FILE, JSON.stringify(list, null, 2));
 }
 
-/**
- * Check if an email address has paid access.
- * Case-insensitive. Checks env var + JSON file.
- */
-export function isPaidEmail(email) {
+// ── Check if email is paid ─────────────────────────────────────────────────
+
+export async function isPaidEmail(email) {
   if (!email) return false;
   const normalised = email.toLowerCase().trim();
 
-  // Check Railway env var override (comma-separated)
+  // 1. Check Railway env var override
   const envEmails = (process.env.PAID_EMAILS || '')
     .split(',')
     .map(e => e.toLowerCase().trim())
     .filter(Boolean);
   if (envEmails.includes(normalised)) return true;
 
-  // Check JSON file (populated by Whop webhook)
+  // 2. Check Supabase
+  if (dbEnabled) {
+    try {
+      const { data, error } = await supabase
+        .from('paid_emails')
+        .select('email')
+        .ilike('email', normalised)
+        .maybeSingle();
+      if (!error && data) return true;
+    } catch (err) {
+      console.error('Supabase isPaidEmail error:', err.message);
+    }
+  }
+
+  // 3. Fallback to JSON file
   const fileEmails = loadPaidEmailsFromFile().map(e => e.toLowerCase().trim());
   return fileEmails.includes(normalised);
 }
 
-/**
- * Register an email as paid (appended to JSON file).
- * Called by the Whop webhook handler.
- */
-export function addPaidEmail(email) {
+// ── Add paid email ─────────────────────────────────────────────────────────
+
+export async function addPaidEmail(email, source = 'whop') {
   if (!email) return;
   const normalised = email.toLowerCase().trim();
+
+  // Write to Supabase
+  if (dbEnabled) {
+    try {
+      const { error } = await supabase
+        .from('paid_emails')
+        .upsert({ email: normalised, source }, { onConflict: 'email' });
+      if (error) throw error;
+      console.log(`✅ Supabase paid email saved: ${normalised}`);
+    } catch (err) {
+      console.error('Supabase addPaidEmail error:', err.message);
+    }
+  }
+
+  // Always write to JSON file as backup
   const list = loadPaidEmailsFromFile();
   if (!list.map(e => e.toLowerCase().trim()).includes(normalised)) {
     list.push(normalised);
     savePaidEmailsToFile(list);
-    console.log(`✅ Paid email added: ${normalised}`);
+    console.log(`✅ JSON paid email saved: ${normalised}`);
   }
 }
 
-/**
- * Get all paid emails from both sources (for admin listing).
- */
-export function getAllPaidEmails() {
-  const fromFile = loadPaidEmailsFromFile().map(e => e.toLowerCase().trim());
-  const fromEnv  = (process.env.PAID_EMAILS || '')
+// ── Get all paid emails (admin) ────────────────────────────────────────────
+
+export async function getAllPaidEmails() {
+  const fromEnv = (process.env.PAID_EMAILS || '')
     .split(',')
     .map(e => e.toLowerCase().trim())
     .filter(Boolean);
-  return [...new Set([...fromFile, ...fromEnv])];
+
+  let fromDb = [];
+  if (dbEnabled) {
+    try {
+      const { data, error } = await supabase
+        .from('paid_emails')
+        .select('email')
+        .order('created_at', { ascending: false });
+      if (!error && data) fromDb = data.map(r => r.email.toLowerCase().trim());
+    } catch (err) {
+      console.error('Supabase getAllPaidEmails error:', err.message);
+    }
+  }
+
+  const fromFile = loadPaidEmailsFromFile().map(e => e.toLowerCase().trim());
+  return [...new Set([...fromEnv, ...fromDb, ...fromFile])];
 }
