@@ -1247,18 +1247,22 @@ function getPersonalisedClose(tradeType) {
   let assetLine = '';
 
   if (t.includes('crypto') || t.includes('bitcoin') || t.includes('btc')) {
-    assetLine = `With crypto moving 24/7 and sentiment shifting faster than any other market, knowing when YOUR judgement is sharpest — and when fear is most likely to make you exit early or hold too long — is the difference between compounding and giving back gains.`;
+    assetLine = `With crypto, sentiment shifts faster than any other market. Knowing when your judgement is sharpest — and when fear is most likely to make you exit early or hold too long — is the difference between compounding and giving back gains.`;
   } else if (t.includes('stock') || t.includes('share') || t.includes('equit')) {
-    assetLine = `In stocks, the biggest losses rarely come from wrong analysis — they come from the right analysis executed at the wrong emotional moment. Panic selling at the bottom. Chasing at the top. Your emotional cycle drives both.`;
+    assetLine = `In stocks, the biggest losses rarely come from wrong analysis. They come from the right analysis executed at the wrong emotional moment. Panic selling at the bottom. Chasing at the top.`;
   } else if (t.includes('forex') || t.includes('fx') || t.includes('currency')) {
-    assetLine = `Forex is unforgiving of emotional decisions — leverage amplifies every hesitation and every impulse. Knowing which days your decision clarity is highest, and which days you're most susceptible to distortion, is a structural edge most forex traders never access.`;
-  } else if (t.includes('commodit') || t.includes('oil') || t.includes('gas') || t.includes('energy') || t.includes('electr')) {
-    assetLine = `Energy and commodities are driven by macro forces that create intense emotional pressure — geopolitical shocks, supply disruptions, AI-driven demand swings. Knowing when your own judgement is clearest — and when emotion will override your read — is the edge that separates disciplined traders from reactive ones.`;
+    assetLine = `Forex is unforgiving of emotional decisions — leverage amplifies every hesitation and every impulse. Knowing which days your clarity is highest, and which days distortion peaks, is a structural edge most forex traders never access.`;
+  } else if (t.includes('commodit') || t.includes('oil') || t.includes('gas') || t.includes('energy')) {
+    assetLine = `In commodities, macro shocks create intense emotional pressure. Knowing when your own judgement is clearest — and when emotion will override your read — separates disciplined traders from reactive ones.`;
   } else {
-    assetLine = `Whatever you trade, the biggest losses rarely come from bad analysis. They come from the right analysis executed at the wrong emotional moment. Your emotional cycle is predictable — and mappable.`;
+    assetLine = `Whatever you trade, the biggest losses rarely come from bad analysis. They come from the right analysis executed at the wrong emotional moment. Your decision cycle is predictable — and mappable.`;
   }
 
-  return `That's The Edge Index Brief.\n\n${assetLine}\n\nThe Brief is a 17-section personalised intelligence document — built from your individual data. It maps your highest-conviction windows (where to move with scale and confidence), your protection periods (where capital discipline is the edge), and the specific behavioural patterns most likely to cost you.\n\nNot a signal tool. Not a market prediction. A map of your decision environment across the next 12 months.\n\nOne payment. Yours for life. Delivered within 15 minutes.\n\n👉 https://edgeindex.io\n\nOnce you've completed your purchase, come back here and I'll walk you through setting up your brief.`;
+  const line1 = `That's what The Edge Index Brief does.\n\n${assetLine}\n\nIt's a 17-section personalised intelligence document built from your individual data — your highest-conviction windows, your protection periods, and the specific behavioural patterns most likely to cost you.`;
+
+  const line2 = `Not a signal tool. A map of your decision environment for the next 12 months.\n\nOne payment. Yours for life.\n\n👉 https://edgeindex.io\n\nOnce you've completed your purchase, come back here and enter your email to access your brief.`;
+
+  return { line1, line2 };
 }
 
 // ─── Outreach briefing builder ─────────────────────────────────────────────────
@@ -1723,30 +1727,30 @@ bot.on('message', async (msg) => {
     saveUser(chatId, { tradeType: text });
     state[chatId] = 'sales_q2';
     await bot.sendMessage(chatId,
-      `Got it.\n\nHave you ever noticed how the same strategy can work perfectly one week — same setup, same rules, same analysis — and then fail completely the next?\n\nNot because the market fundamentally changed. Not because your strategy was wrong.\n\nHave you experienced that?`
+      `Got it.\n\nHave you ever noticed how the same strategy can work perfectly one week — and fail completely the next?\n\nSame setup. Same rules. Same analysis.\n\nHave you experienced that?`
     );
     return;
   }
 
   // ── Sales Q2: Pattern recognition moment ──
   if (currentState === 'sales_q2') {
-    // Score their response for signal strength
     const lead = scoreLeadMessage(text);
     saveUser(chatId, { leadScore: lead.total, leadTier: lead.tier });
     state[chatId] = 'sales_q3';
-
     await bot.sendMessage(chatId,
-      `Almost every serious trader has.\n\nHere's what's rarely discussed: that inconsistency isn't random. It follows a predictable pattern — specific to each trader.\n\nMost traders spend years refining their strategy. Almost none of them ever map the decision-maker running it.\n\nThat's what The Edge Index does.`
+      `Almost every serious trader has.\n\nThat inconsistency isn't random. It follows a pattern — specific to you.\n\nMost traders spend years refining their strategy. Almost none of them ever map the decision-maker running it.`
     );
     return;
   }
 
-  // ── Sales Q3: Deliver personalised close → Whop link ──
+  // ── Sales Q3: Deliver personalised close → link ──
   if (currentState === 'sales_q3') {
     const user = getUser(chatId);
-    const close = getPersonalisedClose(user?.tradeType || text);
+    const { line1, line2 } = getPersonalisedClose(user?.tradeType || text);
     state[chatId] = 'awaiting_email';
-    await bot.sendMessage(chatId, close);
+    await bot.sendMessage(chatId, line1);
+    await new Promise(r => setTimeout(r, 1200));
+    await bot.sendMessage(chatId, line2);
     return;
   }
 
@@ -1771,7 +1775,7 @@ bot.on('message', async (msg) => {
 
     state[chatId] = 'awaiting_date';
     await bot.sendMessage(chatId,
-      `✅ Purchase confirmed — welcome!\n\nTo generate your personalised 12-month Edge Index Brief, I need three things:\n\n1. Your **date of birth**\n2. Your **time of birth**\n3. Your **city and country of birth**\n\nLet's start. Reply with your **date of birth** (DD/MM/YYYY):`,
+      `✅ Access confirmed — let's build your brief.\n\nDate of birth (DD/MM/YYYY):`,
       { parse_mode: 'Markdown' }
     );
     return;
@@ -1789,7 +1793,7 @@ bot.on('message', async (msg) => {
     saveUser(chatId, { dob: iso });
     state[chatId] = 'awaiting_time';
     await bot.sendMessage(chatId,
-      `Got it — ${day}/${month}/${year} ✓\n\nNow your **time of birth** (HH:MM, 24-hour format). If you're unsure, give your best estimate — within an hour is useful.`,
+      `${day}/${month}/${year} ✓\n\nTime of birth (HH:MM, 24-hour). Best estimate is fine if unsure:`,
       { parse_mode: 'Markdown' }
     );
     return;
@@ -1807,7 +1811,7 @@ bot.on('message', async (msg) => {
     saveUser(chatId, { time });
     state[chatId] = 'awaiting_location';
     await bot.sendMessage(chatId,
-      `Birth time ${time} ✓\n\nFinally, your **city and country of birth**. Example: Sydney, Australia`,
+      `${time} ✓\n\nCity and country of birth:`,
       { parse_mode: 'Markdown' }
     );
     return;
