@@ -40,6 +40,8 @@ import { fileURLToPath } from 'url';
 import { isPaidEmail, addPaidEmail, getAllPaidEmails } from './shared/paidUsers.js';
 import { scoreLeadMessage } from './lead-scorer.js';
 import { runLeadScan, getScannerStatus } from './twitter-scanner.js';
+import { initOutreachClient, requestOtp, verifyOtp, isConnected } from './outreach-client.js';
+import { runOutreachSequencer, draftSalesResponse, loadOutreach, saveOutreach } from './outreach-sequencer.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -62,6 +64,10 @@ await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/deleteWebhook?drop_pending
 
 const bot       = new TelegramBot(BOT_TOKEN, { polling: { interval: 2000, autoStart: true, params: { timeout: 10 } } });
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_KEY });
+
+// ─── Pending outreach reply drafts ─────────────────────────────────────────────
+// Stores Claude-drafted replies awaiting Anna's approval
+const pendingDrafts = new Map();
 
 // ─── User data persistence ─────────────────────────────────────────────────────
 
@@ -117,20 +123,8 @@ const INITIAL_TARGETS = [
   { id: 'easytradingbots',   handle: 'easytradingbots.ca',  name: 'EasyTradingBots',     platform: 'Discord',  size: 'Growing', tier: 'Starter', stage: 0, lastMessageDate: null, replied: false, notes: 'Contact James' },
 ];
 
-function loadOutreach() {
-  try {
-    if (!fs.existsSync(OUTREACH_FILE)) {
-      fs.mkdirSync(path.dirname(OUTREACH_FILE), { recursive: true });
-      fs.writeFileSync(OUTREACH_FILE, JSON.stringify({ targets: INITIAL_TARGETS }, null, 2));
-    }
-    return JSON.parse(fs.readFileSync(OUTREACH_FILE, 'utf8'));
-  } catch { return { targets: INITIAL_TARGETS }; }
-}
-
-function saveOutreach(data) {
-  fs.mkdirSync(path.dirname(OUTREACH_FILE), { recursive: true });
-  fs.writeFileSync(OUTREACH_FILE, JSON.stringify(data, null, 2));
-}
+// loadOutreach / saveOutreach imported from outreach-sequencer.js
+// (local versions removed to avoid duplicate declaration)
 
 // ─── Conversation state ────────────────────────────────────────────────────────
 // awaiting_email → awaiting_date → awaiting_time → awaiting_location → complete
@@ -1501,7 +1495,13 @@ bot.onText(/\/admin(.*)/, async (msg, match) => {
       `/admin users — list registered users\n` +
       `/admin emails — list paid emails\n` +
       `/admin paid <email> — manually mark email as paid\n\n` +
-      `*B2B Outreach*\n` +
+      `*B2B Outreach — Automation*\n` +
+      `/admin tgauth start — authenticate outreach client (first time)\n` +
+      `/admin tgauth <code> — enter OTP to complete auth\n` +
+      `/admin tgstatus — check if outreach client is connected\n` +
+      `/admin tgsend <target-id> — manually trigger send to a target now\n` +
+      `/admin approve <target-id> — send Claude's drafted reply\n\n` +
+      `*B2B Outreach — Manual Tracking*\n` +
       `/admin outreach — show today's outreach briefing\n` +
       `/admin sent <target-id> — mark message as sent to target\n` +
       `/admin replied <target-id> — mark target as replied\n\n` +
@@ -1548,6 +1548,116 @@ bot.onText(/\/admin(.*)/, async (msg, match) => {
     }
     addPaidEmail(email);
     await bot.sendMessage(chatId, `✅ ${email} marked as paid. They can now use /start to access their report.`);
+    return;
+  }
+
+  // /admin tgauth start  — request OTP to authenticate gramjs client
+  // /admin tgauth <code> — verify OTP and save session
+  if (cmd === 'tgauth') {
+    const subArg = args[1];
+    if (!subArg || subArg === 'start') {
+      try {
+        await bot.sendMessage(chatId, '📲 Requesting OTP from Telegram...');
+        await requestOtp();
+        await bot.sendMessage(chatId,
+          '✅ OTP sent to your Telegram account (+61438703922).\n\n' +
+          'Check your Telegram messages for the code, then send:\n' +
+          '`/admin tgauth <code>`',
+          { parse_mode: 'Markdown' }
+        );
+      } catch (err) {
+        await bot.sendMessage(chatId, `❌ Auth request failed: ${err.message}`);
+      }
+      return;
+    }
+
+    // Treat subArg as the OTP code
+    const otpCode = subArg;
+    try {
+      await bot.sendMessage(chatId, '🔐 Verifying OTP...');
+      const sessionString = await verifyOtp(otpCode);
+      await bot.sendMessage(chatId,
+        '✅ *Telegram outreach client authenticated!*\n\n' +
+        'Add this to Railway environment variables:\n' +
+        '*Variable:* `TELEGRAM_SESSION`\n' +
+        '*Value:* (see next message)',
+        { parse_mode: 'Markdown' }
+      );
+      // Send session string in a separate message
+      await bot.sendMessage(chatId, sessionString);
+      await bot.sendMessage(chatId,
+        '⚠️ Copy that session string to Railway → Variables → `TELEGRAM_SESSION`\n\n' +
+        'Once saved, the outreach sequencer will start automatically on next deploy.',
+        { parse_mode: 'Markdown' }
+      );
+    } catch (err) {
+      await bot.sendMessage(chatId, `❌ Auth failed: ${err.message}`);
+    }
+    return;
+  }
+
+  // /admin tgstatus — show outreach client connection status
+  if (cmd === 'tgstatus') {
+    const connected = isConnected();
+    await bot.sendMessage(chatId,
+      connected
+        ? '✅ Outreach client connected — auto-sequencer is active.'
+        : '❌ Outreach client not connected.\n\nRun `/admin tgauth start` to authenticate.',
+      { parse_mode: 'Markdown' }
+    );
+    return;
+  }
+
+  // /admin tgsend <target-id> — manually trigger send to a specific target now
+  if (cmd === 'tgsend') {
+    const targetId = args[1];
+    if (!targetId) {
+      await bot.sendMessage(chatId, 'Usage: `/admin tgsend <target-id>`', { parse_mode: 'Markdown' });
+      return;
+    }
+    const outreach = loadOutreach();
+    const target = outreach.targets.find(t => t.id === targetId);
+    if (!target) {
+      await bot.sendMessage(chatId, `Target "${targetId}" not found.`);
+      return;
+    }
+    await bot.sendMessage(chatId, `📤 Running sequencer for ${target.name}...`);
+    try {
+      const { sent, skipped } = await runOutreachSequencer();
+      const sentTarget = sent.find(s => s.id === targetId);
+      if (sentTarget) {
+        await bot.sendMessage(chatId, `✅ Message ${sentTarget.stage} sent to ${target.name}.`);
+      } else {
+        const skip = skipped.find(s => s.id === targetId);
+        await bot.sendMessage(chatId, `⏭ ${target.name} skipped: ${skip?.reason || 'unknown'}`);
+      }
+    } catch (err) {
+      await bot.sendMessage(chatId, `❌ Error: ${err.message}`);
+    }
+    return;
+  }
+
+  // /admin approve <target-id> — send the pending Claude draft reply to target
+  if (cmd === 'approve') {
+    const targetId = args[1];
+    if (!targetId) {
+      await bot.sendMessage(chatId, 'Usage: `/admin approve <target-id>`', { parse_mode: 'Markdown' });
+      return;
+    }
+    const draftKey = `pending_draft_${targetId}`;
+    const draft = pendingDrafts.get(draftKey);
+    if (!draft) {
+      await bot.sendMessage(chatId, `No pending draft for "${targetId}".`);
+      return;
+    }
+    try {
+      const { sendOutreachMessage } = await import('./outreach-client.js');
+      await sendOutreachMessage(draft.handle, draft.text + '\n\n— Anna\nThe Edge Index');
+      pendingDrafts.delete(draftKey);
+      await bot.sendMessage(chatId, `✅ Reply sent to ${draft.targetName}.`);
+    } catch (err) {
+      await bot.sendMessage(chatId, `❌ Failed to send: ${err.message}`);
+    }
     return;
   }
 
@@ -1905,6 +2015,77 @@ cron.schedule('0 22 * * *', async () => {
     }
   } catch (err) {
     console.error('[CRON] Outreach briefing error:', err.message);
+  }
+}, { timezone: 'UTC' });
+
+// ─── Outreach: startup init ────────────────────────────────────────────────────
+
+async function handleOutreachReply(replyData) {
+  if (!ANNA_CHAT_ID) return;
+
+  const { targetId, targetName, handle, messageText, stage } = replyData;
+
+  // Notify Anna immediately
+  await bot.sendMessage(ANNA_CHAT_ID,
+    `💬 *Reply from ${targetName}* (${handle})\n\n"${messageText}"\n\n_Drafting response..._`,
+    { parse_mode: 'Markdown' }
+  );
+
+  // Draft a Claude response
+  try {
+    const draft = await draftSalesResponse(replyData, anthropic);
+
+    // Store for approval
+    pendingDrafts.set(`pending_draft_${targetId}`, {
+      targetId, targetName, handle, text: draft,
+    });
+
+    await bot.sendMessage(ANNA_CHAT_ID,
+      `📝 *Suggested reply:*\n\n${draft}\n\n— Anna\nThe Edge Index\n\n` +
+      `✅ Send it: \`/admin approve ${targetId}\`\n` +
+      `✏️ Edit first, then approve if happy.`,
+      { parse_mode: 'Markdown' }
+    );
+  } catch (err) {
+    await bot.sendMessage(ANNA_CHAT_ID, `⚠️ Couldn't draft reply: ${err.message}`);
+  }
+}
+
+// Init outreach client on startup (non-blocking)
+initOutreachClient(handleOutreachReply).then(connected => {
+  if (connected) {
+    console.log('[OUTREACH] Auto-sequencer ready.');
+  } else {
+    console.log('[OUTREACH] No session — run /admin tgauth start to activate.');
+  }
+}).catch(err => {
+  console.error('[OUTREACH] Init error:', err.message);
+});
+
+// ─── Cron: Daily outreach sequencer — 22:30 UTC (8:30am AEST) ─────────────────
+// Runs 30 minutes after the briefing so Anna sees what's coming first
+
+cron.schedule('30 22 * * *', async () => {
+  if (!isConnected()) {
+    console.log('[CRON] Outreach sequencer skipped — client not connected.');
+    return;
+  }
+
+  console.log('[CRON] Running outreach sequencer...');
+  try {
+    const { sent, skipped } = await runOutreachSequencer();
+
+    if (sent.length > 0 && ANNA_CHAT_ID) {
+      const sentList = sent.map(s => `• ${s.name} — Message ${s.stage}`).join('\n');
+      await bot.sendMessage(ANNA_CHAT_ID,
+        `📤 *Outreach sent today:*\n\n${sentList}`,
+        { parse_mode: 'Markdown' }
+      );
+    } else {
+      console.log('[CRON] Outreach: no messages sent today.');
+    }
+  } catch (err) {
+    console.error('[CRON] Outreach sequencer error:', err.message);
   }
 }, { timezone: 'UTC' });
 

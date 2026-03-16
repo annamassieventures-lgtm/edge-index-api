@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
+    "@supabase/supabase-js": "^2.49.4",
     "astronomy-engine": "^2.1.19",
     "cors": "^2.8.6",
     "express": "^5.2.1",
@@ -25,6 +26,6 @@
     "node-cron": "^3.0.3",
     "node-telegram-bot-api": "^0.66.0",
     "pdfkit": "^0.15.0",
-    "@supabase/supabase-js": "^2.49.4"
+    "telegram": "^2.26.22"
   }
 }
