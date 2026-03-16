@@ -1160,7 +1160,7 @@ function getPersonalisedClose(tradeType) {
     assetLine = `Whatever you trade, the biggest losses rarely come from bad analysis. They come from the right analysis executed at the wrong emotional moment. Your emotional cycle is predictable — and mappable.`;
   }
 
-  return `That's The Edge Index Brief.\n\n${assetLine}\n\nThe Brief is a 17-section personalised intelligence document — built from your individual data. It maps your highest-conviction windows (where to move with scale and confidence), your protection periods (where capital discipline is the edge), and the specific behavioural patterns most likely to cost you.\n\nNot a signal tool. Not a market prediction. A map of your decision environment across the next 12 months.\n\nOne payment. No subscription. Delivered within 15 minutes.\n\n👉 ${WHOP_URL}\n\nOnce you've completed your purchase, come back here and I'll walk you through setting up your brief.`;
+  return `That's The Edge Index Brief.\n\n${assetLine}\n\nThe Brief is a 17-section personalised intelligence document — built from your individual data. It maps your highest-conviction windows (where to move with scale and confidence), your protection periods (where capital discipline is the edge), and the specific behavioural patterns most likely to cost you.\n\nNot a signal tool. Not a market prediction. A map of your decision environment across the next 12 months.\n\nOne payment. Yours for life. Delivered within 15 minutes.\n\n👉 https://edgeindex.io\n\nOnce you've completed your purchase, come back here and I'll walk you through setting up your brief.`;
 }
 
 // ─── Outreach briefing builder ─────────────────────────────────────────────────
