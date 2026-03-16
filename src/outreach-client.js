@@ -42,6 +42,7 @@ function saveSession(sessionString) {
 
 let client        = null;
 let pendingHash   = null; // phoneCodeHash during OTP flow
+let authClient    = null; // kept alive between requestOtp and verifyOtp
 let replyCallback = null; // called when a target replies
 
 export async function initOutreachClient(onReply) {
@@ -75,24 +76,25 @@ export async function initOutreachClient(onReply) {
 // ─── Auth flow ──────────────────────────────────────────────────────────────
 
 export async function requestOtp() {
-  const tempClient = new TelegramClient(new StringSession(''), API_ID, API_HASH, {
+  // Keep authClient alive so the same connection is used for verifyOtp
+  authClient = new TelegramClient(new StringSession(''), API_ID, API_HASH, {
     connectionRetries: 3,
   });
-  await tempClient.connect();
+  await authClient.connect();
 
-  const result = await tempClient.sendCode({ apiId: API_ID, apiHash: API_HASH }, PHONE);
+  const result = await authClient.sendCode({ apiId: API_ID, apiHash: API_HASH }, PHONE);
   pendingHash = result.phoneCodeHash;
 
-  // Store hash in data/ so it survives between bot requests
+  // Also persist hash to file as backup
   fs.mkdirSync(path.dirname(HASH_FILE), { recursive: true });
   fs.writeFileSync(HASH_FILE, pendingHash);
 
-  await tempClient.disconnect();
+  // Do NOT disconnect — keep alive for verifyOtp
   return true;
 }
 
 export async function verifyOtp(code) {
-  // Recover hash from in-memory or from data/ file
+  // Recover hash
   if (!pendingHash) {
     if (fs.existsSync(HASH_FILE)) {
       pendingHash = fs.readFileSync(HASH_FILE, 'utf8').trim();
@@ -101,13 +103,16 @@ export async function verifyOtp(code) {
     }
   }
 
-  const tempClient = new TelegramClient(new StringSession(''), API_ID, API_HASH, {
-    connectionRetries: 3,
-  });
-  await tempClient.connect();
+  // Reuse authClient if still connected, otherwise reconnect
+  if (!authClient || !authClient.connected) {
+    authClient = new TelegramClient(new StringSession(''), API_ID, API_HASH, {
+      connectionRetries: 3,
+    });
+    await authClient.connect();
+  }
 
   try {
-    await tempClient.invoke(new Api.auth.SignIn({
+    await authClient.invoke(new Api.auth.SignIn({
       phoneNumber: PHONE,
       phoneCodeHash: pendingHash,
       phoneCode: code.trim(),
@@ -119,11 +124,12 @@ export async function verifyOtp(code) {
     throw err;
   }
 
-  const sessionString = tempClient.session.save();
+  const sessionString = authClient.session.save();
   saveSession(sessionString);
 
-  // Boot the real client now
-  client = tempClient;
+  // Promote authClient to the live outreach client
+  client = authClient;
+  authClient = null;
   client.addEventHandler(handleIncomingMessage, new NewMessage({}));
 
   pendingHash = null;
