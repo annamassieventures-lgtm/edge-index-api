@@ -1830,6 +1830,31 @@ bot.on('message', async (msg) => {
 
   if (!text || text.startsWith('/')) return;
 
+  // ── OTP intercept: if Anna sends a 5-digit code while tgauth is pending ──
+  if (isAnna(chatId) && /^\d{5}$/.test(text)) {
+    const fs2 = fs;
+    const hashFile = path.join(__dirname, '..', 'data', 'tg-pending-hash.txt');
+    if (fs2.existsSync(hashFile)) {
+      try {
+        await bot.sendMessage(chatId, '🔐 Verifying OTP...');
+        const sessionString = await verifyOtp(text);
+        await bot.sendMessage(chatId,
+          '✅ *Telegram outreach client authenticated!*\n\n' +
+          'Add this to Railway → Variables:\n*Name:* `TELEGRAM_SESSION`\n*Value:* (next message)',
+          { parse_mode: 'Markdown' }
+        );
+        await bot.sendMessage(chatId, sessionString);
+        await bot.sendMessage(chatId,
+          '⚠️ Copy that to Railway env vars, then redeploy. The outreach sequencer will activate automatically.',
+          { parse_mode: 'Markdown' }
+        );
+      } catch (err) {
+        await bot.sendMessage(chatId, `❌ Auth failed: ${err.message}`);
+      }
+      return;
+    }
+  }
+
   const currentState = state[chatId] || 'unknown';
 
   // ── Sales Q1: What do you trade? ──
