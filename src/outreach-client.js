@@ -74,66 +74,52 @@ export async function initOutreachClient(onReply) {
 }
 
 // ─── Auth flow ──────────────────────────────────────────────────────────────
+// Uses gramjs start() which holds ONE connection open and waits for the code.
+// requestOtp() starts the flow and pauses at the phoneCode callback.
+// verifyOtp(code) resolves that callback, completing auth on the same connection.
+
+let pendingCodeResolver = null;
+let pendingAuthPromise  = null;
 
 export async function requestOtp() {
-  // Keep authClient alive so the same connection is used for verifyOtp
+  // Clean up any previous attempt
+  if (authClient) { try { await authClient.disconnect(); } catch {} }
+
   authClient = new TelegramClient(new StringSession(''), API_ID, API_HASH, {
-    connectionRetries: 3,
+    connectionRetries: 5,
   });
-  await authClient.connect();
 
-  const result = await authClient.sendCode({ apiId: API_ID, apiHash: API_HASH }, PHONE);
-  pendingHash = result.phoneCodeHash;
+  // start() runs in background — it will pause waiting for phoneCode promise
+  pendingAuthPromise = authClient.start({
+    phoneNumber: async () => PHONE,
+    phoneCode:   () => new Promise((resolve) => { pendingCodeResolver = resolve; }),
+    onError:     (err) => { console.error('[OUTREACH] Auth error:', err.message); },
+  });
 
-  // Also persist hash to file as backup
-  fs.mkdirSync(path.dirname(HASH_FILE), { recursive: true });
-  fs.writeFileSync(HASH_FILE, pendingHash);
-
-  // Do NOT disconnect — keep alive for verifyOtp
   return true;
 }
 
 export async function verifyOtp(code) {
-  // Recover hash
-  if (!pendingHash) {
-    if (fs.existsSync(HASH_FILE)) {
-      pendingHash = fs.readFileSync(HASH_FILE, 'utf8').trim();
-    } else {
-      throw new Error('No pending OTP request found. Run /admin tgauth start first.');
-    }
+  if (!pendingCodeResolver) {
+    throw new Error('No pending OTP request. Run /admin tgauth start first.');
   }
 
-  // Reuse authClient if still connected, otherwise reconnect
-  if (!authClient || !authClient.connected) {
-    authClient = new TelegramClient(new StringSession(''), API_ID, API_HASH, {
-      connectionRetries: 3,
-    });
-    await authClient.connect();
-  }
+  // Unblock the start() flow with the code
+  pendingCodeResolver(code.trim());
+  pendingCodeResolver = null;
 
-  try {
-    await authClient.invoke(new Api.auth.SignIn({
-      phoneNumber: PHONE,
-      phoneCodeHash: pendingHash,
-      phoneCode: code.trim(),
-    }));
-  } catch (err) {
-    if (err.message.includes('SESSION_PASSWORD_NEEDED')) {
-      throw new Error('2FA is enabled on this account. Disable 2FA in Telegram settings first, then retry.');
-    }
-    throw err;
-  }
+  // Wait for start() to finish authenticating
+  await pendingAuthPromise;
+  pendingAuthPromise = null;
 
   const sessionString = authClient.session.save();
   saveSession(sessionString);
 
-  // Promote authClient to the live outreach client
-  client = authClient;
+  // Promote to live outreach client
+  client    = authClient;
   authClient = null;
   client.addEventHandler(handleIncomingMessage, new NewMessage({}));
 
-  pendingHash = null;
-  if (fs.existsSync(HASH_FILE)) fs.unlinkSync(HASH_FILE);
   return sessionString;
 }
 

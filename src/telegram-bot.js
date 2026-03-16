@@ -388,7 +388,13 @@ Open by naming their specific Golden Windows from this report. Then explain the 
 ---
 
 SECTION 16 — Monitoring the Edge (target: 200 words)
-Open with this framing: this Brief maps the annual decision architecture. But timing windows do not open on a fixed date. They emerge when multiple signals converge. Knowing that June–August is a high-conviction window is strategic intelligence. Knowing the exact week it opens — and the exact day conditions shift — requires live signal tracking. That is what the monitoring layer provides. Frame it clearly: the Brief is the architecture. Monitoring is the operational layer. They are designed to work together. Then introduce the three tiers as the operational components — not as products to purchase, but as the tools that make the Brief actionable in real time. Weekly Edge: your decision environment each week, every Monday. Daily Edge: daily signal tracking so you can see conditions building or pulling back in real time. Live Edge: immediate alerts the moment all signals align — for traders who act in hours, not days. Close with exactly this sentence: "Most traders who receive this Brief choose Daily Edge. They've already paid $2,500 to know their windows. Monitoring is how they don't miss them."
+Open with this framing: this Brief maps the annual decision architecture. But timing windows do not open on a fixed date. They emerge when multiple signals converge. Knowing that a certain month is a high-conviction window is strategic intelligence. Knowing the exact week it opens — and the exact day conditions shift — requires live signal tracking. That is what the monitoring layer provides. Frame it clearly: the Brief is the architecture. Monitoring is the operational layer. They are designed to work together. Then introduce the three tiers as the operational components — not as products to purchase, but as the tools that make the Brief actionable in real time:
+
+Weekly Edge ($97/month): Your decision environment each week, delivered every Monday. Know whether to advance or hold before the week begins.
+Daily Edge ($197/month): Daily signal tracking so you can see conditions building or pulling back in real time. The most popular tier.
+Live Edge ($397/month): Immediate alerts the moment all signals align — for traders who act in hours, not days. Maximum precision.
+
+Present the pricing factually — these are the tools that close the gap between the map and the moment. Close with exactly this sentence: "Most traders who receive this Brief choose Daily Edge. They've already paid $2,500 to know their windows. Monitoring is how they don't miss them."
 
 ---
 
@@ -443,6 +449,17 @@ QUALITY CHECKLIST — verify before outputting:
 
 
 async function generateReport(userData) {
+  const now        = new Date();
+  const reportDate = now.toISOString().split('T')[0];
+
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const startMonth = monthNames[now.getMonth()];
+  const startYear  = now.getFullYear();
+  const endDate    = new Date(now);
+  endDate.setMonth(endDate.getMonth() + 11);
+  const endMonth   = monthNames[endDate.getMonth()];
+  const endYear    = endDate.getFullYear();
+
   const clientData = {
     name:          userData.firstName || 'Trader',
     birthDate:     userData.dob,
@@ -454,8 +471,37 @@ async function generateReport(userData) {
     hdAuthority:   userData.hdAuthority  || 'Sacral Authority',
     hdProfile:     userData.hdProfile    || null,
     hdDefinition:  userData.hdDefinition || null,
-    reportDate:    new Date().toISOString().split('T')[0],
+    tradeType:     userData.tradeType    || 'general trading',
+    reportDate,
+    reportPeriod:  `${startMonth} ${startYear} – ${endMonth} ${endYear}`,
+    currentMonth:  `${startMonth} ${startYear}`,
   };
+
+  const userPrompt =
+`Generate a full 17-section Edge Index Brief for the following client.
+
+TODAY'S DATE: ${reportDate}
+REPORT PERIOD: ${clientData.reportPeriod} — use these exact months throughout the report.
+CURRENT MONTH FOR "RIGHT NOW" CALLOUT IN SECTION 7: ${clientData.currentMonth}
+
+CLIENT:
+- Name: ${clientData.name}
+- Date of birth: ${clientData.birthDate}
+- Time of birth: ${clientData.birthTime}
+- Location of birth: ${clientData.birthLocation} (lat: ${clientData.lat}, lon: ${clientData.lon})
+- HD Type: ${clientData.hdType}
+- HD Authority: ${clientData.hdAuthority}
+- HD Profile: ${clientData.hdProfile || 'not provided'}
+- HD Definition: ${clientData.hdDefinition || 'not provided'}
+- Primary trading focus: ${clientData.tradeType}
+
+REQUIREMENTS:
+- Minimum 4,500 words. All 17 sections in full.
+- Section 7 RIGHT NOW callout must open with "RIGHT NOW — ${clientData.currentMonth}:" and address what this client should be doing this month specifically.
+- All Golden Windows, Protection Periods, and monthly table rows must use real named months from ${clientData.reportPeriod} — no placeholders.
+- Every section must reference ${clientData.name} by name at least once.
+- The client's trading focus (${clientData.tradeType}) must be woven into sections 7, 8, 9, 10, and 12 with specific references.
+- Use Edge Index architecture names exclusively — no HD terminology anywhere in the output.`;
 
   const message = await anthropic.messages.create({
     model:      'claude-sonnet-4-6',
@@ -463,7 +509,7 @@ async function generateReport(userData) {
     system:     SYSTEM_PROMPT,
     messages: [{
       role:    'user',
-      content: `Generate a full 17-section Edge Index Brief (12-month annual decision-timing intelligence report) for the following client. Use all sections as instructed. Minimum 4,500 words. Client data: ${JSON.stringify(clientData)}`,
+      content: userPrompt,
     }],
   });
 
