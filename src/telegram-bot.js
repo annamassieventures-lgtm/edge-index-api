@@ -655,412 +655,510 @@ function markdownBodyToHtml(md) {
   }).filter(p => p).join('\n');
 }
 
-// ─── Premium HTML report builder ──────────────────────────────────────────────
+// ─── Short delivery email (light theme) ───────────────────────────────────────
+// The email is a concise delivery notice — the full report lives in the PDF.
 
 function mdToHtml(reportMarkdown, clientName, userData) {
   const sec    = parseReportSections(reportMarkdown);
   const timing = parseTimingTable(sec.s6table || '');
-  const rules  = parseOperatingRules(sec.s15 || '');
-  const arch   = getArchitectureDisplay(userData?.hdType, userData?.hdAuthority);
   const year   = new Date().getFullYear();
 
-  const S = {};
-  ['s1','s2','s3','s4','s5','s6intro','s6summary','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16','s17'].forEach(k => {
-    S[k] = markdownBodyToHtml(sec[k] || '');
-  });
+  // 12-month visual bar
+  const monthBarCells = timing.rows.length > 0
+    ? timing.rows.map(r => {
+        const bg = r.envClass === 'env-green' ? '#22C55E' : r.envClass === 'env-red' ? '#EF4444' : '#F59E0B';
+        const label = r.month.length > 4 ? r.month.substring(0, 3) : r.month;
+        return `<td style="padding:0 2px;text-align:center;vertical-align:top;"><div style="background:${bg};height:14px;border-radius:3px;margin-bottom:7px;"></div><div style="font-size:9px;color:#999999;font-family:Arial,sans-serif;">${label}</div></td>`;
+      }).join('')
+    : ['J','F','M','A','M','J','J','A','S','O','N','D'].map(m =>
+        `<td style="padding:0 2px;text-align:center;vertical-align:top;"><div style="background:#E0E0E0;height:14px;border-radius:3px;margin-bottom:7px;"></div><div style="font-size:9px;color:#BBBBBB;font-family:Arial,sans-serif;">${m}</div></td>`
+      ).join('');
 
-  const expCallout  = extractCallout(sec.s7  || '');
-  const protCallout = extractCallout(sec.s8  || '');
-  const patCallout  = extractCallout(sec.s12 || '');
-
-  const timingRowsHtml = timing.rows.map(r => `
-      <div style="display:grid;grid-template-columns:110px 1fr 2fr;gap:16px;align-items:center;padding:14px 20px;border-bottom:1px solid #2A2A2A;">
-        <span style="font-size:13px;color:#FFFFFF;letter-spacing:0.05em;">${r.month}</span>
-        <span style="${r.envClass === 'env-green' ? 'background:rgba(29,185,84,0.10);color:#1DB954;border:1px solid rgba(29,185,84,0.3);' : r.envClass === 'env-red' ? 'background:rgba(232,68,90,0.10);color:#E8445A;border:1px solid rgba(232,68,90,0.3);' : 'background:rgba(245,166,35,0.10);color:#F5A623;border:1px solid rgba(245,166,35,0.3);'}display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;padding:4px 10px;border-radius:3px;white-space:nowrap;"><span style="width:6px;height:6px;border-radius:50%;background:${r.envClass === 'env-green' ? '#1DB954' : r.envClass === 'env-red' ? '#E8445A' : '#F5A623'};flex-shrink:0;"></span>${r.envLabel}</span>
-        <span style="font-size:13px;color:#9BA8C0;line-height:1.5;">${r.note}</span>
-      </div>`).join('');
-
-  const rulesHtml = rules.map((r, i) => `
-      <div style="display:flex;gap:16px;align-items:flex-start;padding:18px 0;border-bottom:1px solid #2A2A2A;">
-        <span style="font-family:Georgia,serif;font-size:22px;color:#C9A84C;opacity:0.5;line-height:1;min-width:28px;margin-top:2px;">0${i+1}</span>
-        <div style="font-size:15px;color:#9BA8C0;line-height:1.7;">
-          <span style="display:block;font-size:14px;color:#FFFFFF;letter-spacing:0.03em;margin-bottom:4px;font-family:Georgia,serif;font-style:italic;">${r.title}</span>
-          ${r.body}
-        </div>
-      </div>`).join('');
+  const greenMonths = timing.rows.filter(r => r.envClass === 'env-green').map(r => r.month);
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>The Edge Index Brief — ${clientName}</title>
-  <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{font-size:16px}
-    body{background:#000000;color:#FFFFFF;font-family:'Georgia','Times New Roman',serif;line-height:1.75;-webkit-font-smoothing:antialiased;margin:0;padding:0;}
-    .wrap{max-width:760px;margin:0 auto;padding:0 24px}
-    .section-body p{margin-bottom:18px;color:#E0E0E0;}
-    .section-body p:last-child{margin-bottom:0}
-    .report-section{padding:52px 0;border-bottom:1px solid #2A2A2A}
-    .report-section:last-of-type{border-bottom:none}
-    .section-title::after{content:'';display:block;width:40px;height:2px;background:#C9A84C;margin-top:16px}
-    @media(max-width:600px){.tools-grid{grid-template-columns:1fr!important}.discipline-grid{grid-template-columns:1fr!important}.dual-cta{grid-template-columns:1fr!important}}
-  </style>
+  <title>Your Edge Index Brief — ${clientName}</title>
 </head>
-<body bgcolor="#000000" style="background:#000000;margin:0;padding:0;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#000000" style="background-color:#000000;min-width:100%;">
-<tr><td bgcolor="#000000" style="background-color:#000000;">
+<body style="margin:0;padding:0;background:#EDECEA;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#EDECEA" style="background:#EDECEA;">
+<tr><td align="center" style="padding:48px 20px;">
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
 
-<!-- HEADER -->
-<header style="background:#0A0A0A;border-bottom:1px solid #2A2A2A;padding:48px 0 40px;text-align:center;">
-  <div style="max-width:760px;margin:0 auto;padding:0 24px;">
-    <span style="font-family:Georgia,serif;font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:#C9A84C;margin-bottom:28px;display:block;">The Edge Index</span>
-    <h1 style="font-family:Georgia,serif;font-size:clamp(28px,5vw,42px);font-weight:normal;letter-spacing:-0.02em;color:#FFFFFF;line-height:1.2;margin-bottom:10px;">Strategic Timing Intelligence</h1>
-    <p style="font-size:13px;letter-spacing:0.2em;text-transform:uppercase;color:#9BA8C0;margin-bottom:36px;">Decision Intelligence Brief — ${year}</p>
-    <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);border-radius:4px;padding:10px 20px;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#E8C96A;">
-      <span style="color:#9BA8C0;">Prepared for</span> ${clientName}
+  <!-- HEADER -->
+  <tr><td bgcolor="#111111" style="background:#111111;padding:40px 48px;text-align:center;border-radius:6px 6px 0 0;">
+    <div style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:0.35em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;">The Edge Index</div>
+    <div style="font-family:Georgia,serif;font-size:26px;font-weight:normal;color:#FFFFFF;letter-spacing:-0.02em;margin-bottom:10px;">Your Brief is Ready</div>
+    <div style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#888888;">Prepared for ${clientName} &nbsp;·&nbsp; ${year}</div>
+  </td></tr>
+
+  <!-- GOLD LINE -->
+  <tr><td bgcolor="#C9A84C" style="background:#C9A84C;height:3px;padding:0;font-size:0;line-height:0;">&nbsp;</td></tr>
+
+  <!-- BODY -->
+  <tr><td bgcolor="#FFFFFF" style="background:#FFFFFF;padding:48px 48px 40px;border-left:1px solid #E0DDD4;border-right:1px solid #E0DDD4;">
+
+    <p style="font-size:17px;color:#1A1A1A;line-height:1.85;margin:0 0 18px;font-family:Georgia,serif;">Hello ${clientName},</p>
+    <p style="font-size:15px;color:#333333;line-height:1.85;margin:0 0 16px;font-family:Georgia,serif;">Your Edge Index Brief is attached to this email as a PDF.</p>
+    <p style="font-size:15px;color:#333333;line-height:1.85;margin:0 0 36px;font-family:Georgia,serif;">Begin with the <strong style="color:#1A1A1A;">Executive Overview</strong>, your <strong style="color:#1A1A1A;">Golden Windows</strong>, and your <strong style="color:#1A1A1A;">Protection Periods</strong>. These three pages give you the strategic structure for everything that follows.</p>
+
+    <!-- DIVIDER -->
+    <div style="border-top:1px solid #E8E5DC;margin:0 0 32px;font-size:0;">&nbsp;</div>
+
+    <!-- 12-MONTH SNAPSHOT -->
+    <div style="margin-bottom:32px;">
+      <div style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:#9B8B5E;margin-bottom:18px;">Your 12-Month Snapshot</div>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr style="vertical-align:top;">${monthBarCells}</tr></table>
+      <table cellpadding="0" cellspacing="0" border="0" style="margin-top:16px;">
+        <tr>
+          <td><div style="width:10px;height:10px;background:#22C55E;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:5px;"></div></td>
+          <td style="font-size:11px;color:#555555;font-family:Arial,sans-serif;padding-right:20px;">Expansion — ${timing.greenCount} mo.</td>
+          <td><div style="width:10px;height:10px;background:#F59E0B;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:5px;"></div></td>
+          <td style="font-size:11px;color:#555555;font-family:Arial,sans-serif;padding-right:20px;">Selective — ${timing.amberCount} mo.</td>
+          <td><div style="width:10px;height:10px;background:#EF4444;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:5px;"></div></td>
+          <td style="font-size:11px;color:#555555;font-family:Arial,sans-serif;">Protection — ${timing.redCount} mo.</td>
+        </tr>
+      </table>
+      ${greenMonths.length > 0 ? `<p style="font-size:12px;color:#555555;font-family:Arial,sans-serif;margin:12px 0 0;line-height:1.6;">Strongest windows: <strong style="color:#1A1A1A;">${greenMonths.join(', ')}</strong></p>` : ''}
     </div>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px;padding-top:28px;border-top:1px solid #2A2A2A;"><tr>
-      <td width="33%" style="text-align:center;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#9BA8C0;padding:8px;"><strong style="display:block;font-family:Georgia,serif;font-size:15px;letter-spacing:0;color:#FFFFFF;margin-bottom:4px;font-weight:normal;">${year}–${year+1}</strong>Report Period</td>
-      <td width="33%" style="text-align:center;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#9BA8C0;padding:8px;"><strong style="display:block;font-family:Georgia,serif;font-size:15px;letter-spacing:0;color:#FFFFFF;margin-bottom:4px;font-weight:normal;">17</strong>Sections</td>
-      <td width="33%" style="text-align:center;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#9BA8C0;padding:8px;"><strong style="display:block;font-family:Georgia,serif;font-size:15px;letter-spacing:0;color:#FFFFFF;margin-bottom:4px;font-weight:normal;">${timing.greenCount} / ${timing.amberCount} / ${timing.redCount}</strong>Green · Amber · Red</td>
-    </tr></table>
-  </div>
-</header>
 
-<!-- INTRO LETTER -->
-<div style="background:#0A0A0A;border-bottom:1px solid #2A2A2A;padding:48px 0;">
-  <div style="max-width:760px;margin:0 auto;padding:0 24px;">
-    <p style="font-size:16px;color:#E0E0E0;line-height:1.85;margin-bottom:20px;">Hello ${clientName},</p>
-    <p style="font-size:16px;color:#E0E0E0;line-height:1.85;margin-bottom:20px;">Your Edge Index Brief has been completed.</p>
-    <p style="font-size:16px;color:#E0E0E0;line-height:1.85;margin-bottom:28px;">This document maps your personal decision timing architecture across the next 12 months — identifying the periods where conviction tends to compound and the periods where discipline protects capital.</p>
-    <div style="background:#111;border:1px solid #2A2A2A;border-left:3px solid #C9A84C;padding:24px 28px;margin-bottom:28px;">
-      <p style="font-size:12px;font-family:Arial,sans-serif;letter-spacing:0.18em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;">Inside this brief</p>
-      <p style="font-size:14px;color:#9BA8C0;line-height:1.8;margin-bottom:0;">Your highest-probability capital deployment windows &nbsp;·&nbsp; Protection and consolidation periods &nbsp;·&nbsp; Behavioural pressure points that affect decision quality &nbsp;·&nbsp; Your natural decision authority profile &nbsp;·&nbsp; A full 12-month timing map</p>
-    </div>
-    <p style="font-size:15px;color:#E0E0E0;line-height:1.85;margin-bottom:20px;">The Edge Index is not designed to predict markets. Its purpose is to help you recognise when your decision environment is strongest — so strategy and execution align.</p>
-    <p style="font-size:14px;color:#9BA8C0;line-height:1.85;margin-bottom:28px;font-style:italic;">When you open the report, begin with three sections: the Executive Intelligence Summary, your Golden Windows, and your Protection Periods. These three pages establish the structure for everything that follows.</p>
-    <p style="font-size:13px;color:#666;line-height:1.7;border-top:1px solid #2A2A2A;padding-top:20px;margin-bottom:0;">One important note: timing windows rarely open on a single date. They emerge as multiple signals converge. For traders who want to track these shifts in real time, the Edge Index provides ongoing monitoring — Weekly Edge, Daily Edge, and Live timing alerts. These tools track the moment your timing conditions begin to shift. Details are in Section 15 of your brief.</p>
-  </div>
-</div>
+    <!-- DIVIDER -->
+    <div style="border-top:1px solid #E8E5DC;margin:0 0 32px;font-size:0;">&nbsp;</div>
 
-<!-- SIGNAL BAR -->
-<div style="background:#0A0A0A;border-bottom:1px solid #C9A84C;border-top:1px solid #C9A84C;padding:20px 0;">
-  <div style="max-width:760px;margin:0 auto;padding:0 24px;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-      <td style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#C9A84C;white-space:nowrap;padding-right:16px;">Active Signals</td>
-      <td style="text-align:right;">
-        ${['Clarity','Action','Expansion','Pressure','Emotional Volatility','Risk','Opportunity Window'].map(s => `<span style="display:inline-block;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;margin:2px;border-radius:2px;background:rgba(201,168,76,0.1);color:#C9A84C;border:1px solid rgba(201,168,76,0.3);">${s}</span>`).join('')}
-      </td>
-    </tr></table>
-  </div>
-</div>
-
-<!-- DELIVERY INTRO -->
-<div style="background:#000000;border-bottom:1px solid #2A2A2A;padding:20px 0;">
-  <div style="max-width:760px;margin:0 auto;padding:0 24px;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-      <td style="font-size:13px;color:#CCCCCC;line-height:1.65;">Your Edge Index Brief is a complete decision timing intelligence system for <strong style="color:#C9A84C;">${year}</strong>. Most traders spend $3,000–$6,000 per year on tools that analyse the market — but never personally analyse the decision maker.</td>
-      <td width="120" style="text-align:right;padding-left:16px;white-space:nowrap;vertical-align:middle;">
-        <span style="display:inline-block;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:3px;padding:8px 12px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#C9A84C;">&#9679; PDF attached</span>
-      </td>
-    </tr></table>
-  </div>
-</div>
-
-<!-- TABLE OF CONTENTS -->
-<div class="wrap">
-  <div style="padding:48px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:20px;display:block;">Contents</span>
+    <!-- MONITORING UPSELL -->
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
-      ${(()=>{const items=[['01','Executive Overview'],['02','Your Decision Architecture'],['03','Behaviour Under Pressure'],['04','The Signal Framework'],['05','Your Personal Timing Profile'],['06','Your 12-Month Timing Map'],['07','Expansion Windows'],['08','Protection Periods'],['09','Opportunity Windows'],['10','Risk Environment Patterns'],['11','Emotional Volatility Cycles'],['12','Strategic Patience'],['13','Decision Discipline Framework'],['14','Behavioural Blind Spots'],['15','Strategic Operating Rules'],['16','Monitoring Your Timing'],['17','Final Insight']];let rows='';for(let i=0;i<items.length;i+=2){const a=items[i],b=items[i+1];rows+=`<tr><td style="font-size:13px;color:#DDDDDD;padding:7px 16px 7px 0;border-bottom:1px solid #2A2A2A;width:50%;"><span style="font-size:10px;color:#C9A84C;letter-spacing:0.1em;margin-right:10px;">${a[0]}</span>${a[1]}</td><td style="font-size:13px;color:#DDDDDD;padding:7px 0 7px 16px;border-bottom:1px solid #2A2A2A;width:50%;">${b?`<span style="font-size:10px;color:#C9A84C;letter-spacing:0.1em;margin-right:10px;">${b[0]}</span>${b[1]}`:''}</td></tr>`;}return rows;})()}
+    <tr><td bgcolor="#111111" style="background:#111111;border-radius:4px;padding:32px 36px;text-align:center;">
+      <div style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;">Don't miss your windows</div>
+      <p style="font-family:Georgia,serif;font-size:17px;color:#FFFFFF;line-height:1.55;margin:0 0 12px;font-style:italic;">Your annual map is the foundation.<br/>Timing shifts week to week within that structure.</p>
+      <p style="font-size:13px;color:#AAAAAA;line-height:1.7;margin:0 0 24px;font-family:Arial,sans-serif;">Weekly Edge, Daily Edge, and Live monitoring alerts track the exact moment your conditions begin to shift — so you act in the window, not after it.</p>
+      <a href="https://edgeindex.io" style="display:inline-block;background:#C9A84C;color:#000000;font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;padding:13px 32px;border-radius:3px;text-decoration:none;font-weight:bold;">Explore Monitoring →</a>
+    </td></tr>
     </table>
-  </div>
-</div>
 
-<div style="height:1px;background:linear-gradient(90deg,transparent,#C9A84C,transparent);opacity:0.3;"></div>
+  </td></tr>
 
-<!-- MAIN REPORT -->
-<main class="wrap">
+  <!-- FOOTER -->
+  <tr><td bgcolor="#E4E2DA" style="background:#E4E2DA;padding:22px 48px;text-align:center;border:1px solid #D8D5CC;border-top:none;border-radius:0 0 6px 6px;">
+    <p style="font-size:11px;color:#888888;margin:0;line-height:1.7;font-family:Arial,sans-serif;">Prepared exclusively for ${clientName} &nbsp;·&nbsp; &copy; ${year} The Edge Index &nbsp;·&nbsp; edgeindex.io</p>
+  </td></tr>
 
-  <!-- S1 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 01</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Executive Overview</h2>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s1}</div>
-  </section>
-
-  <!-- S2 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 02</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:16px;line-height:1.3;">Your Decision Architecture</h2>
-    <div style="display:inline-flex;align-items:center;gap:12px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.2);border-radius:4px;padding:10px 18px;margin-bottom:26px;">
-      <span style="font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:#9BA8C0;white-space:nowrap;">Decision Architecture</span>
-      <span style="width:1px;height:14px;background:#263258;flex-shrink:0;"></span>
-      <span style="font-family:Georgia,serif;font-size:14px;color:#E8C96A;font-style:italic;">${arch}</span>
-    </div>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s2}</div>
-  </section>
-
-  <!-- S3 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 03</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Behaviour Under Pressure</h2>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s3}</div>
-  </section>
-
-  <!-- S4 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 04</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">The Edge Index Signal Framework</h2>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s4}</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:24px;">
-      ${['Clarity','Action','Expansion','Pressure','Volatility','Risk','Opportunity Window'].map(s => `<span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;padding:5px 12px;border-radius:3px;background:rgba(155,168,192,0.08);color:#9BA8C0;border:1px solid rgba(155,168,192,0.2);">${s}</span>`).join('')}
-    </div>
-  </section>
-
-  <!-- S5 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 05</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Your Personal Timing Profile</h2>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s5}</div>
-  </section>
-
-  <!-- S6 — TIMING MAP -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 06</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Your 12-Month Timing Map</h2>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s6intro}</div>
-    <div style="margin-top:32px;border:1px solid #2A2A2A;border-radius:6px;overflow:hidden;">
-      <div style="background:#0D0D0D;padding:14px 20px;display:grid;grid-template-columns:110px 1fr 2fr;gap:16px;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#9BA8C0;border-bottom:1px solid #2A2A2A;">
-        <span>Month</span><span>Environment</span><span>Key Conditions</span>
-      </div>
-      ${timingRowsHtml || '<div style="padding:20px;color:#9BA8C0;font-size:13px;">Timing data not available</div>'}
-    </div>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;margin-top:28px;">${S.s6summary}</div>
-  </section>
-
-  <!-- S7 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 07</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Expansion Windows</h2>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s7}</div>
-    ${expCallout ? `<div style="margin:28px 0;padding:24px 28px;border-left:3px solid #1DB954;background:rgba(29,185,84,0.10);border-radius:0 4px 4px 0;"><p style="font-size:15px;color:#FFFFFF;line-height:1.7;margin:0;font-style:italic;">${expCallout}</p></div>` : ''}
-  </section>
-
-  <!-- S8 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 08</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Protection Periods</h2>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s8}</div>
-    ${protCallout ? `<div style="margin:28px 0;padding:24px 28px;border-left:3px solid #E8445A;background:rgba(232,68,90,0.10);border-radius:0 4px 4px 0;"><p style="font-size:15px;color:#FFFFFF;line-height:1.7;margin:0;font-style:italic;">${protCallout}</p></div>` : ''}
-  </section>
-
-  <!-- S9 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 09</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Opportunity Windows</h2>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s9}</div>
-  </section>
-
-  <!-- S10 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 10</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Risk Environment Patterns</h2>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s10}</div>
-  </section>
-
-  <!-- S11 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 11</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Emotional Volatility Cycles</h2>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s11 || S.s10}</div>
-  </section>
-
-  <!-- S12 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 12</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Strategic Patience</h2>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s12}</div>
-    ${patCallout ? `<div style="margin:28px 0;padding:24px 28px;border-left:3px solid #C9A84C;background:rgba(201,168,76,0.12);border-radius:0 4px 4px 0;"><p style="font-size:15px;color:#FFFFFF;line-height:1.7;margin:0;font-style:italic;">${patCallout}</p></div>` : ''}
-  </section>
-
-  <!-- S13 — DISCIPLINE FRAMEWORK -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 13</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Decision Discipline Framework</h2>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s13}</div>
-    <div class="discipline-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px;">
-      <div style="background:rgba(29,185,84,0.10);border:1px solid rgba(29,185,84,0.25);border-radius:6px;padding:24px 20px;text-align:center;">
-        <div style="font-size:10px;letter-spacing:0.25em;text-transform:uppercase;margin-bottom:12px;color:#1DB954;">Green — Expansion</div>
-        <div style="font-family:Georgia,serif;font-size:16px;color:#FFFFFF;margin-bottom:10px;line-height:1.3;">Act Decisively</div>
-        <div style="font-size:12px;color:#9BA8C0;line-height:1.5;">Prioritise high-conviction moves. Size up. Trust the conditions.</div>
-      </div>
-      <div style="background:rgba(245,166,35,0.10);border:1px solid rgba(245,166,35,0.25);border-radius:6px;padding:24px 20px;text-align:center;">
-        <div style="font-size:10px;letter-spacing:0.25em;text-transform:uppercase;margin-bottom:12px;color:#F5A623;">Amber — Selective</div>
-        <div style="font-family:Georgia,serif;font-size:16px;color:#FFFFFF;margin-bottom:10px;line-height:1.3;">Act with Precision</div>
-        <div style="font-size:12px;color:#9BA8C0;line-height:1.5;">Raise entry criteria. Smaller size. Tighter discipline.</div>
-      </div>
-      <div style="background:rgba(232,68,90,0.10);border:1px solid rgba(232,68,90,0.25);border-radius:6px;padding:24px 20px;text-align:center;">
-        <div style="font-size:10px;letter-spacing:0.25em;text-transform:uppercase;margin-bottom:12px;color:#E8445A;">Red — Protection</div>
-        <div style="font-family:Georgia,serif;font-size:16px;color:#FFFFFF;margin-bottom:10px;line-height:1.3;">Protect Capital</div>
-        <div style="font-size:12px;color:#9BA8C0;line-height:1.5;">Reduce exposure. Wait for the next window. Patience is a position.</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- S14 -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 14</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Behavioural Blind Spots</h2>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s14}</div>
-  </section>
-
-  <!-- S15 — OPERATING RULES -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 15</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Strategic Operating Rules</h2>
-    <div style="margin-top:24px;">${rulesHtml}</div>
-  </section>
-
-  <!-- S16 — MONITORING -->
-  <section class="report-section" style="padding:52px 0;border-bottom:1px solid #2A2A2A;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:10px;display:block;">Section 16</span>
-    <h2 class="section-title" style="font-family:Georgia,serif;font-size:clamp(20px,3vw,26px);font-weight:normal;color:#FFFFFF;letter-spacing:-0.01em;margin-bottom:28px;line-height:1.3;">Monitoring Your Timing</h2>
-    <div class="section-body" style="font-size:15.5px;line-height:1.85;color:#9BA8C0;">${S.s16}</div>
-    <div class="tools-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:32px;">
-      ${[['◎','Weekly Edge','Every Week','Weekly signal review and environment assessment for the week ahead. $97/month'],['◉','Daily Edge','Every Day','Daily timing conditions and decision guidance delivered each morning. $197/month'],['●','Live Edge','Real-Time','Live signal monitoring as timing conditions shift throughout the day. $397/month']].map(([icon,name,freq,desc]) => `
-      <div style="background:#0D0D0D;border:1px solid #2A2A2A;border-radius:6px;padding:28px 22px;text-align:center;">
-        <div style="width:40px;height:40px;border-radius:50%;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:16px;">${icon}</div>
-        <div style="font-family:Georgia,serif;font-size:15px;color:#FFFFFF;margin-bottom:8px;">${name}</div>
-        <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#C9A84C;margin-bottom:12px;">${freq}</div>
-        <div style="font-size:12.5px;color:#9BA8C0;line-height:1.6;">${desc}</div>
-      </div>`).join('')}
-    </div>
-    <div style="margin:32px 0 0;padding:24px 28px;border-left:3px solid #C9A84C;background:rgba(201,168,76,0.12);border-radius:0 4px 4px 0;">
-      <p style="font-size:15px;color:#FFFFFF;line-height:1.7;margin:0;font-style:italic;">Most traders who receive this Brief choose Daily Edge. They've already paid $2,500 to know their windows. Monitoring is how they don't miss them.</p>
-    </div>
-  </section>
-
-</main>
-
-<!-- CTA -->
-<div style="background:#0A0A0A;border-top:1px solid #2A2A2A;border-bottom:1px solid #2A2A2A;padding:56px 0;text-align:center;margin-top:16px;">
-  <div style="max-width:660px;margin:0 auto;padding:0 24px;">
-    <p style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:16px;">Continue Your Edge</p>
-    <h2 style="font-family:Georgia,serif;font-size:clamp(22px,4vw,30px);font-weight:normal;color:#FFFFFF;line-height:1.3;margin-bottom:16px;">Track your timing signals in real time</h2>
-    <p style="font-size:14px;color:#9BA8C0;line-height:1.7;margin-bottom:32px;">Your yearly map is the strategic foundation. Timing conditions shift week to week and day to day within that structure.</p>
-    <div class="dual-cta" style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #2A2A2A;border-radius:6px;overflow:hidden;max-width:600px;margin:0 auto;">
-      <div style="padding:32px 28px;text-align:center;background:#0D0D0D;border-right:1px solid #2A2A2A;">
-        <span style="font-size:9px;letter-spacing:0.3em;text-transform:uppercase;margin-bottom:10px;display:block;color:#1DB954;">For Individual Traders</span>
-        <div style="font-family:Georgia,serif;font-size:16px;font-weight:normal;color:#FFFFFF;line-height:1.35;margin-bottom:10px;">Weekly, Daily &amp; Live Monitoring</div>
-        <p style="font-size:12px;color:#9BA8C0;line-height:1.6;margin-bottom:22px;">Stay aligned with your timing windows as they open and close throughout ${year}.</p>
-        <a href="https://edgeindex.io/monitoring" style="display:inline-block;background:#C9A84C;color:#000000;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;padding:11px 22px;border-radius:3px;text-decoration:none;font-family:Georgia,serif;font-weight:bold;">Explore Monitoring →</a>
-      </div>
-      <div style="padding:32px 28px;text-align:center;background:#0A0A0A;">
-        <span style="font-size:9px;letter-spacing:0.3em;text-transform:uppercase;margin-bottom:10px;display:block;color:#C9A84C;">For Community Operators</span>
-        <div style="font-family:Georgia,serif;font-size:16px;font-weight:normal;color:#FFFFFF;line-height:1.35;margin-bottom:10px;">Community Licensing</div>
-        <p style="font-size:12px;color:#9BA8C0;line-height:1.6;margin-bottom:22px;">Add the Edge Index Brief to your community as a premium timing intelligence product.</p>
-        <a href="https://edgeindex.io/community" style="display:inline-block;background:transparent;color:#C9A84C;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;padding:10px 22px;border-radius:3px;text-decoration:none;font-family:Georgia,serif;border:1px solid rgba(201,168,76,0.35);">Learn About Licensing →</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- S17 — FINAL INSIGHT -->
-<div class="wrap">
-  <div style="padding:64px 0 72px;text-align:center;">
-    <span style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;display:block;margin-bottom:12px;">Section 17</span>
-    <p style="font-family:Georgia;font-size:clamp(14px,2vw,16px);letter-spacing:0.12em;text-transform:uppercase;color:#9BA8C0;margin:0 0 40px;">Final Insight</p>
-    <p style="font-family:Georgia,serif;font-size:clamp(18px,3vw,24px);color:#FFFFFF;font-style:italic;line-height:1.6;max-width:580px;margin:0 auto 32px;">"In high-performance environments, the edge rarely comes from superior information alone. It comes from knowing when conditions support decisive action — and having the discipline to wait when they do not."</p>
-    <div style="width:60px;height:1px;background:#C9A84C;margin:32px auto;opacity:0.5;"></div>
-    <div style="font-size:14.5px;color:#9BA8C0;line-height:1.8;max-width:520px;margin:0 auto;">${S.s17}</div>
-    <div style="width:60px;height:1px;background:#C9A84C;margin:32px auto;opacity:0.5;"></div>
-    <p style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#C9A84C;margin-top:8px;">The Edge Index — ${year}</p>
-  </div>
-</div>
-
-<!-- FOOTER -->
-<footer style="background:#0A0A0A;border-top:1px solid #2A2A2A;padding:36px 0;">
-  <div style="max-width:760px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
-    <span style="font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:#C9A84C;">The Edge Index</span>
-    <p style="font-size:11.5px;color:#9BA8C0;line-height:1.6;">This report was prepared exclusively for ${clientName}.<br/>Strategic Timing Intelligence &amp; Decision Psychology.<br/>edgeindex.io</p>
-    <p style="font-size:11.5px;color:#9BA8C0;line-height:1.6;text-align:right;">&copy; ${year} The Edge Index.<br/>All rights reserved.</p>
-  </div>
-</footer>
-
-</td></tr></table>
+</table>
+</td></tr>
+</table>
 </body>
 </html>`;
 }
 
-// ─── PDF generation ────────────────────────────────────────────────────────────
 
-function generatePDF(reportMarkdown, clientName, reportDate) {
+// ─── PDF generation — Premium full report ─────────────────────────────────────
+
+function generatePDF(reportMarkdown, clientName, reportDate, userData = {}) {
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ margin: 60, size: 'A4' });
+    const doc = new PDFDocument({ margin: 60, size: 'A4', autoFirstPage: false });
     const chunks = [];
     doc.on('data', chunk => chunks.push(chunk));
-    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('end',  () => resolve(Buffer.concat(chunks)));
     doc.on('error', reject);
 
-    // Header
-    doc.rect(0, 0, doc.page.width, 120).fill('#0a0a0a');
-    doc.fillColor('#c9a84c').fontSize(9).font('Helvetica')
-       .text('PERSONALISED DECISION-TIMING INTELLIGENCE', 60, 35, { align: 'center', width: doc.page.width - 120, characterSpacing: 2 });
-    doc.fillColor('#ffffff').fontSize(28).font('Helvetica-Bold')
-       .text('THE EDGE INDEX', 60, 52, { align: 'center', width: doc.page.width - 120 });
-    doc.fillColor('#888888').fontSize(11).font('Helvetica-Oblique')
-       .text(`Annual Brief — ${clientName}`, 60, 88, { align: 'center', width: doc.page.width - 120 });
+    const W  = 595.28; // A4 width
+    const H  = 841.89; // A4 height
+    const M  = 60;     // margin
+    const CW = W - M * 2; // content width = 475
+    const year = new Date().getFullYear();
 
-    doc.moveDown(3);
-    doc.fillColor('#333333');
+    // Parse structured data
+    const sec    = parseReportSections(reportMarkdown);
+    const timing = parseTimingTable(sec.s6table || '');
+    const arch   = getArchitectureDisplay(userData?.hdType, userData?.hdAuthority);
 
-    // Strip emojis helper — pdfkit can't render them and shows garbage
-    const stripEmoji = (str) => str.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27FF}\u{2300}-\u{23FF}\u{FE00}-\u{FEFF}\u{1F000}-\u{1F02F}\u{1F0A0}-\u{1F0FF}\u{1F100}-\u{1F1FF}\u{1F200}-\u{1F2FF}\u{1F004}\u{1F0CF}\u{2702}\u{2705}\u{2708}-\u{270D}\u{270F}\u{2712}\u{2714}\u{2716}\u{271D}\u{2721}\u{2728}\u{2733}-\u{2734}\u{2744}\u{2747}\u{274C}\u{274E}\u{2753}-\u{2755}\u{2757}\u{2763}-\u{2764}\u{2795}-\u{2797}\u{27A1}\u{27B0}\u{27BF}\u{2934}-\u{2935}\u{25AA}-\u{25AB}\u{25B6}\u{25C0}\u{25FB}-\u{25FE}\u{2614}-\u{2615}\u{2648}-\u{2653}\u{26AA}-\u{26AB}\u{26BD}-\u{26BE}\u{26C4}-\u{26C5}\u{26CE}\u{26D4}\u{26EA}\u{26F2}-\u{26F3}\u{26F5}\u{26FA}\u{26FD}\u{2702}\u{231A}-\u{231B}\u{23E9}-\u{23F3}\u{23F8}-\u{23FA}]/gu, '');
+    // Strip emoji helper
+    const stripEmoji = s => s.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27FF}\u{2300}-\u{23FF}\u{FE00}-\u{FEFF}\u{1F000}-\u{1FFFF}]/gu, '');
 
-    // Parse and render markdown sections
-    const lines = reportMarkdown.split('\n');
-    for (const rawLine of lines) {
-      const line = stripEmoji(rawLine);
-      if (/^-{3,}$/.test(line.trim())) continue; // skip horizontal rules
-      if (line.startsWith('# ')) {
-        doc.addPage();
-        doc.fillColor('#0a0a0a').fontSize(20).font('Helvetica-Bold')
-           .text(line.replace('# ', ''), { paragraphGap: 8 });
-        doc.moveTo(60, doc.y).lineTo(doc.page.width - 60, doc.y)
-           .strokeColor('#c9a84c').lineWidth(1).stroke();
-        doc.moveDown(0.5);
-      } else if (line.startsWith('## ')) {
-        doc.moveDown(0.5);
-        doc.fillColor('#1a1a1a').fontSize(14).font('Helvetica-Bold')
-           .text(line.replace('## ', ''), { paragraphGap: 4 });
-      } else if (line.startsWith('### ')) {
-        doc.fillColor('#333333').fontSize(12).font('Helvetica-Bold')
-           .text(line.replace('### ', ''), { paragraphGap: 3 });
-      } else if (line.startsWith('**') && line.endsWith('**')) {
-        doc.fillColor('#1a1a1a').fontSize(11).font('Helvetica-Bold')
-           .text(line.replace(/\*\*/g, ''), { paragraphGap: 2 });
-      } else if (line.startsWith('- ') || line.startsWith('• ')) {
-        doc.fillColor('#333333').fontSize(10).font('Helvetica')
-           .text(`  • ${line.replace(/^[-•] /, '')}`, { indent: 10, paragraphGap: 2 });
-      } else if (line.trim() === '') {
-        doc.moveDown(0.3);
-      } else if (line.trim()) {
-        const clean = line.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1');
-        doc.fillColor('#333333').fontSize(10).font('Helvetica')
-           .text(clean, { align: 'justify', paragraphGap: 3 });
+    // Clean markdown to plain text
+    const cleanMd = s => stripEmoji(s || '')
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/\*([^*]+)\*/g, '$1')
+      .replace(/^#{1,3}\s+/gm, '');
+
+    let pageNum = 0;
+    let isCoverPage = false;
+
+    const addFooter = () => {
+      if (isCoverPage) return;
+      doc.save();
+      doc.fillColor('#AAAAAA').fontSize(7.5).font('Helvetica')
+         .text(`The Edge Index Brief  ·  ${clientName}  ·  ${reportDate}`, M, H - 34, { width: CW, align: 'center' });
+      doc.restore();
+    };
+
+    const newPage = (darkBg = false) => {
+      if (pageNum > 0) addFooter();
+      doc.addPage();
+      pageNum++;
+      isCoverPage = darkBg;
+      if (darkBg) {
+        doc.rect(0, 0, W, H).fill('#0A0A0A');
+      }
+    };
+
+    // ── COVER PAGE ────────────────────────────────────────────────────────────
+    newPage(true);
+
+    // Top gold bar
+    doc.rect(0, 0, W, 5).fill('#C9A84C');
+
+    // "THE EDGE INDEX" label
+    doc.fillColor('#C9A84C').fontSize(9).font('Helvetica')
+       .text('THE EDGE INDEX', M, 160, { align: 'center', width: CW, characterSpacing: 3 });
+
+    // Main title
+    doc.fillColor('#FFFFFF').fontSize(42).font('Helvetica-Bold')
+       .text('Annual', M, 186, { align: 'center', width: CW });
+    doc.fillColor('#FFFFFF').fontSize(42).font('Helvetica-Bold')
+       .text('Decision-Timing', M, 236, { align: 'center', width: CW });
+    doc.fillColor('#C9A84C').fontSize(42).font('Helvetica-Bold')
+       .text('Brief', M, 286, { align: 'center', width: CW });
+
+    // Gold divider
+    doc.moveTo(W / 2 - 50, 344).lineTo(W / 2 + 50, 344)
+       .strokeColor('#C9A84C').lineWidth(1).stroke();
+
+    // Client name
+    doc.fillColor('#FFFFFF').fontSize(22).font('Helvetica')
+       .text(clientName, M, 360, { align: 'center', width: CW });
+
+    // Architecture subtitle
+    doc.fillColor('#888888').fontSize(10).font('Helvetica-Oblique')
+       .text(arch, M, 392, { align: 'center', width: CW });
+
+    // Year
+    doc.fillColor('#C9A84C').fontSize(13).font('Helvetica')
+       .text(String(year), M, 424, { align: 'center', width: CW, characterSpacing: 4 });
+
+    // Stats bar
+    const statsY = H - 180;
+    doc.moveTo(M, statsY).lineTo(M + CW, statsY).strokeColor('#2A2A2A').lineWidth(1).stroke();
+
+    const statItems = [
+      { val: `${year}–${year+1}`, label: 'Report Period' },
+      { val: '17',                label: 'Sections'      },
+      { val: String(timing.greenCount || '—'), label: 'Green Windows' },
+    ];
+    const sw = CW / 3;
+    statItems.forEach((s, i) => {
+      doc.fillColor('#FFFFFF').fontSize(22).font('Helvetica-Bold')
+         .text(s.val, M + i * sw, statsY + 20, { width: sw, align: 'center' });
+      doc.fillColor('#888888').fontSize(8).font('Helvetica')
+         .text(s.label.toUpperCase(), M + i * sw, statsY + 50, { width: sw, align: 'center', characterSpacing: 1 });
+    });
+
+    // Bottom gold bar
+    doc.rect(0, H - 5, W, 5).fill('#C9A84C');
+
+    // ── 12-MONTH VISUAL TIMELINE ──────────────────────────────────────────────
+    newPage(false);
+
+    doc.fillColor('#C9A84C').fontSize(9).font('Helvetica')
+       .text('YOUR YEAR AT A GLANCE', M, 72, { characterSpacing: 2 });
+    doc.fillColor('#0A0A0A').fontSize(24).font('Helvetica-Bold')
+       .text('12-Month Timing Overview', M, 90, { width: CW });
+    doc.moveTo(M, 120).lineTo(M + 70, 120).strokeColor('#C9A84C').lineWidth(2).stroke();
+
+    if (timing.rows.length > 0) {
+      const chartTop = 144;
+      const blockW   = CW / Math.max(timing.rows.length, 12);
+      const blockH   = 52;
+
+      timing.rows.forEach((row, i) => {
+        const bx    = M + i * blockW;
+        const color = row.envClass === 'env-green' ? '#22C55E' : row.envClass === 'env-red' ? '#EF4444' : '#F59E0B';
+        doc.rect(bx + 2, chartTop, blockW - 4, blockH).fill(color);
+        // Month label
+        const ml = (row.month.length > 4 ? row.month.substring(0, 3) : row.month);
+        doc.fillColor('#333333').fontSize(7.5).font('Helvetica')
+           .text(ml, bx + 2, chartTop + blockH + 5, { width: blockW - 4, align: 'center' });
+      });
+
+      // Legend
+      const legY = chartTop + blockH + 24;
+      const legItems = [
+        { color: '#22C55E', label: `Expansion — ${timing.greenCount} months` },
+        { color: '#F59E0B', label: `Selective — ${timing.amberCount} months`  },
+        { color: '#EF4444', label: `Protection — ${timing.redCount} months`   },
+      ];
+      legItems.forEach((item, i) => {
+        const lx = M + i * (CW / 3);
+        doc.rect(lx, legY, 10, 10).fill(item.color);
+        doc.fillColor('#333333').fontSize(9.5).font('Helvetica')
+           .text(item.label, lx + 15, legY, { width: CW / 3 - 18 });
+      });
+
+      // Monthly detail table
+      const tblY = legY + 32;
+      doc.fillColor('#888888').fontSize(8).font('Helvetica')
+         .text('MONTH', M, tblY, { width: 90 });
+      doc.fillColor('#888888').fontSize(8).font('Helvetica')
+         .text('ENVIRONMENT', M + 90, tblY, { width: 90 });
+      doc.fillColor('#888888').fontSize(8).font('Helvetica')
+         .text('KEY CONDITIONS', M + 180, tblY, { width: CW - 180 });
+      doc.moveTo(M, tblY + 14).lineTo(M + CW, tblY + 14).strokeColor('#C9A84C').lineWidth(0.5).stroke();
+
+      let rowY = tblY + 22;
+      for (const row of timing.rows) {
+        if (rowY > H - 80) { newPage(false); rowY = 80; }
+        const color = row.envClass === 'env-green' ? '#22C55E' : row.envClass === 'env-red' ? '#EF4444' : '#F59E0B';
+        doc.rect(M, rowY, 3, 14).fill(color);
+        doc.fillColor('#1A1A1A').fontSize(9).font('Helvetica')
+           .text(row.month, M + 7, rowY, { width: 83 });
+        doc.fillColor(color).fontSize(9).font('Helvetica-Bold')
+           .text(row.envLabel, M + 90, rowY, { width: 82 });
+        const noteClean = cleanMd(row.note).substring(0, 220);
+        doc.fillColor('#444444').fontSize(9).font('Helvetica')
+           .text(noteClean, M + 180, rowY, { width: CW - 180, lineGap: 1 });
+        const noteH = doc.heightOfString(noteClean, { width: CW - 180, fontSize: 9 });
+        rowY += Math.max(20, noteH + 8);
+        doc.moveTo(M, rowY - 1).lineTo(M + CW, rowY - 1).strokeColor('#E8E8E8').lineWidth(0.3).stroke();
+      }
+    } else {
+      doc.fillColor('#888888').fontSize(11).font('Helvetica')
+         .text('Timing data will appear here once the report is generated.', M, 160, { width: CW });
+    }
+
+    // ── GOLDEN WINDOWS ────────────────────────────────────────────────────────
+    if (sec.golden) {
+      newPage(true);
+
+      // Dark header
+      doc.fillColor('#C9A84C').fontSize(9).font('Helvetica')
+         .text('YOUR HIGHEST-LEVERAGE PERIODS', M, 80, { align: 'center', width: CW, characterSpacing: 2 });
+      doc.fillColor('#FFFFFF').fontSize(32).font('Helvetica-Bold')
+         .text('Golden Windows', M, 104, { align: 'center', width: CW });
+      doc.moveTo(W / 2 - 50, 148).lineTo(W / 2 + 50, 148)
+         .strokeColor('#C9A84C').lineWidth(1).stroke();
+      doc.fillColor('#888888').fontSize(10).font('Helvetica-Oblique')
+         .text('The periods where conviction and conditions converge', M, 160, { align: 'center', width: CW });
+
+      doc.rect(0, 188, W, 1).fill('#2A2A2A');
+
+      let gy = 204;
+      const goldenParas = cleanMd(sec.golden).split(/\n\n+/).filter(p => p.trim());
+      for (const para of goldenParas) {
+        const t = para.trim();
+        if (!t) continue;
+        if (gy > H - 100) { newPage(true); doc.rect(0, 0, W, H).fill('#0A0A0A'); gy = 80; }
+
+        // Window title (short line, likely a month-range label)
+        if (t.length < 70 && /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|\d{4}|window|golden)/i.test(t)) {
+          doc.rect(M, gy, CW, 38).fill('#1A1A1A');
+          doc.rect(M, gy, 4, 38).fill('#C9A84C');
+          doc.fillColor('#C9A84C').fontSize(13).font('Helvetica-Bold')
+             .text(t, M + 14, gy + 10, { width: CW - 20 });
+          gy += 48;
+        } else if (t.startsWith('*') || t.toLowerCase().includes('the windows above')) {
+          // Italic note
+          doc.fillColor('#888888').fontSize(10).font('Helvetica-Oblique')
+             .text(t.replace(/^\*+|\*+$/g, ''), M, gy, { width: CW, lineGap: 2 });
+          gy = doc.y + 12;
+        } else {
+          doc.fillColor('#CCCCCC').fontSize(11).font('Helvetica')
+             .text(t, M, gy, { width: CW, lineGap: 3 });
+          gy = doc.y + 12;
+        }
       }
     }
 
-    // Footer
-    doc.fillColor('#888888').fontSize(8)
-       .text(`The Edge Index Brief | ${clientName} | ${reportDate}`, 60, doc.page.height - 40, { align: 'center', width: doc.page.width - 120 });
+    // ── MAIN REPORT SECTIONS ──────────────────────────────────────────────────
+    const sections = [
+      { key: 's1',  num: '01', title: 'Executive Overview'              },
+      { key: 's2',  num: '02', title: 'Your Decision Architecture'      },
+      { key: 's3',  num: '03', title: 'Behaviour Under Pressure'        },
+      { key: 's4',  num: '04', title: 'The Edge Index Signal Framework' },
+      { key: 's5',  num: '05', title: 'Your Personal Timing Profile'    },
+      { key: 's7',  num: '07', title: 'Expansion Windows'               },
+      { key: 's8',  num: '08', title: 'Protection Periods'              },
+      { key: 's9',  num: '09', title: 'Opportunity Windows'             },
+      { key: 's10', num: '10', title: 'Risk Environment Patterns'       },
+      { key: 's11', num: '11', title: 'Emotional Volatility Cycles'     },
+      { key: 's12', num: '12', title: 'Strategic Patience'              },
+      { key: 's13', num: '13', title: 'Decision Discipline Framework'   },
+      { key: 's14', num: '14', title: 'Behavioural Blind Spots'         },
+      { key: 's15', num: '15', title: 'Strategic Operating Rules'       },
+    ];
+
+    for (const s of sections) {
+      const content = sec[s.key];
+      if (!content) continue;
+
+      newPage(false);
+
+      // Gold section label
+      doc.fillColor('#C9A84C').fontSize(8.5).font('Helvetica')
+         .text(`SECTION ${s.num}`, M, 68, { characterSpacing: 2 });
+
+      // Section title
+      doc.fillColor('#0A0A0A').fontSize(22).font('Helvetica-Bold')
+         .text(s.title, M, 84, { width: CW });
+
+      // Gold underline
+      const underY = doc.y + 6;
+      doc.moveTo(M, underY).lineTo(M + 55, underY).strokeColor('#C9A84C').lineWidth(2).stroke();
+      doc.y = underY + 20;
+
+      // Render content
+      const paras = cleanMd(content).split(/\n\n+/).filter(p => p.trim());
+      for (const para of paras) {
+        const t = para.trim();
+        if (!t || /^-{3,}$/.test(t)) continue;
+        if (doc.y > H - 90) { newPage(false); doc.y = 72; }
+
+        if (/^RIGHT NOW/i.test(t)) {
+          // Green callout box
+          const bText = t.replace(/^RIGHT NOW[^:]*:\s*/i, '');
+          const bh = Math.max(60, doc.heightOfString(bText, { width: CW - 28, fontSize: 10.5 }) + 38);
+          const by = doc.y;
+          doc.rect(M, by, CW, bh).fill('#F0FDF4');
+          doc.rect(M, by, 4, bh).fill('#22C55E');
+          doc.fillColor('#166534').fontSize(8).font('Helvetica-Bold')
+             .text('RIGHT NOW', M + 12, by + 10, { characterSpacing: 1 });
+          doc.fillColor('#1A3320').fontSize(10.5).font('Helvetica')
+             .text(bText, M + 12, by + 24, { width: CW - 24, lineGap: 2 });
+          doc.y = by + bh + 14;
+        } else if (t.startsWith('> ')) {
+          // Blockquote
+          const qt = t.replace(/^> /, '');
+          const bh = Math.max(40, doc.heightOfString(qt, { width: CW - 24, fontSize: 11 }) + 24);
+          const by = doc.y;
+          doc.rect(M, by, 3, bh).fill('#C9A84C');
+          doc.rect(M + 3, by, CW - 3, bh).fill('#FFFBF0');
+          doc.fillColor('#333333').fontSize(11).font('Helvetica-Oblique')
+             .text(qt, M + 16, by + 12, { width: CW - 28, lineGap: 2 });
+          doc.y = by + bh + 14;
+        } else if (/^[-•]/.test(t)) {
+          const lines = t.split('\n').filter(l => /^[-•]/.test(l.trim()));
+          for (const line of lines) {
+            if (doc.y > H - 60) { newPage(false); doc.y = 72; }
+            doc.fillColor('#444444').fontSize(10.5).font('Helvetica')
+               .text(`•  ${line.replace(/^[-•]\s*/, '')}`, M + 10, doc.y, { width: CW - 10, lineGap: 2 });
+            doc.moveDown(0.3);
+          }
+          doc.moveDown(0.3);
+        } else if (/^##/.test(t)) {
+          doc.fillColor('#1A1A1A').fontSize(13).font('Helvetica-Bold')
+             .text(t.replace(/^##\s*/, ''), M, doc.y, { width: CW });
+          doc.moveDown(0.4);
+        } else {
+          doc.fillColor('#2A2A2A').fontSize(10.5).font('Helvetica')
+             .text(t, M, doc.y, { width: CW, align: 'justify', lineGap: 3 });
+          doc.moveDown(0.7);
+        }
+      }
+    }
+
+    // ── MONITORING UPSELL PAGE ────────────────────────────────────────────────
+    newPage(true);
+
+    // Top accent
+    doc.rect(0, 0, W, 5).fill('#C9A84C');
+
+    doc.fillColor('#C9A84C').fontSize(9).font('Helvetica')
+       .text('SECTION 16', M, 72, { characterSpacing: 2 });
+    doc.fillColor('#FFFFFF').fontSize(26).font('Helvetica-Bold')
+       .text('Your Annual Map Is the Foundation.', M, 90, { width: CW });
+    doc.fillColor('#C9A84C').fontSize(24).font('Helvetica-Bold')
+       .text("Don't Miss Your Windows.", M, 122, { width: CW });
+
+    doc.moveTo(M, 160).lineTo(M + CW, 160).strokeColor('#2A2A2A').lineWidth(1).stroke();
+
+    doc.fillColor('#CCCCCC').fontSize(11).font('Helvetica')
+       .text('Your brief shows when conditions favour decisive action across the next 12 months. But timing shifts week to week — and day to day — within that structure.', M, 178, { width: CW, lineGap: 3 });
+
+    const afterFirstPara = doc.y + 10;
+    doc.fillColor('#CCCCCC').fontSize(11).font('Helvetica')
+       .text("Without live monitoring, you know your window is coming — but not exactly when it opens. That gap is where opportunities are missed.", M, afterFirstPara, { width: CW, lineGap: 3 });
+
+    const afterSecondPara = doc.y + 10;
+    doc.fillColor('#FFFFFF').fontSize(11).font('Helvetica-Bold')
+       .text('The Edge Index monitoring suite bridges that gap.', M, afterSecondPara, { width: CW });
+
+    // Three tier boxes
+    const tierY  = doc.y + 24;
+    const tierW  = (CW - 20) / 3;
+    const tierH  = 158;
+    const tiers  = [
+      { name: 'Weekly Edge',  freq: 'Every Monday',  price: '$97/month',  desc: 'Weekly signal review and environment assessment for the week ahead.' },
+      { name: 'Daily Edge',   freq: 'Every Morning', price: '$197/month', desc: 'Daily timing conditions and decision guidance delivered each morning.' },
+      { name: 'Live Edge',    freq: 'Real-Time',     price: '$397/month', desc: 'Live signal monitoring as your timing conditions shift through the day.' },
+    ];
+
+    tiers.forEach((tier, i) => {
+      const tx = M + i * (tierW + 10);
+      doc.rect(tx, tierY, tierW, tierH).fill('#1A1A1A');
+      doc.rect(tx, tierY, tierW, 4).fill('#C9A84C');
+      doc.fillColor('#FFFFFF').fontSize(13).font('Helvetica-Bold')
+         .text(tier.name, tx + 12, tierY + 18, { width: tierW - 24 });
+      doc.fillColor('#C9A84C').fontSize(8).font('Helvetica')
+         .text(tier.freq.toUpperCase(), tx + 12, tierY + 38, { width: tierW - 24, characterSpacing: 1 });
+      doc.fillColor('#AAAAAA').fontSize(9.5).font('Helvetica')
+         .text(tier.desc, tx + 12, tierY + 56, { width: tierW - 24, lineGap: 2 });
+      doc.fillColor('#C9A84C').fontSize(15).font('Helvetica-Bold')
+         .text(tier.price, tx + 12, tierY + tierH - 36, { width: tierW - 24 });
+    });
+
+    const afterTiers = tierY + tierH + 22;
+
+    // Quote
+    doc.fillColor('#888888').fontSize(10).font('Helvetica-Oblique')
+       .text('"Most traders who receive this Brief choose Daily Edge. They\'ve already paid $2,500 to know their windows. Monitoring is how they don\'t miss them."', M, afterTiers, { width: CW, lineGap: 3, align: 'center' });
+
+    const afterQuote = doc.y + 22;
+
+    // CTA button
+    const ctaW = 300;
+    const ctaX = M + (CW - ctaW) / 2;
+    doc.rect(ctaX, afterQuote, ctaW, 38).fill('#C9A84C');
+    doc.fillColor('#000000').fontSize(10).font('Helvetica-Bold')
+       .text('EXPLORE MONITORING AT EDGEINDEX.IO', ctaX, afterQuote + 12, { width: ctaW, align: 'center', characterSpacing: 0.5 });
+
+    // ── SECTION 17 — FINAL INSIGHT ────────────────────────────────────────────
+    newPage(false);
+
+    doc.fillColor('#C9A84C').fontSize(8.5).font('Helvetica')
+       .text('SECTION 17', M, 68, { characterSpacing: 2 });
+    doc.fillColor('#0A0A0A').fontSize(22).font('Helvetica-Bold')
+       .text('Final Insight', M, 84, { width: CW });
+
+    const s17underY = doc.y + 6;
+    doc.moveTo(M, s17underY).lineTo(M + 55, s17underY).strokeColor('#C9A84C').lineWidth(2).stroke();
+    doc.y = s17underY + 22;
+
+    if (sec.s17) {
+      const s17text = cleanMd(sec.s17).trim();
+      doc.fillColor('#2A2A2A').fontSize(11).font('Helvetica')
+         .text(s17text, M, doc.y, { width: CW, align: 'justify', lineGap: 3 });
+    }
+
+    doc.moveDown(2);
+
+    // Closing quote
+    const qY = doc.y;
+    doc.moveTo(M, qY).lineTo(M + CW, qY).strokeColor('#E0E0E0').lineWidth(0.5).stroke();
+    doc.moveDown(1.2);
+    doc.fillColor('#888888').fontSize(12).font('Helvetica-Oblique')
+       .text('"In high-performance environments, the edge rarely comes from superior information alone. It comes from knowing when conditions support decisive action — and having the discipline to wait when they do not."', M, doc.y, { width: CW, align: 'center', lineGap: 4 });
+    doc.moveDown(1.5);
+    doc.fillColor('#C9A84C').fontSize(10).font('Helvetica')
+       .text(`THE EDGE INDEX  ·  ${year}`, M, doc.y, { width: CW, align: 'center', characterSpacing: 2 });
+
+    // Final page footer
+    addFooter();
 
     doc.end();
   });
 }
+
 
 // ─── Email delivery via Resend ─────────────────────────────────────────────────
 
@@ -1073,7 +1171,7 @@ async function sendReportEmail(toEmail, toName, reportMarkdown, userData = {}) {
   const htmlBody  = mdToHtml(reportMarkdown, toName, userData);
   const subject   = `Your Edge Index Brief is Ready`;
   const reportDate = new Date().toISOString().split('T')[0];
-  const pdfBuffer = await generatePDF(reportMarkdown, toName, reportDate);
+  const pdfBuffer = await generatePDF(reportMarkdown, toName, reportDate, userData);
 
   const res = await fetch('https://api.resend.com/emails', {
     method:  'POST',
@@ -1638,7 +1736,7 @@ bot.on('message', async (msg) => {
     state[chatId] = 'sales_q3';
 
     await bot.sendMessage(chatId,
-      `Almost every serious trader has.\n\nHere's what's rarely discussed: that inconsistency isn't random. It follows a pattern — and the pattern is specific to each trader.\n\nYour decision quality fluctuates on a cycle. There are windows in the year where your judgement is sharper, your conviction is cleaner, and the same trade works. And there are periods where the same analysis produces the opposite result — not because of the market, but because of the internal environment you're operating in.\n\nMost traders spend years refining their strategy. Almost none of them ever map the decision-maker running the strategy.\n\nThat's what The Edge Index does.`
+      `Almost every serious trader has.\n\nHere's what's rarely discussed: that inconsistency isn't random. It follows a predictable pattern — specific to each trader.\n\nMost traders spend years refining their strategy. Almost none of them ever map the decision-maker running it.\n\nThat's what The Edge Index does.`
     );
     return;
   }
