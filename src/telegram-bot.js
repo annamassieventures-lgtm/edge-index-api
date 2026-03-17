@@ -42,6 +42,8 @@ import { scoreLeadMessage } from './lead-scorer.js';
 import { runLeadScan, getScannerStatus } from './twitter-scanner.js';
 import { initOutreachClient, requestOtp, verifyOtp, isConnected } from './outreach-client.js';
 import { runOutreachSequencer, draftSalesResponse, loadOutreach, saveOutreach } from './outreach-sequencer.js';
+import { runWeeklyEdge, runDailyEdge, sendDay7Checkin, sendDay30Upsell } from './monitoring-engine.js';
+import { addSubscriber, getSubscriberCount, getAllSubscribers, restoreFromEnv } from './shared/monitoringSubscribers.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -64,6 +66,9 @@ await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/deleteWebhook?drop_pending
 
 const bot       = new TelegramBot(BOT_TOKEN, { polling: { interval: 2000, autoStart: true, params: { timeout: 10 } } });
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_KEY });
+
+// Restore monitoring subscribers from Railway env var backup on startup
+restoreFromEnv();
 
 // ─── Pending outreach reply drafts ─────────────────────────────────────────────
 // Stores Claude-drafted replies awaiting Anna's approval
@@ -1595,7 +1600,11 @@ bot.onText(/\/admin(.*)/, async (msg, match) => {
       `/admin replied <target-id> — mark target as replied\n\n` +
       `*Lead Detection*\n` +
       `/admin score <trader post> — score a trader's message and get opener\n` +
-      `/admin playbook — today's B2C lead generation guide`,
+      `/admin playbook — today's B2C lead generation guide\n\n` +
+      `*Monitoring Subscriptions*\n` +
+      `/admin monitors — list all monitoring subscribers + MRR\n` +
+      `/admin monitor add <email> <tier> — add subscriber (weekly/daily/live)\n` +
+      `/admin monitor remove <email> — deactivate subscriber`,
       { parse_mode: 'Markdown' }
     );
     return;
@@ -1907,6 +1916,106 @@ bot.onText(/\/admin(.*)/, async (msg, match) => {
     return;
   }
 
+  // /admin monitors — list all monitoring subscribers
+  if (cmd === 'monitors') {
+    const counts = getSubscriberCount();
+    const all    = getAllSubscribers();
+    if (!all.length) {
+      await bot.sendMessage(chatId,
+        `📊 *Monitoring Subscribers*\n\nNo active subscribers yet.\n\nAdd one: /admin monitor add <email> weekly`,
+        { parse_mode: 'Markdown' }
+      );
+      return;
+    }
+    const lines = all.map(s => `• ${s.name} (${s.email}) — *${s.tier}* · since ${s.startDate}`).join('\n');
+    await bot.sendMessage(chatId,
+      `📊 *Monitoring Subscribers — ${counts.total} active*\n\n` +
+      `Weekly Edge: ${counts.weekly} @ $97 = $${counts.weekly * 97}/mo\n` +
+      `Daily Edge:  ${counts.daily}  @ $197 = $${counts.daily * 197}/mo\n` +
+      `Live Edge:   ${counts.live}   @ $397 = $${counts.live * 397}/mo\n` +
+      `*Monitoring MRR: $${counts.mrr}/mo*\n\n` +
+      `${lines}`,
+      { parse_mode: 'Markdown' }
+    );
+    return;
+  }
+
+  // /admin monitor add <email> <tier>  |  /admin monitor remove <email>
+  if (cmd === 'monitor') {
+    const sub = args[1]?.toLowerCase();
+
+    if (sub === 'add') {
+      const email = args[2];
+      const tier  = (args[3] || 'weekly').toLowerCase();
+      if (!email || !email.includes('@')) {
+        await bot.sendMessage(chatId, 'Usage: /admin monitor add <email> <weekly|daily|live>');
+        return;
+      }
+      if (!['weekly', 'daily', 'live'].includes(tier)) {
+        await bot.sendMessage(chatId, 'Tier must be one of: weekly, daily, live');
+        return;
+      }
+      // Look up user data for richer subscriber record
+      const users     = getAllUsers();
+      const userData  = Object.values(users).find(u => u.email === email) || {};
+      const telegramId = Object.entries(users).find(([, u]) => u.email === email)?.[0] || null;
+
+      const record = addSubscriber({
+        email,
+        telegramChatId: telegramId,
+        tier,
+        name:        userData.firstName || email.split('@')[0],
+        hdType:      userData.hdType       || 'Generator',
+        hdAuthority: userData.hdAuthority  || 'Emotional Authority',
+        tradeType:   userData.tradeType    || 'general trading',
+        dob:         userData.dob          || null,
+        time:        userData.time         || null,
+        location:    userData.location     || null,
+        lat:         userData.lat          || null,
+        lon:         userData.lon          || null,
+      });
+
+      const tierPrices = { weekly: 97, daily: 197, live: 397 };
+      await bot.sendMessage(chatId,
+        `✅ *Monitoring subscriber added*\n\n` +
+        `${record.name} (${record.email})\n` +
+        `Tier: *${tier}* — $${tierPrices[tier]}/month\n` +
+        `First delivery: ${tier === 'weekly' ? 'next Monday 7am AEST' : 'tomorrow 6am AEST'}`,
+        { parse_mode: 'Markdown' }
+      );
+
+      // Notify the subscriber if we have their Telegram
+      if (telegramId) {
+        const tierMessages = {
+          weekly: `📊 *Weekly Edge activated*\n\nYou're now receiving personalised weekly signal updates every Monday morning.\n\nFirst briefing arrives Monday at 7am AEST.`,
+          daily:  `📊 *Daily Edge activated*\n\nYou're now receiving personalised daily decision briefings every morning.\n\nFirst briefing arrives tomorrow at 6am AEST.`,
+          live:   `📊 *Live Edge activated*\n\nYou're now receiving real-time alerts when your Golden Window opens.\n\nYou'll be notified the moment conditions converge.`,
+        };
+        await bot.sendMessage(telegramId, tierMessages[tier], { parse_mode: 'Markdown' });
+      }
+      return;
+    }
+
+    if (sub === 'remove') {
+      const email = args[2];
+      if (!email) {
+        await bot.sendMessage(chatId, 'Usage: /admin monitor remove <email>');
+        return;
+      }
+      const { removeSubscriber } = await import('./shared/monitoringSubscribers.js');
+      const removed = removeSubscriber(email);
+      if (removed) {
+        await bot.sendMessage(chatId, `✅ ${email} removed from monitoring.`);
+      } else {
+        await bot.sendMessage(chatId, `No active subscriber found for ${email}.`);
+      }
+      return;
+    }
+
+    await bot.sendMessage(chatId, 'Usage:\n/admin monitor add <email> <weekly|daily|live>\n/admin monitor remove <email>');
+    return;
+  }
+
   await bot.sendMessage(chatId, `Unknown admin command: ${cmd}. Send /admin to see options.`);
 });
 
@@ -2118,8 +2227,30 @@ cron.schedule('0 22 * * *', async () => {
     return;
   }
 
-  console.log('[CRON] Sending daily outreach briefing to Anna...');
+  console.log('[CRON] Sending daily CEO briefing to Anna...');
   try {
+    // Revenue + subscriber snapshot
+    const counts     = getSubscriberCount();
+    const paidEmails = getAllPaidEmails();
+    const users      = getAllUsers();
+    const totalUsers = Object.values(users).filter(u => u.dob).length;
+    const annualMrr  = paidEmails.length * 2500; // one-time treated as MRR indicator
+
+    const revHeader =
+      `💼 *Edge Index — Daily CEO Brief*\n` +
+      `${new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' })}\n\n` +
+      `*Revenue*\n` +
+      `Annual Briefs delivered: ${totalUsers}\n` +
+      `Monitoring subscribers: ${counts.total}\n` +
+      `  └ Weekly Edge: ${counts.weekly} @ $97\n` +
+      `  └ Daily Edge:  ${counts.daily}  @ $197\n` +
+      `  └ Live Edge:   ${counts.live}   @ $397\n` +
+      `Monitoring MRR: *$${counts.mrr}/mo*\n\n`;
+
+    await bot.sendMessage(ANNA_CHAT_ID, revHeader, { parse_mode: 'Markdown' });
+    await new Promise(r => setTimeout(r, 400));
+
+    // Outreach pipeline briefing
     const briefing = buildOutreachBriefing();
     const chunks   = briefing.match(/[\s\S]{1,4000}/g) || [briefing];
     for (const chunk of chunks) {
@@ -2127,7 +2258,7 @@ cron.schedule('0 22 * * *', async () => {
       await new Promise(r => setTimeout(r, 300));
     }
   } catch (err) {
-    console.error('[CRON] Outreach briefing error:', err.message);
+    console.error('[CRON] CEO briefing error:', err.message);
   }
 }, { timezone: 'UTC' });
 
@@ -2199,6 +2330,70 @@ cron.schedule('30 22 * * *', async () => {
     }
   } catch (err) {
     console.error('[CRON] Outreach sequencer error:', err.message);
+  }
+}, { timezone: 'UTC' });
+
+// ─── Cron: Weekly Edge — Sunday 21:00 UTC = Monday 7:00am AEST ────────────────
+
+cron.schedule('0 21 * * 0', async () => {
+  console.log('[CRON] Weekly Edge starting...');
+  try {
+    const { sent, failed } = await runWeeklyEdge(bot, ANNA_CHAT_ID);
+    console.log(`[CRON] Weekly Edge complete — sent: ${sent}, failed: ${failed}`);
+  } catch (err) {
+    console.error('[CRON] Weekly Edge error:', err.message);
+    if (ANNA_CHAT_ID) {
+      await bot.sendMessage(ANNA_CHAT_ID, `⚠️ Weekly Edge cron error: ${err.message}`);
+    }
+  }
+}, { timezone: 'UTC' });
+
+// ─── Cron: Daily Edge — 20:00 UTC daily = 6:00am AEST ─────────────────────────
+
+cron.schedule('0 20 * * *', async () => {
+  console.log('[CRON] Daily Edge starting...');
+  try {
+    const { sent, failed } = await runDailyEdge(bot, ANNA_CHAT_ID);
+    console.log(`[CRON] Daily Edge complete — sent: ${sent}, failed: ${failed}`);
+  } catch (err) {
+    console.error('[CRON] Daily Edge error:', err.message);
+  }
+}, { timezone: 'UTC' });
+
+// ─── Cron: Day 7 / Day 30 check-in sweep — 21:30 UTC daily ───────────────────
+// Checks all users who received a report 7 or 30 days ago
+
+cron.schedule('30 21 * * *', async () => {
+  const users   = getAllUsers();
+  const today   = new Date();
+
+  for (const [chatId, userData] of Object.entries(users)) {
+    if (!userData.lastReportAt) continue;
+    const reportDate = new Date(userData.lastReportAt);
+    const daysSince  = Math.floor((today - reportDate) / (1000 * 60 * 60 * 24));
+
+    // Day 7 check-in
+    if (daysSince === 7 && !userData.checkin7Sent) {
+      const tier = userData.monitoringTier || 'none';
+      try {
+        await sendDay7Checkin(bot, chatId, userData.firstName || 'there', tier);
+        saveUser(chatId, { checkin7Sent: true });
+        console.log(`[CRON] Day 7 check-in sent to ${chatId}`);
+      } catch (e) {
+        console.error(`[CRON] Day 7 check-in failed for ${chatId}:`, e.message);
+      }
+    }
+
+    // Day 30 upsell
+    if (daysSince === 30 && !userData.upsell30Sent) {
+      try {
+        await sendDay30Upsell(bot, chatId, userData.firstName || 'there');
+        saveUser(chatId, { upsell30Sent: true });
+        console.log(`[CRON] Day 30 upsell sent to ${chatId}`);
+      } catch (e) {
+        console.error(`[CRON] Day 30 upsell failed for ${chatId}:`, e.message);
+      }
+    }
   }
 }, { timezone: 'UTC' });
 

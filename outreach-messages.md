@@ -1,8 +1,10 @@
 # Edge Index — B2B Outreach Messages (Updated March 2026)
+## POSITIONING: Female Traders / HD / Astrology × Trading Communities
 
 ## LANGUAGE RULES
-✅ USE: Decision timing intelligence · Behavioural pattern recognition · Timing discipline · Green/Amber/Red signal system · Decision windows · Personalised timing profile
-❌ NEVER: Astrology · Planetary · Cosmic · Moon/Mercury/retrograde · Energy (spiritual) · Chart reading
+✅ USE: Decision timing intelligence · Cyclical pattern analysis · Decision architecture · Timing windows · Behavioural profile · Personalised timing map · How you actually make decisions
+✅ NOW ALSO USE (for right audiences): Cyclical intelligence · Human Design application · Planetary cycle timing · How women trade differently
+❌ NEVER: Generic trading signals language · "Alpha" · "Edge over competitors" (for female audiences — reframe as self-knowledge, not competition)
 
 ---
 
