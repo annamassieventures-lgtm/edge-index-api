@@ -349,16 +349,16 @@
     "tier": 1,
     "platform": "YouTube/X/Podcast",
     "audience": "10M+",
-    "email": "gvaynerchuk@gmail.com",
+    "email": null,
     "dmHandle": "@garyvee",
     "niche": "ai-business",
-    "stage": 0,
+    "stage": 4,
     "emailSentAt": null,
     "followupSentAt": null,
     "reportReceivedAt": null,
     "affiliatePitchSentAt": null,
-    "replied": false,
-    "notes": "Massive business audience, covers AI heavily"
+    "replied": true,
+    "notes": "Massive business audience, covers AI heavily [EXCLUDED]"
   },
   {
     "id": "mario-nawfal",
@@ -428,13 +428,13 @@
     "email": null,
     "dmHandle": "@SteveBartlettSC",
     "niche": "ai-business",
-    "stage": 0,
+    "stage": 4,
     "emailSentAt": null,
     "followupSentAt": null,
     "reportReceivedAt": null,
     "affiliatePitchSentAt": null,
-    "replied": false,
-    "notes": "UK, biggest business podcast, covers AI + investing heavily — huge USD audience"
+    "replied": true,
+    "notes": "UK, biggest business podcast, covers AI + investing heavily — huge USD audience [EXCLUDED]"
   },
   {
     "id": "ali-abdaal",
@@ -447,13 +447,13 @@
     "email": null,
     "dmHandle": "@aliabdaal",
     "niche": "ai-productivity",
-    "stage": 0,
+    "stage": 4,
     "emailSentAt": null,
     "followupSentAt": null,
     "reportReceivedAt": null,
     "affiliatePitchSentAt": null,
-    "replied": false,
-    "notes": "UK doctor turned creator, 5M YouTube, AI productivity + wealth building"
+    "replied": true,
+    "notes": "UK doctor turned creator, 5M YouTube, AI productivity + wealth building [EXCLUDED]"
   },
   {
     "id": "mark-tilbury",
