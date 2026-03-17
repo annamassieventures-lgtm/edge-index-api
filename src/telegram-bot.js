@@ -44,6 +44,11 @@ import { initOutreachClient, requestOtp, verifyOtp, isConnected } from './outrea
 import { runOutreachSequencer, draftSalesResponse, loadOutreach, saveOutreach } from './outreach-sequencer.js';
 import { runWeeklyEdge, runDailyEdge, sendDay7Checkin, sendDay30Upsell } from './monitoring-engine.js';
 import { addSubscriber, getSubscriberCount, getAllSubscribers, restoreFromEnv } from './shared/monitoringSubscribers.js';
+import {
+  loadOutreachData, getTarget, updateTarget, markReplied,
+  sendColdEmail, sendFollowUp, sendLicensingPitch,
+  runDailyFollowUpSweep, getOutreachStats, getTierTargets, getReadyTargets,
+} from './female-outreach.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -1604,7 +1609,16 @@ bot.onText(/\/admin(.*)/, async (msg, match) => {
       `*Monitoring Subscriptions*\n` +
       `/admin monitors — list all monitoring subscribers + MRR\n` +
       `/admin monitor add <email> <tier> — add subscriber (weekly/daily/live)\n` +
-      `/admin monitor remove <email> — deactivate subscriber`,
+      `/admin monitor remove <email> — deactivate subscriber\n\n` +
+      `*Female Outreach (Automated Email)*\n` +
+      `/admin fem status — pipeline overview + stats\n` +
+      `/admin fem list <tier> — list targets by tier (1–6) + email status\n` +
+      `/admin fem send <id> — send cold email to one target\n` +
+      `/admin fem batch <tier> — send cold emails to all tier targets with emails\n` +
+      `/admin fem followup <id> — manually trigger follow-up email\n` +
+      `/admin fem pitch <id> — send licensing pitch (after they engage)\n` +
+      `/admin fem replied <id> — mark as replied (stops follow-up sequence)\n` +
+      `/admin fem dmsonly — list DM-only targets (no email, need manual contact)`,
       { parse_mode: 'Markdown' }
     );
     return;
@@ -2016,6 +2030,167 @@ bot.onText(/\/admin(.*)/, async (msg, match) => {
     return;
   }
 
+  // ─── /admin fem — Female community outreach commands ─────────────────────
+  if (cmd === 'fem') {
+    const sub = args[1]?.toLowerCase();
+
+    // /admin fem status — overview
+    if (!sub || sub === 'status') {
+      const stats = getOutreachStats();
+      const lines = [
+        `💜 *Female Outreach Pipeline*\n`,
+        `Total targets: ${stats.total}`,
+        `Have email: ${stats.hasEmail} | DM-only: ${stats.total - stats.hasEmail}`,
+        ``,
+        `*By stage:*`,
+        `🔵 Stage 0 (not started): ${stats.byStage[0] || 0}`,
+        `📧 Stage 1 (cold sent): ${stats.byStage[1] || 0}`,
+        `🔁 Stage 2 (follow-up sent): ${stats.byStage[2] || 0}`,
+        `💰 Stage 3 (licensing pitch): ${stats.byStage[3] || 0}`,
+        `✅ Replied: ${stats.replied}`,
+        ``,
+        `*By tier:*`,
+        Object.entries(stats.byTier).sort(([a],[b]) => Number(a)-Number(b)).map(([t,c]) => `Tier ${t}: ${c}`).join(' | '),
+        ``,
+        `Send cold emails: /admin fem batch 1`,
+        `See all tier 1: /admin fem list 1`,
+      ];
+      await bot.sendMessage(chatId, lines.join('\n'), { parse_mode: 'Markdown' });
+      return;
+    }
+
+    // /admin fem list <tier>
+    if (sub === 'list') {
+      const tier = parseInt(args[2]);
+      const targets = tier ? loadOutreachData().filter(t => t.tier === tier) : loadOutreachData();
+      if (!targets.length) {
+        await bot.sendMessage(chatId, `No targets found for tier ${tier || 'all'}.`);
+        return;
+      }
+      const stageEmoji = { 0: '🔵', 1: '📧', 2: '🔁', 3: '💰' };
+      const lines = targets.map(t =>
+        `${stageEmoji[t.stage] || '?'} *${t.name}* — ${t.community}\n` +
+        `   ${t.email ? `📩 ${t.email}` : `📱 DM: ${t.dmHandle}`} | ${t.niche}${t.replied ? ' ✅ replied' : ''}\n` +
+        `   ID: \`${t.id}\``
+      );
+      const chunks = [];
+      let chunk = `💜 *Tier ${tier || 'All'} Targets (${targets.length})*\n\n`;
+      for (const line of lines) {
+        if (chunk.length + line.length > 3800) { chunks.push(chunk); chunk = ''; }
+        chunk += line + '\n\n';
+      }
+      chunks.push(chunk);
+      for (const c of chunks) await bot.sendMessage(chatId, c.trim(), { parse_mode: 'Markdown' });
+      return;
+    }
+
+    // /admin fem send <id> — send cold email to one target
+    if (sub === 'send') {
+      const id = args[2];
+      if (!id) { await bot.sendMessage(chatId, 'Usage: /admin fem send <target-id>'); return; }
+      try {
+        const target = await sendColdEmail(id);
+        await bot.sendMessage(chatId,
+          `✅ Cold email sent to *${target.name}* (${target.email})\n\nFollow-up will auto-send in 3 days if no reply.`,
+          { parse_mode: 'Markdown' }
+        );
+      } catch (e) {
+        await bot.sendMessage(chatId, `❌ Error: ${e.message}`);
+      }
+      return;
+    }
+
+    // /admin fem batch <tier> — batch send to all tier targets with emails
+    if (sub === 'batch') {
+      const tier = parseInt(args[2]);
+      if (!tier) { await bot.sendMessage(chatId, 'Usage: /admin fem batch <1|2|3|4|5|6>'); return; }
+      const ready = getTierTargets(tier);
+      if (!ready.length) {
+        await bot.sendMessage(chatId, `No stage-0 email targets in tier ${tier}.`);
+        return;
+      }
+      await bot.sendMessage(chatId,
+        `📤 Sending cold emails to ${ready.length} tier ${tier} targets...\n\n` +
+        ready.map(t => `• ${t.name} → ${t.email}`).join('\n')
+      );
+      let sent = 0; let failed = 0;
+      for (const target of ready) {
+        try {
+          await sendColdEmail(target.id);
+          sent++;
+          await new Promise(r => setTimeout(r, 1500)); // 1.5s gap between sends
+        } catch (e) {
+          failed++;
+          console.error(`Fem outreach batch error for ${target.id}:`, e.message);
+        }
+      }
+      await bot.sendMessage(chatId,
+        `✅ Batch complete — ${sent} sent, ${failed} failed.\n\nFollow-ups will auto-send in 3 days for no-replies.`
+      );
+      return;
+    }
+
+    // /admin fem followup <id>
+    if (sub === 'followup') {
+      const id = args[2];
+      if (!id) { await bot.sendMessage(chatId, 'Usage: /admin fem followup <target-id>'); return; }
+      try {
+        const target = await sendFollowUp(id);
+        await bot.sendMessage(chatId, `✅ Follow-up sent to *${target.name}* (${target.email})`, { parse_mode: 'Markdown' });
+      } catch (e) {
+        await bot.sendMessage(chatId, `❌ Error: ${e.message}`);
+      }
+      return;
+    }
+
+    // /admin fem pitch <id> — send licensing pitch
+    if (sub === 'pitch') {
+      const id = args[2];
+      if (!id) { await bot.sendMessage(chatId, 'Usage: /admin fem pitch <target-id>'); return; }
+      try {
+        const target = await sendLicensingPitch(id);
+        await bot.sendMessage(chatId, `💰 Licensing pitch sent to *${target.name}* (${target.email})`, { parse_mode: 'Markdown' });
+      } catch (e) {
+        await bot.sendMessage(chatId, `❌ Error: ${e.message}`);
+      }
+      return;
+    }
+
+    // /admin fem replied <id> — mark replied
+    if (sub === 'replied') {
+      const id = args[2];
+      const notes = args.slice(3).join(' ');
+      if (!id) { await bot.sendMessage(chatId, 'Usage: /admin fem replied <target-id> [notes]'); return; }
+      const ok = markReplied(id, notes);
+      if (ok) {
+        const t = getTarget(id);
+        await bot.sendMessage(chatId, `✅ *${t?.name}* marked as replied. Follow-up sequence stopped.${notes ? `\nNotes: ${notes}` : ''}`, { parse_mode: 'Markdown' });
+      } else {
+        await bot.sendMessage(chatId, `❌ Target not found: ${id}`);
+      }
+      return;
+    }
+
+    // /admin fem dmsonly — list DM-only targets (no email)
+    if (sub === 'dmsonly') {
+      const targets = loadOutreachData().filter(t => !t.email && t.stage === 0);
+      if (!targets.length) { await bot.sendMessage(chatId, 'No DM-only targets remaining.'); return; }
+      const lines = targets.map(t =>
+        `• *${t.name}* (Tier ${t.tier}) — ${t.community}\n  Platform: ${t.platform} | Handle: ${t.dmHandle}`
+      );
+      const msg = `📱 *DM-Only Targets (${targets.length}) — Manual Contact Needed*\n\n` + lines.join('\n\n');
+      if (msg.length > 4000) {
+        await bot.sendMessage(chatId, msg.substring(0, 3900) + '\n\n_(truncated — use /admin fem list to see all)_', { parse_mode: 'Markdown' });
+      } else {
+        await bot.sendMessage(chatId, msg, { parse_mode: 'Markdown' });
+      }
+      return;
+    }
+
+    await bot.sendMessage(chatId, 'Usage: /admin fem status | list <tier> | send <id> | batch <tier> | followup <id> | pitch <id> | replied <id> | dmsonly');
+    return;
+  }
+
   await bot.sendMessage(chatId, `Unknown admin command: ${cmd}. Send /admin to see options.`);
 });
 
@@ -2250,7 +2425,18 @@ cron.schedule('0 22 * * *', async () => {
     await bot.sendMessage(ANNA_CHAT_ID, revHeader, { parse_mode: 'Markdown' });
     await new Promise(r => setTimeout(r, 400));
 
-    // Outreach pipeline briefing
+    // Female outreach pipeline snapshot
+    const femStats = getOutreachStats();
+    const femSummary =
+      `*Female Outreach Pipeline*\n` +
+      `Not started: ${femStats.byStage[0] || 0} | Cold sent: ${femStats.byStage[1] || 0} | Follow-up: ${femStats.byStage[2] || 0} | Replied: ${femStats.replied}\n` +
+      `Ready to email: ${(femStats.byStage[0] || 0)} targets\n` +
+      `_Send Tier 1 batch: /admin fem batch 1_\n\n`;
+
+    await bot.sendMessage(ANNA_CHAT_ID, femSummary, { parse_mode: 'Markdown' });
+    await new Promise(r => setTimeout(r, 400));
+
+    // B2B outreach pipeline briefing
     const briefing = buildOutreachBriefing();
     const chunks   = briefing.match(/[\s\S]{1,4000}/g) || [briefing];
     for (const chunk of chunks) {
@@ -2259,6 +2445,33 @@ cron.schedule('0 22 * * *', async () => {
     }
   } catch (err) {
     console.error('[CRON] CEO briefing error:', err.message);
+  }
+}, { timezone: 'UTC' });
+
+// ─── Cron: Daily female outreach follow-up sweep ─────────────────────────────
+// Every day at 23:00 UTC = 9:00 AM AEST — sends follow-ups 3 days after cold emails
+
+cron.schedule('0 23 * * *', async () => {
+  console.log('[CRON] Female outreach follow-up sweep...');
+  try {
+    const results = await runDailyFollowUpSweep();
+    if (results.length === 0) return; // Nothing to do, no noise
+
+    const sent   = results.filter(r => r.status === 'sent');
+    const errors = results.filter(r => r.status === 'error');
+
+    if (ANNA_CHAT_ID && sent.length > 0) {
+      const lines = sent.map(r => `• ${r.target.name} → ${r.target.email}`).join('\n');
+      await bot.sendMessage(ANNA_CHAT_ID,
+        `💜 *Female Outreach — Follow-ups Sent*\n\n${lines}\n\n${errors.length > 0 ? `⚠️ ${errors.length} failed` : '✅ All sent'}`,
+        { parse_mode: 'Markdown' }
+      );
+    }
+    if (errors.length > 0) {
+      console.error('[CRON] Follow-up errors:', errors.map(r => `${r.target.id}: ${r.error}`).join(', '));
+    }
+  } catch (err) {
+    console.error('[CRON] Female outreach sweep error:', err.message);
   }
 }, { timezone: 'UTC' });
 
