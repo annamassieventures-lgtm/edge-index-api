@@ -42,15 +42,11 @@ echo "$CHANGED" | sed 's/^/  + /'
 echo ""
 
 echo "Committing..."
-git commit -m "feat: payment gate, Resend email delivery, Whop webhook, outreach automation
+TIMESTAMP=$(date +"%Y-%m-%d %H:%M")
+git commit -m "deploy: ${TIMESTAMP}
 
-- src/shared/paidUsers.js: isPaidEmail / addPaidEmail / getAllPaidEmails
-- src/routes/webhook.js: POST /webhook/whop — Whop payment event handler
-- src/index.js: mount webhook route, version bump to 2.0
-- src/telegram-bot.js v2: email verification step, payment gate,
-  Resend HTML email delivery, outreach state tracker, daily 8am AEST
-  briefing cron to Anna, admin commands (/admin paid/users/emails/outreach/sent/replied)
-- /myid command for all users to get their chat ID"
+Changed files:
+$(git diff --cached --name-only | sed 's/^/  - /')"
 
 echo ""
 echo "Pushing to GitHub..."
@@ -60,27 +56,20 @@ echo ""
 echo "✅ Done! Railway will redeploy automatically in ~2 minutes."
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "NEXT STEPS — set these in Railway dashboard → Variables:"
+echo "AFTER DEPLOY — run these commands in your Telegram bot:"
 echo ""
-echo "  RESEND_API_KEY        → from resend.com (create free account)"
-echo "  ANNA_CHAT_ID          → send /myid to your bot to get it"
-echo "  WHOP_URL              → your Whop checkout link"
-echo "  WHOP_WEBHOOK_SECRET   → from Whop dashboard → Webhooks"
-echo "  PAID_EMAILS           → comma-separated emails (manual override)"
+echo "  /admin ai status          — check AI affiliate pipeline"
+echo "  /admin fem status         — check trading community pipeline"
+echo "  /admin fem batch 1        — fire Tier 1 cold emails (82 targets)"
+echo "  /admin fem batch 2        — fire Tier 2 cold emails (100 targets)"
+echo "  /admin fem batch 3        — fire Tier 3 cold emails (60 targets)"
+echo "  /admin ai batch 1         — fire AI Tier 1 emails (confirmed emails only)"
 echo ""
-echo "WHOP WEBHOOK URL to paste in Whop dashboard:"
-echo "  https://YOUR-RAILWAY-URL/webhook/whop"
-echo ""
-echo "RESEND SETUP:"
-echo "  1. Create account at resend.com"
-echo "  2. Add domain edgeindex.io (or use onboarding@resend.dev for testing)"
-echo "  3. Copy API key → RESEND_API_KEY in Railway"
-echo ""
-echo "TEST the bot:"
-echo "  1. Set PAID_EMAILS=your@email.com in Railway"
-echo "  2. Send /start to your bot"
-echo "  3. Enter your@email.com when prompted"
-echo "  4. Enter birth data and confirm report arrives in your inbox"
+echo "⚠️  DATA WARNING:"
+echo "  Once outreach emails are sent, DO NOT redeploy until the sequence"
+echo "  completes (~3 weeks). Railway filesystem is ephemeral — a redeploy"
+echo "  resets outreach stage tracking (who has been emailed + when)."
+echo "  The system will auto-handle follow-ups and pitches via daily crons."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "Press any key to close..."

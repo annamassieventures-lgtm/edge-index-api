@@ -46,9 +46,18 @@ import { runWeeklyEdge, runDailyEdge, sendDay7Checkin, sendDay30Upsell } from '.
 import { addSubscriber, getSubscriberCount, getAllSubscribers, restoreFromEnv } from './shared/monitoringSubscribers.js';
 import {
   loadOutreachData, getTarget, updateTarget, markReplied,
-  sendColdEmail, sendFollowUp, sendLicensingPitch,
-  runDailyFollowUpSweep, getOutreachStats, getTierTargets, getReadyTargets,
-} from './female-outreach.js';
+  sendColdEmail, sendFollowUp,
+  runDailyFollowUpSweep, runDailyLicensingSweep,
+  markReportReceived, getOutreachStats, getTierTargets, getReadyTargets,
+  importFromCSV,
+} from './community-outreach.js';
+
+import {
+  loadAiData, getAiTarget, markAiReplied,
+  sendAiColdEmail, sendAiFollowUp, sendAffiliatePitch,
+  runAiDailyFollowUpSweep, runAiAffiliatePitchSweep,
+  markAiReportReceived, getAiStats, batchSendAiColdEmails,
+} from './ai-affiliate-outreach.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -1311,6 +1320,9 @@ async function sendReportToUser(chatId, userData) {
         `✅ Your Edge Index Brief has been sent to *${email}*\n\nCheck your inbox — and your spam folder just in case. The report is 17 sections of personalised decision-timing intelligence for the next 12 months.\n\nIf you have questions, reply here.`,
         { parse_mode: 'Markdown' }
       );
+      // Flag report received — triggers licensing sequence (trading) and affiliate pitch (AI)
+      markReportReceived(email);
+      markAiReportReceived(email);
     } else {
       // Fallback: send in Telegram if no email (shouldn't happen in normal flow)
       await bot.sendMessage(chatId, report.substring(0, 4000), { parse_mode: 'Markdown' });
@@ -1618,7 +1630,8 @@ bot.onText(/\/admin(.*)/, async (msg, match) => {
       `/admin fem followup <id> — manually trigger follow-up email\n` +
       `/admin fem pitch <id> — send licensing pitch (after they engage)\n` +
       `/admin fem replied <id> — mark as replied (stops follow-up sequence)\n` +
-      `/admin fem dmsonly — list DM-only targets (no email, need manual contact)`,
+      `/admin fem dmsonly — list DM-only targets (no email, need manual contact)\n` +
+      `/admin fem import — import targets from data/outreach-import.csv`,
       { parse_mode: 'Markdown' }
     );
     return;
@@ -2038,22 +2051,26 @@ bot.onText(/\/admin(.*)/, async (msg, match) => {
     if (!sub || sub === 'status') {
       const stats = getOutreachStats();
       const lines = [
-        `💜 *Female Outreach Pipeline*\n`,
+        `⚡ *Community Outreach Pipeline*\n`,
         `Total targets: ${stats.total}`,
         `Have email: ${stats.hasEmail} | DM-only: ${stats.total - stats.hasEmail}`,
         ``,
+        `*By gender:*`,
+        `👩 Female: ${stats.byGender?.female || 0} | 👨 Male: ${stats.byGender?.male || 0} | 🤝 Mixed: ${stats.byGender?.mixed || 0}`,
+        ``,
         `*By stage:*`,
-        `🔵 Stage 0 (not started): ${stats.byStage[0] || 0}`,
-        `📧 Stage 1 (cold sent): ${stats.byStage[1] || 0}`,
-        `🔁 Stage 2 (follow-up sent): ${stats.byStage[2] || 0}`,
-        `💰 Stage 3 (licensing pitch): ${stats.byStage[3] || 0}`,
+        `🔵 Not started: ${stats.byStage[0] || 0}`,
+        `📧 Cold sent: ${stats.byStage[1] || 0}`,
+        `🔁 Follow-up sent: ${stats.byStage[2] || 0}`,
+        `💰 Report received (licensing): ${stats.byStage[3] || 0}`,
         `✅ Replied: ${stats.replied}`,
         ``,
         `*By tier:*`,
         Object.entries(stats.byTier).sort(([a],[b]) => Number(a)-Number(b)).map(([t,c]) => `Tier ${t}: ${c}`).join(' | '),
         ``,
-        `Send cold emails: /admin fem batch 1`,
-        `See all tier 1: /admin fem list 1`,
+        `Fire Tier 1: /admin fem batch 1`,
+        `Fire Tier 2: /admin fem batch 2`,
+        `Add 1000 more: drop outreach-import.csv → /admin fem import`,
       ];
       await bot.sendMessage(chatId, lines.join('\n'), { parse_mode: 'Markdown' });
       return;
@@ -2187,7 +2204,117 @@ bot.onText(/\/admin(.*)/, async (msg, match) => {
       return;
     }
 
-    await bot.sendMessage(chatId, 'Usage: /admin fem status | list <tier> | send <id> | batch <tier> | followup <id> | pitch <id> | replied <id> | dmsonly');
+    // /admin fem import — import targets from CSV at data/outreach-import.csv
+    if (sub === 'import') {
+      const csvPath = path.join(__dirname, '..', 'data', 'outreach-import.csv');
+      try {
+        const result = importFromCSV(csvPath);
+        await bot.sendMessage(chatId,
+          `✅ *Import complete*\n\nAdded: ${result.added}\nSkipped (duplicates): ${result.skipped}\nTotal in pipeline: ${result.total}\n\nDrop a new outreach-import.csv in /data/ and run this again to add more.`,
+          { parse_mode: 'Markdown' }
+        );
+      } catch (e) {
+        await bot.sendMessage(chatId,
+          `❌ Import failed: ${e.message}\n\nCreate a CSV at \`data/outreach-import.csv\` with columns:\nid, name, community, tier, platform, audience, email, dmHandle, niche, gender`
+        );
+      }
+      return;
+    }
+
+    await bot.sendMessage(chatId, 'Usage: /admin fem status | list <tier> | send <id> | batch <tier> | followup <id> | pitch <id> | replied <id> | dmsonly | import');
+    return;
+  }
+
+  // ─── /admin ai — AI influencer affiliate commands ─────────────────────────
+  if (cmd === 'ai') {
+    const sub  = parts[2];
+    const id   = parts[3];
+    const tier = parseInt(parts[3]);
+
+    // /admin ai status
+    if (!sub || sub === 'status') {
+      const s = getAiStats();
+      await bot.sendMessage(chatId,
+        `🤖 *AI Affiliate Pipeline*\n\n` +
+        `Total targets: ${s.total} (${s.withEmail} with email)\n` +
+        `Tier 1: ${s.tier1} | Tier 2: ${s.tier2}\n\n` +
+        `Stage 0 (unsent): ${s.stage0}\n` +
+        `Stage 1 (cold sent): ${s.stage1}\n` +
+        `Stage 2 (follow-up sent): ${s.stage2}\n` +
+        `Stage 3 (affiliate pitch sent): ${s.stage3}\n` +
+        `Replied: ${s.replied}\n\n` +
+        `Fire Tier 1: /admin ai batch 1\n` +
+        `Fire Tier 2: /admin ai batch 2`,
+        { parse_mode: 'Markdown' }
+      );
+      return;
+    }
+
+    // /admin ai send <id>
+    if (sub === 'send') {
+      if (!id) { await bot.sendMessage(chatId, 'Usage: /admin ai send <target-id>'); return; }
+      try {
+        const t = await sendAiColdEmail(id);
+        await bot.sendMessage(chatId, `✅ AI cold email sent to ${t.name} (${t.email})`);
+      } catch(e) {
+        await bot.sendMessage(chatId, `❌ Error: ${e.message}`);
+      }
+      return;
+    }
+
+    // /admin ai batch <tier>
+    if (sub === 'batch') {
+      if (!tier) { await bot.sendMessage(chatId, 'Usage: /admin ai batch <1|2>'); return; }
+      await bot.sendMessage(chatId, `🚀 Sending AI cold emails to Tier ${tier}...`);
+      try {
+        const results = await batchSendAiColdEmails(tier);
+        const sent    = results.filter(r => r.status === 'sent');
+        const failed  = results.filter(r => r.status === 'failed');
+        await bot.sendMessage(chatId,
+          `✅ *AI Tier ${tier} batch complete*\n\nSent: ${sent.length}\nFailed: ${failed.length}` +
+          (failed.length ? `\n\nFailed:\n${failed.map(r => `• ${r.name}: ${r.error}`).join('\n')}` : ''),
+          { parse_mode: 'Markdown' }
+        );
+      } catch(e) {
+        await bot.sendMessage(chatId, `❌ Batch error: ${e.message}`);
+      }
+      return;
+    }
+
+    // /admin ai pitch <id>
+    if (sub === 'pitch') {
+      if (!id) { await bot.sendMessage(chatId, 'Usage: /admin ai pitch <target-id>'); return; }
+      try {
+        const t = await sendAffiliatePitch(id);
+        await bot.sendMessage(chatId, `✅ Affiliate pitch sent to ${t.name}`);
+      } catch(e) {
+        await bot.sendMessage(chatId, `❌ Error: ${e.message}`);
+      }
+      return;
+    }
+
+    // /admin ai replied <id>
+    if (sub === 'replied') {
+      if (!id) { await bot.sendMessage(chatId, 'Usage: /admin ai replied <target-id>'); return; }
+      markAiReplied(id);
+      await bot.sendMessage(chatId, `✅ Marked as replied: ${id}`);
+      return;
+    }
+
+    // /admin ai list
+    if (sub === 'list') {
+      const targets = loadAiData();
+      const tierFilter = tier || null;
+      const list = tierFilter ? targets.filter(t => t.tier === tierFilter) : targets;
+      const lines = list.map(t =>
+        `${t.stage > 0 ? '✅' : '⬜'} [T${t.tier}] ${t.name} — ${t.email || `DM: ${t.dmHandle}`} — stage ${t.stage}`
+      ).join('\n');
+      const msg = `🤖 *AI Targets${tierFilter ? ` (Tier ${tierFilter})` : ''}*\n\n${lines}`;
+      await bot.sendMessage(chatId, msg.substring(0, 3900), { parse_mode: 'Markdown' });
+      return;
+    }
+
+    await bot.sendMessage(chatId, 'Usage: /admin ai status | list | send <id> | batch <tier> | pitch <id> | replied <id>');
     return;
   }
 
@@ -2452,26 +2579,64 @@ cron.schedule('0 22 * * *', async () => {
 // Every day at 23:00 UTC = 9:00 AM AEST — sends follow-ups 3 days after cold emails
 
 cron.schedule('0 23 * * *', async () => {
-  console.log('[CRON] Female outreach follow-up sweep...');
+  console.log('[CRON] Female outreach sweep (follow-ups + licensing)...');
   try {
-    const results = await runDailyFollowUpSweep();
-    if (results.length === 0) return; // Nothing to do, no noise
+    // Follow-up sweep — 3 days after cold email
+    const followUps = await runDailyFollowUpSweep();
 
-    const sent   = results.filter(r => r.status === 'sent');
-    const errors = results.filter(r => r.status === 'error');
+    // Licensing sweep — 24hrs after they received their report
+    const licensing = await runDailyLicensingSweep();
 
-    if (ANNA_CHAT_ID && sent.length > 0) {
-      const lines = sent.map(r => `• ${r.target.name} → ${r.target.email}`).join('\n');
+    const allResults = [...followUps, ...licensing];
+    if (allResults.length === 0) return;
+
+    if (ANNA_CHAT_ID) {
+      const fuSent   = followUps.filter(r => r.status === 'sent');
+      const pitches  = licensing.filter(r => r.status === 'pitch_sent');
+      const nudges   = licensing.filter(r => r.status === 'nudge_sent');
+      const errors   = allResults.filter(r => r.status === 'error');
+
+      const lines = [
+        fuSent.length  ? `📧 Follow-ups sent (${fuSent.length}):\n${fuSent.map(r => `  • ${r.target.name}`).join('\n')}` : null,
+        pitches.length ? `💰 Licensing pitches sent (${pitches.length}):\n${pitches.map(r => `  • ${r.target.name}`).join('\n')}` : null,
+        nudges.length  ? `🔔 Final nudges sent (${nudges.length}):\n${nudges.map(r => `  • ${r.target.name}`).join('\n')}` : null,
+        errors.length  ? `⚠️ Errors (${errors.length}): ${errors.map(r => r.target.name).join(', ')}` : null,
+      ].filter(Boolean).join('\n\n');
+
       await bot.sendMessage(ANNA_CHAT_ID,
-        `💜 *Female Outreach — Follow-ups Sent*\n\n${lines}\n\n${errors.length > 0 ? `⚠️ ${errors.length} failed` : '✅ All sent'}`,
+        `💜 *Female Outreach — Daily Sweep*\n\n${lines}`,
         { parse_mode: 'Markdown' }
       );
     }
-    if (errors.length > 0) {
-      console.error('[CRON] Follow-up errors:', errors.map(r => `${r.target.id}: ${r.error}`).join(', '));
-    }
   } catch (err) {
     console.error('[CRON] Female outreach sweep error:', err.message);
+  }
+}, { timezone: 'UTC' });
+
+// ─── Cron: Daily AI affiliate sweep ──────────────────────────────────────────
+// Every day at 23:30 UTC — follow-ups + affiliate pitches for AI influencer track
+
+cron.schedule('30 23 * * *', async () => {
+  console.log('[CRON] AI affiliate sweep (follow-ups + pitches)...');
+  try {
+    const followUps = await runAiDailyFollowUpSweep();
+    const pitches   = await runAiAffiliatePitchSweep();
+
+    if (followUps.length === 0 && pitches.length === 0) return;
+
+    if (ANNA_CHAT_ID) {
+      const lines = [
+        followUps.length ? `📧 AI follow-ups sent (${followUps.length}):\n${followUps.map(n => `  • ${n}`).join('\n')}` : null,
+        pitches.length   ? `💰 AI affiliate pitches sent (${pitches.length}):\n${pitches.map(n => `  • ${n}`).join('\n')}` : null,
+      ].filter(Boolean).join('\n\n');
+
+      await bot.sendMessage(ANNA_CHAT_ID,
+        `🤖 *AI Affiliate — Daily Sweep*\n\n${lines}`,
+        { parse_mode: 'Markdown' }
+      );
+    }
+  } catch (err) {
+    console.error('[CRON] AI affiliate sweep error:', err.message);
   }
 }, { timezone: 'UTC' });
 

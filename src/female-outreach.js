@@ -13,6 +13,7 @@
 import fs   from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { addPaidEmail } from './shared/paidUsers.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_FILE = path.join(__dirname, '..', 'data', 'female-outreach.json');
@@ -129,8 +130,10 @@ function buildColdEmailHtml(target) {
     <div class="body">
       <p>Hi ${target.name},</p>
       <p>I've been following ${target.community} for a while — love what you're building for women in ${nicheLabel}.</p>
-      <p>I just launched something I think your audience would genuinely find useful: a personalised decision-timing intelligence report that maps when your judgment is sharpest and when emotional pressure is highest over the next 12 months. It's built from individual data — not generic market signals.</p>
-      <p>I'd love to send you a complimentary one. No strings attached — it takes two minutes to get your details to me, and you'll have the full report in your inbox within the hour.</p>
+      <p>Right now the pressure on women financially is unlike anything we've seen in a long time. Rates are up. Petrol, food, everything costs more. The geopolitical situation is feeding straight into cost of living — and for women who are trying to trade or invest their way to more security, the stakes of every decision have never felt higher.</p>
+      <p>On top of that, women carry a weight that rarely gets talked about in trading spaces — the background hum of financial anxiety that never fully switches off. Worrying whether it's enough. Whether the decisions they're making now will hold. Whether they should be doing more, or less, or something different entirely. That stress doesn't stay out of the market — it sits behind every trade, every entry, every time they hesitate or second-guess a position they know is right. Most of them blame themselves for it. The reality is it's timing — and it follows a pattern specific to each person.</p>
+      <p>I built The Edge Index for exactly this — a personalised report and platform designed to give every trader their personal edge. Not a generic signal. Not a market forecast. A map of <em>them</em> — so they know when to back themselves and when to step back, in any market condition.</p>
+      <p>I'd love to send you a complimentary one. No strings attached — it takes two minutes, and you'll have the full report in your inbox within the hour.</p>
       <p>Would you be open to it?</p>
       <p><a href="https://t.me/TheEdgeIndexBot" class="cta">Get Your Free Report →</a></p>
     </div>
@@ -168,9 +171,10 @@ function buildFollowUpEmailHtml(target) {
     </div>
     <div class="body">
       <p>Hi ${target.name},</p>
-      <p>Just following up on my note from a few days ago about a complimentary personalised report for you.</p>
-      <p>The report maps your specific decision-making patterns over the next 12 months — the periods where your judgment is clearest, and the windows where emotional pressure tends to spike. Several traders I've sent it to have said it's the most useful thing they've received all year.</p>
-      <p>Happy to send yours — just two minutes of your time to get your details across.</p>
+      <p>Just following up on my note from a few days ago.</p>
+      <p>With everything happening in the world right now — rates rising, cost of living squeezing harder, markets reacting to every geopolitical headline — the women who come out ahead won't just have the best strategy. They'll know themselves well enough to execute it clearly when the pressure is highest.</p>
+      <p>The women I've sent this report to say the same thing: they already knew their strategy — what they didn't have was a map of themselves. Now they know which months to be aggressive, which weeks to step back, and why certain periods have always felt harder than others. One said it was the first time she stopped feeling like the problem.</p>
+      <p>I'd love to send you yours — just two minutes to get your details across.</p>
       <p><a href="https://t.me/TheEdgeIndexBot" class="cta">Get Your Free Report →</a></p>
     </div>
     <div class="signature">
@@ -228,6 +232,93 @@ function buildLicensingEmailHtml(target) {
 </html>`;
 }
 
+function buildPostReportEmailHtml(target) {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Georgia, serif; background: #0a0a0a; color: #e8e0d0; margin: 0; padding: 0; }
+    .container { max-width: 580px; margin: 0 auto; padding: 40px 32px; }
+    .header { border-bottom: 1px solid #2a2a2a; padding-bottom: 24px; margin-bottom: 32px; }
+    .logo { font-family: 'Helvetica Neue', sans-serif; font-size: 13px; letter-spacing: 3px; color: #c9a84c; text-transform: uppercase; }
+    .body { font-size: 16px; line-height: 1.7; color: #d4ccc0; }
+    .body p { margin: 0 0 20px; }
+    .highlight { background: #1a1a0e; border-left: 3px solid #c9a84c; padding: 16px 20px; margin: 20px 0; font-size: 15px; color: #c9a84c; }
+    .signature { border-top: 1px solid #2a2a2a; padding-top: 24px; margin-top: 32px; font-size: 14px; color: #8a7a60; }
+    .cta { display: inline-block; margin: 8px 0; padding: 14px 28px; background: #c9a84c; color: #0a0a0a; font-family: 'Helvetica Neue', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 1px; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">The Edge Index</div>
+    </div>
+    <div class="body">
+      <p>Hi ${target.name},</p>
+      <p>I hope your Edge Index Brief landed well — I'd love to know what you took from it.</p>
+      <p>I want to be direct with you about why I reached out specifically.</p>
+      <p>The women in ${target.community} trust you. They follow you because you've shown them something real about money, markets, and how to navigate both. Right now — with cost of living crushing people, geopolitical instability driving up the price of everything, and a level of financial anxiety most of us haven't felt in our lifetimes — the women in your community are scared. Not just about their trades. About their future. Their children's future. Whether the decisions they're making right now are going to hold.</p>
+      <p>What you just experienced in your report is a map. A personalised map that tells you when your judgment is clearest and when emotional pressure distorts it. That map is what every woman in your community needs right now — not as a luxury, but as protection. So they stop second-guessing themselves at exactly the wrong moment. So they stop losing money in windows that were always going to be hard for them specifically.</p>
+      <p>You have the ability to give every one of them that.</p>
+      <div class="highlight">
+        Founding community licence: <strong>$500/month</strong> (standard rate: $2,500/month)<br><br>
+        Every member of ${target.community} gets their own personalised 12-month Edge Index Brief. Their own map. Their own edge.
+      </div>
+      <p>This is what community leaders do in a crisis — they bring their people something that actually helps. Would you be open to a quick call this week?</p>
+      <p><a href="mailto:anna@annamassie.com.au" class="cta">Reply to Book a Call →</a></p>
+    </div>
+    <div class="signature">
+      Anna Massie<br>
+      Founder, The Edge Index<br>
+      <a href="https://edgeindex.io" style="color: #c9a84c; text-decoration: none;">edgeindex.io</a>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function buildPostReportNudgeHtml(target) {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Georgia, serif; background: #0a0a0a; color: #e8e0d0; margin: 0; padding: 0; }
+    .container { max-width: 580px; margin: 0 auto; padding: 40px 32px; }
+    .header { border-bottom: 1px solid #2a2a2a; padding-bottom: 24px; margin-bottom: 32px; }
+    .logo { font-family: 'Helvetica Neue', sans-serif; font-size: 13px; letter-spacing: 3px; color: #c9a84c; text-transform: uppercase; }
+    .body { font-size: 16px; line-height: 1.7; color: #d4ccc0; }
+    .body p { margin: 0 0 20px; }
+    .signature { border-top: 1px solid #2a2a2a; padding-top: 24px; margin-top: 32px; font-size: 14px; color: #8a7a60; }
+    .cta { display: inline-block; margin: 8px 0; padding: 14px 28px; background: #c9a84c; color: #0a0a0a; font-family: 'Helvetica Neue', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 1px; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">The Edge Index</div>
+    </div>
+    <div class="body">
+      <p>Hi ${target.name},</p>
+      <p>Just a final note from me.</p>
+      <p>The world feels financially unstable right now in a way that's hard to ignore. The women in your community are feeling it — in their trading, in their decisions, in the quiet anxiety about whether they're doing enough to protect themselves and the people they love.</p>
+      <p>The founding licence I mentioned gives every one of them their own personalised edge — their own map of when to push and when to protect. I only have three spots at this rate, and I wanted to make sure you had a genuine chance to claim one for your community before I move on.</p>
+      <p>If now isn't the right moment, no problem at all. But if you want to talk through what it would look like — even just a 15-minute conversation — I'm here.</p>
+      <p><a href="mailto:anna@annamassie.com.au" class="cta">Let's Talk →</a></p>
+    </div>
+    <div class="signature">
+      Anna Massie<br>
+      Founder, The Edge Index<br>
+      <a href="https://edgeindex.io" style="color: #c9a84c; text-decoration: none;">edgeindex.io</a>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
 // ─── Resend email sender ─────────────────────────────────────────────────────
 
 async function sendEmail(to, subject, html) {
@@ -265,6 +356,9 @@ export async function sendColdEmail(targetId) {
   const subject = `Complimentary Edge Index Brief for you`;
   const html = buildColdEmailHtml(target);
   await sendEmail(target.email, subject, html);
+
+  // Whitelist their email so they pass the payment gate automatically
+  addPaidEmail(target.email);
 
   updateTarget(targetId, { stage: 1, emailSentAt: new Date().toISOString() });
   return target;
@@ -312,6 +406,62 @@ export function markReplied(targetId, notes = '') {
   if (!target) return false;
   updateTarget(targetId, { replied: true, notes: notes || target.notes });
   return true;
+}
+
+/**
+ * Called by the bot when a report is sent to someone in the outreach list.
+ * Marks them as report_received so the licensing sequence can begin.
+ */
+export function markReportReceived(email) {
+  const targets = loadOutreachData();
+  const target = targets.find(t => t.email?.toLowerCase() === email?.toLowerCase());
+  if (!target) return false;
+  updateTarget(target.id, { reportReceivedAt: new Date().toISOString() });
+  return target;
+}
+
+/**
+ * Daily sweep — sends post-report licensing pitch 24hrs after report, nudge 5 days later
+ */
+export async function runDailyLicensingSweep() {
+  const targets = loadOutreachData();
+  const now = Date.now();
+  const ONE_DAY  = 24 * 60 * 60 * 1000;
+  const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000;
+  const results = [];
+
+  for (const target of targets) {
+    if (!target.email || !target.reportReceivedAt || target.replied) continue;
+    const receivedAt = new Date(target.reportReceivedAt).getTime();
+    const elapsed = now - receivedAt;
+
+    // Send licensing pitch 24hrs after they received their report
+    if (elapsed >= ONE_DAY && !target.licensingPitchSentAt) {
+      try {
+        const subject = `Your Edge Index Brief — and what's possible for ${target.community}`;
+        const html = buildPostReportEmailHtml(target);
+        await sendEmail(target.email, subject, html);
+        updateTarget(target.id, { licensingPitchSentAt: new Date().toISOString() });
+        results.push({ target, status: 'pitch_sent' });
+      } catch (e) {
+        results.push({ target, status: 'error', error: e.message });
+      }
+    }
+
+    // Send final nudge 5 days after licensing pitch if no reply
+    if (elapsed >= ONE_DAY + FIVE_DAYS && target.licensingPitchSentAt && !target.nudgeSentAt) {
+      try {
+        const subject = `Re: Edge Index community licence — last note`;
+        const html = buildPostReportNudgeHtml(target);
+        await sendEmail(target.email, subject, html);
+        updateTarget(target.id, { nudgeSentAt: new Date().toISOString() });
+        results.push({ target, status: 'nudge_sent' });
+      } catch (e) {
+        results.push({ target, status: 'error', error: e.message });
+      }
+    }
+  }
+  return results;
 }
 
 /**
