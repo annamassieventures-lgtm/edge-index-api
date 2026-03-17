@@ -2227,9 +2227,9 @@ bot.onText(/\/admin(.*)/, async (msg, match) => {
 
   // ─── /admin ai — AI influencer affiliate commands ─────────────────────────
   if (cmd === 'ai') {
-    const sub  = parts[2];
-    const id   = parts[3];
-    const tier = parseInt(parts[3]);
+    const sub  = args[1]?.toLowerCase();
+    const id   = args[2];
+    const tier = parseInt(args[2]);
 
     // /admin ai status
     if (!sub || sub === 'status') {
