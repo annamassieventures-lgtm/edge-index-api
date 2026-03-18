@@ -14,6 +14,14 @@
 import { Router } from 'express';
 import crypto     from 'crypto';
 import { addPaidEmail } from '../shared/paidUsers.js';
+import { addSubscriber } from '../shared/monitoringSubscribers.js';
+
+// Whop plan ID → monitoring tier mapping
+const MONITORING_PLANS = {
+  'plan_BxrNEydk1OwxU': 'weekly',   // Weekly Edge $97/month
+  'plan_MuLGo1pM0Y9KR': 'daily',    // Daily Edge  $197/month
+  'plan_q4X3kcISZSjud': 'live',     // Live Edge   $397/month
+};
 
 const router = Router();
 
@@ -56,9 +64,29 @@ router.post('/whop', async (req, res) => {
         event?.data?.email                    ||
         null;
 
+      // Extract plan ID from payload (Whop nests it in different places)
+      const planId =
+        event?.data?.membership?.plan_id  ||
+        event?.data?.plan_id              ||
+        event?.data?.product?.id          ||
+        event?.data?.membership?.product_id ||
+        null;
+
+      console.log(`Whop webhook: plan_id=${planId}, email=${email}`);
+
       if (email) {
-        addPaidEmail(email);
-        console.log(`✅ Whop payment confirmed — registered: ${email}`);
+        const monitoringTier = planId ? MONITORING_PLANS[planId] : null;
+
+        if (monitoringTier) {
+          // Monitoring subscription — add to subscriber registry
+          addSubscriber({ email, tier: monitoringTier });
+          addPaidEmail(email); // also grant bot access
+          console.log(`✅ Monitoring subscription — ${monitoringTier} tier registered: ${email}`);
+        } else {
+          // Report purchase (or unknown plan) — grant bot access only
+          addPaidEmail(email);
+          console.log(`✅ Report payment confirmed — registered: ${email}`);
+        }
       } else {
         console.warn('Whop webhook: payment event received but no email found in payload', JSON.stringify(event?.data));
       }
